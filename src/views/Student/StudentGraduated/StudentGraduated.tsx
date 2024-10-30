@@ -57,7 +57,7 @@ const StudentGraduatedView = () => {
       },
       {
         accessorKey: "fullName",
-        header: "Họ tên sinh viên",
+        header: "Họ và tên sinh viên",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
