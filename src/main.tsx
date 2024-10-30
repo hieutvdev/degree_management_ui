@@ -7,6 +7,7 @@ import "@mantine/notifications/styles.css";
 import { ModalsProvider } from "@mantine/modals";
 import { Button, createTheme, MantineProvider, rem } from "@mantine/core";
 import App from "./App";
+import { Notifications } from "@mantine/notifications";
 
 const theme = createTheme({
   fontSizes: {
@@ -39,6 +40,7 @@ if (rootElement) {
     <StrictMode>
       <MantineProvider theme={theme}>
         <ModalsProvider>
+          <Notifications position="top-center" zIndex={1000} autoClose={4000} />
           <App />
         </ModalsProvider>
       </MantineProvider>
