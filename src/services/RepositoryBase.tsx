@@ -74,7 +74,7 @@ export class RepositoryBase<T> {
       data,
       config
     );
-    return response;
+    return response.data as ResponseBase<T>;
   }
 
   async put(
@@ -87,7 +87,7 @@ export class RepositoryBase<T> {
       data,
       config
     );
-    return response;
+    return response.data as ResponseBase<T>;
   }
 
   async delete(
@@ -98,7 +98,7 @@ export class RepositoryBase<T> {
       url,
       config
     );
-    return response;
+    return response.data as ResponseBase<T>;
   }
   async getLists(
     url: string,
