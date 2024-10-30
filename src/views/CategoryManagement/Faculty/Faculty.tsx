@@ -30,6 +30,7 @@ import { DegreeRepository } from "../../../services/RepositoryBase";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import DeleteDataView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
+import EditDataView from "./EditDataView";
 
 const Faculty = () => {
   //data and fetching state
@@ -106,13 +107,21 @@ const Faculty = () => {
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
             <Tooltip label="Chỉnh sửa">
-              <ActionIcon variant="light" color="orange">
+              <ActionIcon
+                variant="light"
+                color="orange"
+                onClick={() => handleUpdate(row.original.id)}
+              >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Chi tiết">
-              <ActionIcon variant="light" color="cyan">
+              <ActionIcon
+                variant="light"
+                color="cyan"
+                onClick={() => handleDetail(row.original.id)}
+              >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -172,11 +181,21 @@ const Faculty = () => {
     });
   };
 
+  const handleUpdate = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chỉnh sửa khoa</Title>,
+      size: "auto",
+      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
   const handleDetail = (id: string | null) => {
     modals.openConfirmModal({
       title: <Title order={5}>Chi tiết khoa</Title>,
       size: "auto",
-      children: <DetailDataView onClose={setDeleteViewStatus} id={id} />,
+      children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });

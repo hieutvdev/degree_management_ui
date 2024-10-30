@@ -10,29 +10,62 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { IconWindow } from "@tabler/icons-react";
+import { IconCheck, IconWindow } from "@tabler/icons-react";
+import { EditFacultyModel } from "../../../interfaces/Faculty";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
-import { useEffect } from "react";
+import { notifications } from "@mantine/notifications";
+import { useEffect, useState } from "react";
 
-const DetailDataView = ({ id }: DetailDataViewProps) => {
+const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   const entity = {
+    id: id,
     name: null,
     code: null,
-    active: false,
-    description: "",
+    active: null,
+    description: null,
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<any>({
+  const form = useForm<EditFacultyModel>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       ...entity,
     },
+
+    validate: {
+      code: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng nhập mã khoa!";
+        }
+      },
+      name: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng nhập tên khoa!";
+        }
+      },
+    },
   });
+
+  const handleUpdateFaculty = async (dataSubmit: EditFacultyModel) => {
+    open();
+    const url = `${API_ROUTER.UPDATE_FACULTY}`;
+    const repo = new DegreeRepository<EditFacultyModel>();
+    const dataApi = await repo.put(url, dataSubmit);
+
+    if (dataApi?.isSuccess) {
+      onClose((prev: any) => !prev);
+      notifications.show({
+        color: "green",
+        message: "Chỉnh sửa khoa thành công !",
+      });
+      modals.closeAll();
+    }
+    close();
+  };
 
   const getDataDetail = async () => {
     const url = `${API_ROUTER.DETAIL_FACULTY}`;
@@ -58,6 +91,9 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
+        onSubmit={form.onSubmit((e: EditFacultyModel) => {
+          handleUpdateFaculty(e);
+        })}
         style={{ position: "relative" }}
       >
         <LoadingOverlay
@@ -71,16 +107,16 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
             <TextInput
               label={"Mã khoa"}
               placeholder={"Nhập mã"}
+              withAsterisk
               {...form.getInputProps("code")}
-              readOnly
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 8 }}>
             <TextInput
               label={"Tên khoa"}
               placeholder={"Nhập tên khoa"}
+              withAsterisk
               {...form.getInputProps("name")}
-              readOnly
             />
           </Grid.Col>
         </Grid>
@@ -90,15 +126,27 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
             <Textarea
               label={"Ghi chú"}
               placeholder="Nhập ghi chú"
+              value={form.getValues().description}
               {...form.getInputProps("description")}
-              readOnly
+              onChange={(e) =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  description: e.currentTarget.value,
+                }))
+              }
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
             <Checkbox
               label={"Sử dụng"}
               checked={form.getValues().active}
-              readOnly
+              {...form.getInputProps("active")}
+              onClick={() =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  active: !form.getValues().active,
+                }))
+              }
             />
           </Grid.Col>
         </Grid>
@@ -123,14 +171,22 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
           >
             Đóng
           </Button>
+          <Button
+            type="submit"
+            loading={visible}
+            leftSection={!visible ? <IconCheck size={18} /> : undefined}
+          >
+            Lưu
+          </Button>
         </Group>
       </Box>
     </>
   );
 };
 
-export default DetailDataView;
+export default EditDataView;
 
-type DetailDataViewProps = {
+type EditDataViewProps = {
   id: any;
+  onClose: any;
 };
