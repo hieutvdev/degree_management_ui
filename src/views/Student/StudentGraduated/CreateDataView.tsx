@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Checkbox,
+  ComboboxItem,
   Flex,
   Grid,
   Group,
@@ -15,8 +16,11 @@ import { IconCheck, IconWindow } from "@tabler/icons-react";
 import { StudentGraduatedModelQuery } from "../../../interfaces/StudentGraduated";
 import { hasLength, useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { useEffect } from "react";
-import { DateTimePicker } from "@mantine/dates";
+import { useEffect, useState } from "react";
+import { DateTimePicker, YearPickerInput } from "@mantine/dates";
+import { SelectBase } from "../../../interfaces/SelectBase";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import { DegreeRepository } from "../../../services/RepositoryBase";
 
 const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
@@ -32,6 +36,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
+  const [dataMajors, setDataMajors] = useState<ComboboxItem[]>();
 
   const form = useForm<StudentGraduatedModelQuery>({
     mode: "uncontrolled",
@@ -85,6 +90,20 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
       },
     },
   });
+
+  const getSelectMajor = async () => {
+    try {
+      const url = `${API_ROUTER.GET_SELECT_MAJORS}`;
+      const repo = new DegreeRepository<SelectBase>();
+      const dataApi = await repo.get(url);
+      if (dataApi) {
+        const result = dataApi;
+        console.log(result);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleCreateTblDMInventory = async (
     dataSubmit: StudentGraduatedModelQuery
@@ -148,27 +167,41 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
               label={"Giới tính"}
               placeholder={"Chọn giới tính"}
               type="number"
-              {...form.getInputProps("fax")}
+              data={[
+                { value: "0", label: "Nam" },
+                { value: "1", label: "Nữ" },
+              ]}
+              {...form.getInputProps("gender")}
+              onChange={(value) =>
+                form.setValues((prev) => ({ ...prev, gender: value === "1" }))
+              }
             />
           </Grid.Col>
         </Grid>
 
         <Grid>
           <Grid.Col span={6}>
-            <TextInput
-              label={"Điện thoại"}
-              placeholder={"Nhập số điện thoại"}
-              type="number"
+            <YearPickerInput
+              label={"Năm tốt nghiệp"}
+              placeholder={"Chọn năm tốt nghiệp"}
               withAsterisk
-              {...form.getInputProps("phone")}
+              clearable
+              {...form.getInputProps("graduationYear")}
+              onChange={(value) =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  graduationYear: value?.toISOString(),
+                }))
+              }
             />
           </Grid.Col>
           <Grid.Col span={6}>
-            <TextInput
-              label={"Fax"}
-              placeholder={"Nhập fax"}
-              type="number"
-              {...form.getInputProps("fax")}
+            <Select
+              label={"Ngành học"}
+              placeholder={"Chọn ngành học"}
+              data={dataMajors}
+              onClick={() => getSelectMajor()}
+              {...form.getInputProps("majorId")}
             />
           </Grid.Col>
         </Grid>
