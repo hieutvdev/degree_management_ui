@@ -64,30 +64,41 @@ export class RepositoryBase<T> {
     return response.data;
   }
 
-  async post(url: string, data: T, config?: AxiosRequestConfig): Promise<T> {
+  async post(
+    url: string,
+    data: T,
+    config?: AxiosRequestConfig
+  ): Promise<ResponseBase<T>> {
     const response: AxiosResponse<T> = await this.httpClient.post(
       url,
       data,
       config
     );
-    return response.data;
+    return response;
   }
 
-  async put(url: string, data: T, config?: AxiosRequestConfig): Promise<T> {
+  async put(
+    url: string,
+    data: T,
+    config?: AxiosRequestConfig
+  ): Promise<ResponseBase<T>> {
     const response: AxiosResponse<T> = await this.httpClient.put(
       url,
       data,
       config
     );
-    return response.data;
+    return response;
   }
 
-  async delete(url: string, config?: AxiosRequestConfig): Promise<T> {
+  async delete(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ResponseBase<T>> {
     const response: AxiosResponse<T> = await this.httpClient.delete(
       url,
       config
     );
-    return response.data;
+    return response;
   }
   async getLists(
     url: string,
