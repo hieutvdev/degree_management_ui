@@ -29,6 +29,10 @@ import {
 import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { StudentGraduated } from "../../../interfaces/StudentGraduated";
+import {
+  formatDateTime,
+  formatDateTransfer,
+} from "../../../helpers/FunctionHelper";
 
 const StudentGraduatedView = () => {
   //data and fetching state
@@ -64,6 +68,9 @@ const StudentGraduatedView = () => {
       {
         accessorKey: "dateOfBirth",
         header: "Ngày sinh",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -143,23 +150,28 @@ const StudentGraduatedView = () => {
   );
 
   async function fetchData() {
+    setIsLoading(true);
+    setIsRefetching(true);
     try {
       const url = `${API_ROUTER.GET_LIST_STUDENTS}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<
-        ResponseBase<PaginationResponseBase<StudentGraduated>>
-      >();
-      const dataApi = await repo.get(url);
-      if (dataApi) {
+      const repo = new DegreeRepository<StudentGraduated>();
+      const dataApi = await repo.getLists(url);
+      if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
-        setData(result?.data ? result?.data : []);
-        setRowCount(result?.count ?? 0);
+        if (result) {
+          setData(result.data);
+          setRowCount(result?.count ?? 0);
+        } else {
+          setData([]);
+          setRowCount(0);
+        }
         setSelectIds([]);
         table.resetRowSelection();
         setIsLoading(false);
         setIsRefetching(false);
       }
     } catch (error) {
-      console.error("Error fetching faculty list:", error);
+      console.error("Error fetching student list:", error);
     }
   }
 
