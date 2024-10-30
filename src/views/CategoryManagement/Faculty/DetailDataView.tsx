@@ -17,7 +17,7 @@ import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
-const CreateDataView = ({ onClose }: CreateDataViewProps) => {
+const DetailDataView = ({ id, onClose }: DetailDataViewProps) => {
   const entity = {
     name: null,
     code: null,
@@ -147,8 +147,9 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   );
 };
 
-export default CreateDataView;
+export default DetailDataView;
 
-type CreateDataViewProps = {
+type DetailDataViewProps = {
+  id: any;
   onClose: any;
 };

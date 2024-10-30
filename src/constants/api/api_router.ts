@@ -3,4 +3,5 @@ export const API_ROUTER = {
   // Faculty
   GET_LIST_FACULTY: "/Faculty/get-list",
   CREATE_FACULTY: "/Faculty/create",
+  DELETE_FACULTY: "/Faculty/delete",
 };
