@@ -41,3 +41,5 @@ export function NavbarNested() {
     </nav>
   );
 }
+
+export default NavbarNested;

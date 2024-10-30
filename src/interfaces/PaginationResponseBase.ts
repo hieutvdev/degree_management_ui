@@ -5,7 +5,7 @@ export interface PaginationResponseBase<T> {
   pageSize?: number;
 }
 
-export const paginationBase: any = {
+export const paginationBase: object = {
   pageIndex: 0,
   pageSize: 50,
 };
