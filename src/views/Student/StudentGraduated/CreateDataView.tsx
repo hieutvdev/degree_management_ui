@@ -1,301 +1,266 @@
-// import {
-//   Box,
-//   Button,
-//   Checkbox,
-//   Flex,
-//   Grid,
-//   Group,
-//   LoadingOverlay,
-//   TextInput,
-//   Textarea,
-// } from "@mantine/core";
-// // import { hasLength, useForm } from "@mantine/form";
-// // import { useDisclosure } from "@mantine/hooks";
-// // import { modals } from "@mantine/modals";
-// // import { IconCheck, IconWindow } from "@tabler/icons-react";
-// // import { useEffect } from "react";
-// // import { repositoryPos } from "../../../../_base/_const/_constVar";
-// // import { NotificationExtension } from "../../../../_base/extension/NotificationExtension";
-// // import { MessageResponse } from "../../../../model/MessageResponse";
-// // import { TblDMInventory } from "../../../../model/TblDMInventory";
-// // import { handleKeyDown } from "../../../../_base/helper/FunctionHelper";
-// // import { sky_blue } from "../../../../const/variables";
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Grid,
+  Group,
+  LoadingOverlay,
+  Select,
+  TextInput,
+  Textarea,
+} from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { IconCheck, IconWindow } from "@tabler/icons-react";
+import { StudentGraduatedModelQuery } from "../../../interfaces/StudentGraduated";
+import { hasLength, useForm } from "@mantine/form";
+import { useDisclosure } from "@mantine/hooks";
+import { useEffect } from "react";
+import { DateTimePicker } from "@mantine/dates";
 
-// const CreateDataView = ({ onClose }: CreateDataViewProps) => {
-//   const entity = {
-//     id: "0",
-//     idBranch: 0,
-//     code: "",
-//     name: "",
-//     addr: "",
-//     type: null,
-//     phone: null,
-//     fax: null,
-//     note: null,
-//     active: false,
-//     closeBookDate: null,
-//     isPrintInvoice: null,
-//     isPrintReceve: null,
-//     synDate: null,
-//     oldInventoryCode: null,
-//     codeoracle: null,
-//     positionId: null,
-//     createBy: null,
-//     createDate: null,
-//     lastUpdateBy: null,
-//     lastUpdateDate: null,
-//     openBookDate: null,
-//   };
+const CreateDataView = ({ onClose }: CreateDataViewProps) => {
+  const entity = {
+    fullName: null,
+    dateOfBirth: null,
+    gender: null,
+    graduationYear: null,
+    majorId: 0,
+    gpa: null,
+    honors: null,
+    contactEmail: null,
+    phoneNumber: null,
+  };
 
-//   const [visible, { toggle, close, open }] = useDisclosure(false);
+  const [visible, { toggle, close, open }] = useDisclosure(false);
 
-//   const form = useForm<TblDMInventory>({
-//     mode: "uncontrolled",
-//     validateInputOnChange: true,
-//     initialValues: {
-//       ...entity,
-//     },
+  const form = useForm<StudentGraduatedModelQuery>({
+    mode: "uncontrolled",
+    validateInputOnChange: true,
+    initialValues: {
+      ...entity,
+    },
 
-//     validate: {
-//       name: (value: string | null) => {
-//         if (!value) {
-//           return "Vui lòng nhập tên kho!";
-//         }
-//         return hasLength(
-//           { min: 5, max: 50 },
-//           "Tên phải từ 5-50 kí tự!"
-//         )(value as string);
-//       },
-//       code: (value: string | null) => {
-//         if (!value) {
-//           return "Vui lòng nhập mã kho!";
-//         }
-//         return hasLength(
-//           { max: 10 },
-//           "Mã phải nhỏ hơn 10 kí tự!"
-//         )(value as string);
-//       },
-//       addr: (value: string | null) => {
-//         if (!value) {
-//           return "Vui lòng nhập địa chỉ kho!";
-//         }
-//         return hasLength(
-//           { max: 250 },
-//           "Địa chỉ không quá 250 kí tự!"
-//         )(value as string);
-//       },
-//       phone: (value: string | null) => {
-//         if (!value) {
-//           return "Vui lòng nhập số điện thoại!";
-//         }
-//         if (!/^\d{8,10}$/.test(value)) {
-//           return "Số điện thoại phải có từ 8 đến 10 chữ số!";
-//         }
-//       },
-//       note: (value: string | null) => {
-//         if (value && hasLength({ max: 250 })(value)) {
-//           return "Ghi chú không quá 250 kí tự!";
-//         }
-//       },
-//     },
-//   });
+    validate: {
+      fullName: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng nhập tên sinh viên!";
+        }
+        return hasLength(
+          { min: 5, max: 50 },
+          "Tên phải từ 5-50 kí tự!"
+        )(value as string);
+      },
+      dateOfBirth: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng chọn ngày sinh!";
+        }
+      },
+      gender: (value: boolean | null) => {
+        if (!value) {
+          return "Vui lòng chọn giới tính!";
+        }
+      },
+      gpa: (value: number | null) => {
+        if (!value) {
+          return "Vui lòng nhập điểm gpa hệ 4.0!";
+        }
+      },
+      majorId: (value: number | null) => {
+        if (!value) {
+          return "Vui lòng chọn ngành học!";
+        }
+      },
 
-//   const callApiGetData = async () => {
-//     open();
-//     const callApi = await repositoryPos.get<MessageResponse<TblDMInventory>>(
-//       "/api/v1/TblDMInventory/create"
-//     );
-//     if (callApi?.success) {
-//       const dataApi = callApi?.data;
-//       if (dataApi !== null) {
-//         form.setValues(dataApi);
-//         form.resetDirty(dataApi);
-//       }
-//       close();
-//     } else {
-//       NotificationExtension.Fails("Bạn không có quyền tạo!!!");
-//       modals.closeAll();
-//     }
-//   };
+      phoneNumber: (value: string | null) => {
+        if (value && !/^\d{8,10}$/.test(value)) {
+          return "Số điện thoại phải có từ 8 đến 10 chữ số!";
+        }
+      },
+      contactEmail: (value: string | null) => {
+        const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+        if (value && !emailRegex.test(value)) {
+          return "Email không hợp lệ!";
+        }
+        return null;
+      },
+    },
+  });
 
-//   const handleCreateTblDMInventory = async (dataSubmit: TblDMInventory) => {
-//     open();
-//     const dataApi = await repositoryPos.post<MessageResponse<TblDMInventory>>(
-//       "/api/v1/TblDMInventory/create",
-//       dataSubmit
-//     );
-//     if (dataApi?.success) {
-//       onClose((prev: any) => !prev);
-//       modals.closeAll();
-//       NotificationExtension.Success("Thêm thành công !");
-//     }
-//     close();
-//   };
+  const handleCreateTblDMInventory = async (
+    dataSubmit: StudentGraduatedModelQuery
+  ) => {
+    open();
+    console.log(dataSubmit);
 
-//   useEffect(() => {
-//     callApiGetData();
-//   }, []);
+    // const dataApi = await repositoryPos.post<MessageResponse<TblDMInventory>>(
+    //   "/api/v1/TblDMInventory/create",
+    //   dataSubmit
+    // );
+    // if (dataApi?.success) {
+    //   onClose((prev: any) => !prev);
+    //   modals.closeAll();
+    // }
+    onClose((prev: any) => !prev);
 
-//   return (
-//     <>
-//       <Box
-//         component="form"
-//         mx="auto"
-//         w={{ base: "250px", md: "300px", lg: "400px" }}
-//         onSubmit={form.onSubmit((e: TblDMInventory) => {
-//           handleCreateTblDMInventory(e);
-//         })}
-//         style={{ position: "relative" }}
-//       >
-//         <LoadingOverlay
-//           visible={visible}
-//           zIndex={1000}
-//           overlayProps={{ radius: "sm", blur: 2 }}
-//         />
+    close();
+  };
 
-//         <Grid mt={10}>
-//           <Grid.Col span={4}>
-//             <TextInput
-//               label={"Mã kho"}
-//               placeholder={"Nhập mã kho"}
-//               type="text"
-//               withAsterisk
-//               onKeyDown={handleKeyDown}
-//               {...form.getInputProps("code")}
-//             />
-//           </Grid.Col>
-//           <Grid.Col span={8}>
-//             <TextInput
-//               label={"Tên kho"}
-//               placeholder={"Nhập tên kho"}
-//               type="text"
-//               withAsterisk
-//               w={"100%"}
-//               {...form.getInputProps("name")}
-//             />
-//           </Grid.Col>
-//         </Grid>
+  return (
+    <>
+      <Box
+        component="form"
+        mx="auto"
+        w={{ base: "250px", md: "300px", lg: "400px" }}
+        onSubmit={form.onSubmit((e: StudentGraduatedModelQuery) => {
+          handleCreateTblDMInventory(e);
+        })}
+        style={{ position: "relative" }}
+      >
+        <LoadingOverlay
+          visible={visible}
+          zIndex={1000}
+          overlayProps={{ radius: "sm", blur: 2 }}
+        />
 
-//         <Grid>
-//           <Grid.Col>
-//             <TextInput
-//               label={"Địa chỉ"}
-//               placeholder={"Nhập địa chỉ kho"}
-//               type="text"
-//               withAsterisk
-//               {...form.getInputProps("addr")}
-//             />
-//           </Grid.Col>
-//         </Grid>
+        <Grid mt={10}>
+          <Grid.Col>
+            <TextInput
+              label={"Họ và tên"}
+              placeholder={"Nhập họ và tên"}
+              type="text"
+              withAsterisk
+              {...form.getInputProps("fullName")}
+            />
+          </Grid.Col>
+        </Grid>
 
-//         <Grid>
-//           <Grid.Col span={6}>
-//             <TextInput
-//               label={"Điện thoại"}
-//               placeholder={"Nhập số điện thoại"}
-//               type="number"
-//               withAsterisk
-//               {...form.getInputProps("phone")}
-//             />
-//           </Grid.Col>
-//           <Grid.Col span={6}>
-//             <TextInput
-//               label={"Fax"}
-//               placeholder={"Nhập fax"}
-//               type="number"
-//               {...form.getInputProps("fax")}
-//             />
-//           </Grid.Col>
-//         </Grid>
+        <Grid>
+          <Grid.Col span={6}>
+            <DateTimePicker
+              label={"Ngày Sinh"}
+              placeholder={"Chọn ngày sinh"}
+              withAsterisk
+              {...form.getInputProps("dateOfBirth")}
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Select
+              label={"Giới tính"}
+              placeholder={"Chọn giới tính"}
+              type="number"
+              {...form.getInputProps("fax")}
+            />
+          </Grid.Col>
+        </Grid>
 
-//         <Grid>
-//           <Grid.Col span={6}>
-//             <TextInput
-//               label={"Mã vùng"}
-//               placeholder={"Nhập mã vùng"}
-//               type="text"
-//               {...form.getInputProps("positionId")}
-//             />
-//           </Grid.Col>
-//           <Grid.Col span={6}>
-//             <TextInput
-//               label={"Trung tâm khác"}
-//               placeholder={"Nhập trung tâm"}
-//               type="text"
-//               {...form.getInputProps("oldInventoryCode")}
-//             />
-//           </Grid.Col>
-//         </Grid>
+        <Grid>
+          <Grid.Col span={6}>
+            <TextInput
+              label={"Điện thoại"}
+              placeholder={"Nhập số điện thoại"}
+              type="number"
+              withAsterisk
+              {...form.getInputProps("phone")}
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <TextInput
+              label={"Fax"}
+              placeholder={"Nhập fax"}
+              type="number"
+              {...form.getInputProps("fax")}
+            />
+          </Grid.Col>
+        </Grid>
 
-//         <Grid align="center">
-//           <Grid.Col span={6}>
-//             <TextInput
-//               label={"Mã kho ORC"}
-//               placeholder={"Nhập mã kho"}
-//               type="text"
-//               {...form.getInputProps("codeoracle")}
-//             />
-//           </Grid.Col>
-//           <Grid.Col span={6}>
-//             <TextInput
-//               label={"Tên loại kho"}
-//               placeholder={"Nhập loại kho"}
-//               type="number"
-//               {...form.getInputProps("type")}
-//             />
-//           </Grid.Col>
-//         </Grid>
-//         <Grid align="center">
-//           <Grid.Col span={12}>
-//             <Textarea
-//               label={"Ghi chú"}
-//               placeholder="Nhập ghi chú"
-//               w={"100%"}
-//               {...form.getInputProps("note")}
-//             />
-//           </Grid.Col>
-//           <Grid.Col span={12}>
-//             <Checkbox label={"Sử dụng"} {...form.getInputProps("active")} />
-//           </Grid.Col>
-//         </Grid>
+        <Grid>
+          <Grid.Col span={6}>
+            <TextInput
+              label={"Mã vùng"}
+              placeholder={"Nhập mã vùng"}
+              type="text"
+              {...form.getInputProps("positionId")}
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <TextInput
+              label={"Trung tâm khác"}
+              placeholder={"Nhập trung tâm"}
+              type="text"
+              {...form.getInputProps("oldInventoryCode")}
+            />
+          </Grid.Col>
+        </Grid>
 
-//         <Group
-//           justify="end"
-//           mt="xs"
-//           style={{
-//             position: "sticky",
-//             bottom: 0,
-//             backgroundColor: "white",
-//           }}
-//         >
-//           <Button
-//             type="button"
-//             color="gray"
-//             loading={visible}
-//             onClick={() => {
-//               modals.closeAll();
-//             }}
-//             leftSection={!visible ? <IconWindow size={18} /> : undefined}
-//           >
-//             Đóng
-//           </Button>
-//           <Button
-//             type="submit"
-//             color={sky_blue.base}
-//             loading={visible}
-//             leftSection={!visible ? <IconCheck size={18} /> : undefined}
-//           >
-//             Lưu
-//           </Button>
-//           <></>
-//         </Group>
-//       </Box>
-//     </>
-//   );
-// };
+        <Grid align="center">
+          <Grid.Col span={6}>
+            <TextInput
+              label={"Mã kho ORC"}
+              placeholder={"Nhập mã kho"}
+              type="text"
+              {...form.getInputProps("codeoracle")}
+            />
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <TextInput
+              label={"Tên loại kho"}
+              placeholder={"Nhập loại kho"}
+              type="number"
+              {...form.getInputProps("type")}
+            />
+          </Grid.Col>
+        </Grid>
+        <Grid align="center">
+          <Grid.Col span={12}>
+            <Textarea
+              label={"Ghi chú"}
+              placeholder="Nhập ghi chú"
+              w={"100%"}
+              {...form.getInputProps("note")}
+            />
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <Checkbox label={"Sử dụng"} {...form.getInputProps("active")} />
+          </Grid.Col>
+        </Grid>
 
-// export default CreateDataView;
+        <Group
+          justify="end"
+          mt="xs"
+          style={{
+            position: "sticky",
+            bottom: 0,
+            backgroundColor: "white",
+          }}
+        >
+          <Button
+            type="button"
+            color="gray"
+            loading={visible}
+            onClick={() => {
+              modals.closeAll();
+            }}
+            leftSection={!visible ? <IconWindow size={18} /> : undefined}
+          >
+            Đóng
+          </Button>
+          <Button
+            type="submit"
+            color={"blue"}
+            loading={visible}
+            leftSection={!visible ? <IconCheck size={18} /> : undefined}
+          >
+            Lưu
+          </Button>
+          <></>
+        </Group>
+      </Box>
+    </>
+  );
+};
 
-// type CreateDataViewProps = {
-//   onClose: any;
-// };
+export default CreateDataView;
+
+type CreateDataViewProps = {
+  onClose: any;
+};

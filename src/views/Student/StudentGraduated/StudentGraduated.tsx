@@ -44,6 +44,7 @@ import {
   formatDateTransfer,
   formatYear,
 } from "../../../helpers/FunctionHelper";
+import CreateDataView from "./CreateDataView";
 
 const StudentGraduatedView = () => {
   //data and fetching state
@@ -236,15 +237,15 @@ const StudentGraduatedView = () => {
     }
   }
 
-  // const handleCreate = () => {
-  //   modals.openConfirmModal({
-  //     title: "Tạo mới sinh viên",
-  //     size: "auto",
-  //     children: <CreateDataView />,
-  //     confirmProps: { display: "none" },
-  //     cancelProps: { display: "none" },
-  //   });
-  // };
+  const handleCreate = () => {
+    modals.openConfirmModal({
+      title: "Tạo mới sinh viên",
+      size: "auto",
+      children: <CreateDataView onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
 
   // const handleEdit = () => {
   //   modals.openConfirmModal({
@@ -277,7 +278,7 @@ const StudentGraduatedView = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [deleteViewStatus]);
 
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
@@ -306,7 +307,7 @@ const StudentGraduatedView = () => {
         <Flex gap="md">
           <Button
             leftSection={<IconPlus size={"15px"} />}
-            // onClick={() => handleCreate()}
+            onClick={() => handleCreate()}
           >
             Thêm mới
           </Button>
