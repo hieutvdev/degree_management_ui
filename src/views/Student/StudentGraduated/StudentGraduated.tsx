@@ -1,6 +1,7 @@
 import { TextInput, Flex, Button, Tooltip, ActionIcon } from "@mantine/core";
 import {
   MRT_ColumnDef,
+  MRT_PaginationState,
   MRT_RowSelectionState,
   MantineReactTable,
   useMantineReactTable,
@@ -13,31 +14,47 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { RepositoryBase } from "../../../services/RepositoryBase";
+import {
+  DegreeRepository,
+  RepositoryBase,
+} from "../../../services/RepositoryBase";
 import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
-import { paginationBase } from "../../../interfaces/PaginationResponseBase";
+import {
+  paginationBase,
+  PaginationResponseBase,
+} from "../../../interfaces/PaginationResponseBase";
 import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import { StudentGraduated } from "../../../interfaces/StudentGraduated";
 
-const StudentGraduated = () => {
+const StudentGraduatedView = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<DegreeTypeModelQuery[]>([]);
+  const [data, setData] = useState<StudentGraduated[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
   const [rowCount, setRowCount] = useState(0);
   const [height, setHeight] = useState(0);
-  const [pagination, setPagination] = useState(paginationBase);
+  const [pagination, setPagination] =
+    useState<MRT_PaginationState>(paginationBase);
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
-  const columns = React.useMemo<MRT_ColumnDef<any>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<StudentGraduated>[]>(
     () => [
+      {
+        accessorKey: "index",
+        header: "STT",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+        Cell: ({ row }) => Number(row.index) + 1,
+      },
       {
         accessorKey: "fullName",
         header: "Họ tên sinh viên",
@@ -125,40 +142,26 @@ const StudentGraduated = () => {
     []
   );
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    setIsRefetching(true);
-    setIsError(false);
-    setData([]);
-    setRowCount(0);
-
-    // let url = `?Skip=${pagination?.pageIndex * pagination?.pageSize}&Take=${
-    //   pagination.pageSize
-    // }`;
-
-    const fetchDataGetList = async () => {
-      try {
-        const url = "/api/StudentGraduated/get-list?PageIndex=0&PageSize=50";
-        const repo = new RepositoryBase<ResponseBase<any>>(
-          "https://localhost:7190"
-        );
-        const dataApi = await repo.get(url);
-        if (dataApi && dataApi.isSuccess) {
-          const result = dataApi?.data;
-          setData(result?.data ? result?.data : []);
-          setRowCount(result.count);
-          setSelectIds([]);
-          table.resetRowSelection();
-          setIsLoading(false);
-          setIsRefetching(false);
-        }
-      } catch (error) {
-        console.error("Error fetching faculty list:", error);
+  async function fetchData() {
+    try {
+      const url = `${API_ROUTER.GET_LIST_STUDENTS}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<
+        ResponseBase<PaginationResponseBase<StudentGraduated>>
+      >();
+      const dataApi = await repo.get(url);
+      if (dataApi) {
+        const result = dataApi?.data;
+        setData(result?.data ? result?.data : []);
+        setRowCount(result?.count ?? 0);
+        setSelectIds([]);
+        table.resetRowSelection();
+        setIsLoading(false);
+        setIsRefetching(false);
       }
-    };
-
-    fetchDataGetList();
-  };
+    } catch (error) {
+      console.error("Error fetching faculty list:", error);
+    }
+  }
 
   const handleCreate = () => {
     // setDeleteViewStatus(!deleteViewStatus);
@@ -285,4 +288,4 @@ const StudentGraduated = () => {
   return <MantineReactTable table={table} />;
 };
 
-export default StudentGraduated;
+export default StudentGraduatedView;
