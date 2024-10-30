@@ -14,7 +14,6 @@ import { IconCheck, IconWindow } from "@tabler/icons-react";
 import { CreateFacultyModel } from "../../../interfaces/Faculty";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
-import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
@@ -23,7 +22,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     name: null,
     code: null,
     active: false,
-    description: null,
+    description: "",
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
@@ -55,13 +54,15 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     const repo = new DegreeRepository<CreateFacultyModel>();
     const dataApi = await repo.post(url, dataSubmit);
 
-    if (dataApi && dataApi?.isSuccess) {
+    console.log(dataApi);
+
+    if (dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
-      modals.closeAll();
       notifications.show({
         color: "green",
         message: "Thêm khoa thành công !",
       });
+      modals.closeAll();
     }
     close();
   };
@@ -142,7 +143,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
           >
             Lưu
           </Button>
-          <></>
         </Group>
       </Box>
     </>
