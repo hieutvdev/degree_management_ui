@@ -190,16 +190,14 @@ const StudentGraduatedView = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      // 190 là chiều cao của phần phân trang
-      // headerHeight là chiều cao của phần header
       setHeight(window.innerHeight - (140 + headerHeight));
     };
 
-    handleResize(); // Set initial height
-    window.addEventListener("resize", handleResize); // Update height on window resize
+    handleResize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize); // Clean up event listener
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
