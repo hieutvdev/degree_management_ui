@@ -10,14 +10,13 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { IconCheck, IconWindow } from "@tabler/icons-react";
-import { CreateFacultyModel } from "../../../interfaces/Faculty";
+import { IconWindow } from "@tabler/icons-react";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
+import { useEffect } from "react";
 
-const CreateDataView = ({ onClose }: CreateDataViewProps) => {
+const DetailDataView = ({ id }: DetailDataViewProps) => {
   const entity = {
     name: null,
     code: null,
@@ -27,43 +26,31 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<CreateFacultyModel>({
+  const form = useForm<any>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       ...entity,
     },
-
-    validate: {
-      code: (value: string | null) => {
-        if (!value) {
-          return "Vui lòng nhập mã khoa!";
-        }
-      },
-      name: (value: string | null) => {
-        if (!value) {
-          return "Vui lòng nhập tên khoa!";
-        }
-      },
-    },
   });
 
-  const handleCreateFaculty = async (dataSubmit: CreateFacultyModel) => {
-    open();
-    const url = `${API_ROUTER.CREATE_FACULTY}`;
-    const repo = new DegreeRepository<CreateFacultyModel>();
-    const dataApi = await repo.post(url, dataSubmit);
+  const getDataDetail = async () => {
+    const url = `${API_ROUTER.DETAIL_FACULTY}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url + `?id=${id}`);
 
     if (dataApi?.isSuccess) {
-      onClose((prev: any) => !prev);
-      notifications.show({
-        color: "green",
-        message: "Thêm khoa thành công !",
-      });
+      form.setValues(dataApi?.data);
+    } else {
       modals.closeAll();
     }
-    close();
   };
+
+  useEffect(() => {
+    if (id) {
+      getDataDetail();
+    }
+  }, [id]);
 
   return (
     <>
@@ -71,9 +58,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: CreateFacultyModel) => {
-          handleCreateFaculty(e);
-        })}
         style={{ position: "relative" }}
       >
         <LoadingOverlay
@@ -87,16 +71,16 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
             <TextInput
               label={"Mã khoa"}
               placeholder={"Nhập mã"}
-              withAsterisk
               {...form.getInputProps("code")}
+              readOnly
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 8 }}>
             <TextInput
               label={"Tên khoa"}
               placeholder={"Nhập tên khoa"}
-              withAsterisk
               {...form.getInputProps("name")}
+              readOnly
             />
           </Grid.Col>
         </Grid>
@@ -107,10 +91,15 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
               label={"Ghi chú"}
               placeholder="Nhập ghi chú"
               {...form.getInputProps("description")}
+              readOnly
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
-            <Checkbox label={"Sử dụng"} {...form.getInputProps("active")} />
+            <Checkbox
+              label={"Sử dụng"}
+              checked={form.getValues().active}
+              readOnly
+            />
           </Grid.Col>
         </Grid>
 
@@ -134,21 +123,14 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
           >
             Đóng
           </Button>
-          <Button
-            type="submit"
-            loading={visible}
-            leftSection={!visible ? <IconCheck size={18} /> : undefined}
-          >
-            Lưu
-          </Button>
         </Group>
       </Box>
     </>
   );
 };
 
-export default CreateDataView;
+export default DetailDataView;
 
-type CreateDataViewProps = {
-  onClose: any;
+type DetailDataViewProps = {
+  id: any;
 };

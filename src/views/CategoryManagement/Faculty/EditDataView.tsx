@@ -11,23 +11,25 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { IconCheck, IconWindow } from "@tabler/icons-react";
-import { CreateFacultyModel } from "../../../interfaces/Faculty";
+import { EditFacultyModel } from "../../../interfaces/Faculty";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
+import { useEffect, useState } from "react";
 
-const CreateDataView = ({ onClose }: CreateDataViewProps) => {
+const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   const entity = {
+    id: id,
     name: null,
     code: null,
-    active: false,
-    description: "",
+    active: null,
+    description: null,
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<CreateFacultyModel>({
+  const form = useForm<EditFacultyModel>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
@@ -48,22 +50,40 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     },
   });
 
-  const handleCreateFaculty = async (dataSubmit: CreateFacultyModel) => {
+  const handleUpdateFaculty = async (dataSubmit: EditFacultyModel) => {
     open();
-    const url = `${API_ROUTER.CREATE_FACULTY}`;
-    const repo = new DegreeRepository<CreateFacultyModel>();
-    const dataApi = await repo.post(url, dataSubmit);
+    const url = `${API_ROUTER.UPDATE_FACULTY}`;
+    const repo = new DegreeRepository<EditFacultyModel>();
+    const dataApi = await repo.put(url, dataSubmit);
 
     if (dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Thêm khoa thành công !",
+        message: "Chỉnh sửa khoa thành công !",
       });
       modals.closeAll();
     }
     close();
   };
+
+  const getDataDetail = async () => {
+    const url = `${API_ROUTER.DETAIL_FACULTY}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url + `?id=${id}`);
+
+    if (dataApi?.isSuccess) {
+      form.setValues(dataApi?.data);
+    } else {
+      modals.closeAll();
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      getDataDetail();
+    }
+  }, [id]);
 
   return (
     <>
@@ -71,8 +91,8 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: CreateFacultyModel) => {
-          handleCreateFaculty(e);
+        onSubmit={form.onSubmit((e: EditFacultyModel) => {
+          handleUpdateFaculty(e);
         })}
         style={{ position: "relative" }}
       >
@@ -106,11 +126,28 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
             <Textarea
               label={"Ghi chú"}
               placeholder="Nhập ghi chú"
+              value={form.getValues().description}
               {...form.getInputProps("description")}
+              onChange={(e) =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  description: e.currentTarget.value,
+                }))
+              }
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
-            <Checkbox label={"Sử dụng"} {...form.getInputProps("active")} />
+            <Checkbox
+              label={"Sử dụng"}
+              checked={form.getValues().active}
+              {...form.getInputProps("active")}
+              onClick={() =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  active: !form.getValues().active,
+                }))
+              }
+            />
           </Grid.Col>
         </Grid>
 
@@ -147,8 +184,9 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   );
 };
 
-export default CreateDataView;
+export default EditDataView;
 
-type CreateDataViewProps = {
+type EditDataViewProps = {
+  id: any;
   onClose: any;
 };

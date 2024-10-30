@@ -28,6 +28,9 @@ import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import { FacultyModelQuery } from "../../../interfaces/Faculty";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { API_ROUTER } from "../../../constants/api/api_router";
+import DeleteDataView from "./DeleteDataView";
+import DetailDataView from "./DetailDataView";
+import EditDataView from "./EditDataView";
 
 const Faculty = () => {
   //data and fetching state
@@ -101,22 +104,34 @@ const Faculty = () => {
         accessorKey: "action",
         header: "Thao tác",
         size: 10,
-        Cell: () => (
+        Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
             <Tooltip label="Chỉnh sửa">
-              <ActionIcon variant="light" color="orange">
+              <ActionIcon
+                variant="light"
+                color="orange"
+                onClick={() => handleUpdate(row.original.id)}
+              >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Chi tiết">
-              <ActionIcon variant="light" color="cyan">
+              <ActionIcon
+                variant="light"
+                color="cyan"
+                onClick={() => handleDetail(row.original.id)}
+              >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Xóa">
-              <ActionIcon variant="light" color="red">
+              <ActionIcon
+                variant="light"
+                color="red"
+                onClick={() => handleDelete(row.original.id)}
+              >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -157,11 +172,40 @@ const Faculty = () => {
   }
 
   const handleCreate = () => {
-    setDeleteViewStatus(!deleteViewStatus);
     modals.openConfirmModal({
       title: <Title order={5}>Thêm khoa</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleUpdate = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chỉnh sửa khoa</Title>,
+      size: "auto",
+      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDetail = (id: string | null) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chi tiết khoa</Title>,
+      size: "auto",
+      children: <DetailDataView id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDelete = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xóa khoa</Title>,
+      size: "auto",
+      children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
