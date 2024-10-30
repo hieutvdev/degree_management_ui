@@ -20,12 +20,12 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { RepositoryBase } from "../../../services/RepositoryBase";
-import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import { FacultyModelQuery } from "../../../interfaces/Faculty";
+import { DegreeRepository } from "../../../services/RepositoryBase";
+import { API_ROUTER } from "../../../constants/api/api_router";
 
 const Faculty = () => {
   //data and fetching state
@@ -132,20 +132,8 @@ const Faculty = () => {
 
     const fetchFacultyList = async () => {
       try {
-        const url = "/api/Faculty/get-list?PageIndex=0&PageSize=50";
-        const repo = new RepositoryBase<ResponseBase<any>>(
-          "https://localhost:7190"
-        );
-        const facultyList = await repo.get(url);
-        if (facultyList && facultyList.isSuccess) {
-          const result = facultyList?.data;
-          setData(result?.data ? result?.data : []);
-          setRowCount(result.count);
-          setSelectIds([]);
-          table.resetRowSelection();
-          setIsLoading(false);
-          setIsRefetching(false);
-        }
+        const response = new DegreeRepository<FacultyModelQuery>();
+        const getData = await response.get(API_ROUTER.GET_LIST_FACULTY);
       } catch (error) {
         console.error("Error fetching faculty list:", error);
       }
@@ -196,7 +184,7 @@ const Faculty = () => {
         <Flex gap="md">
           <Button
             leftSection={<IconPlus size={"15px"} />}
-            //onClick={() => handleCreate()}
+            onClick={() => handleCreate()}
           >
             Thêm mới
           </Button>

@@ -101,6 +101,6 @@ export class RepositoryBase<T> {
 
 export class DegreeRepository<T> extends RepositoryBase<T> {
   constructor() {
-    super(`${API_URL}`);
+    super(`${API_URL}/api`);
   }
 }
