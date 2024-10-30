@@ -18,11 +18,11 @@ export const router = [
     links: [
       {
         label: "Danh sách khoa",
-        link: "/category-management/faculty-management",
+        link: "/faculty",
       },
       {
         label: "Danh sách chuyên ngành",
-        link: "/category-management/major-management",
+        link: "/major",
       },
     ],
   },
@@ -30,14 +30,12 @@ export const router = [
     label: "Sinh viên",
     icon: IconSchool,
     initiallyOpened: true,
-    links: [
-      { label: "Sinh viên tốt nghiệp", link: "/student/student-graduated" },
-    ],
+    links: [{ label: "Sinh viên tốt nghiệp", link: "/student-graduated" }],
   },
   {
     label: "Văn bằng",
     icon: IconCertificate,
     initiallyOpened: true,
-    links: [{ label: "Loại văn bằng", link: "/degree/degree-type" }],
+    links: [{ label: "Loại văn bằng", link: "/degree-type" }],
   },
 ];
