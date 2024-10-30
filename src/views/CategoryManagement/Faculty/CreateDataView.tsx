@@ -34,19 +34,34 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     initialValues: {
       ...entity,
     },
+
+    validate: {
+      code: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng nhập mã khoa!";
+        }
+      },
+      name: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng nhập tên khoa!";
+        }
+      },
+    },
   });
 
-  const handleCreateFaculty = async (
-    dataSubmit: ResponseBase<CreateFacultyModel>
-  ) => {
+  const handleCreateFaculty = async (dataSubmit: CreateFacultyModel) => {
     open();
     const url = `${API_ROUTER.CREATE_FACULTY}`;
-    const repo = new DegreeRepository<ResponseBase<CreateFacultyModel>>();
+    const repo = new DegreeRepository<CreateFacultyModel>();
     const dataApi = await repo.post(url, dataSubmit);
 
     if (dataApi && dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
       modals.closeAll();
+      notifications.show({
+        color: "green",
+        message: "Thêm khoa thành công !",
+      });
     }
     close();
   };
@@ -57,6 +72,9 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
+        onSubmit={form.onSubmit((e: CreateFacultyModel) => {
+          handleCreateFaculty(e);
+        })}
         style={{ position: "relative" }}
       >
         <LoadingOverlay
@@ -68,18 +86,16 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid mt={10}>
           <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
             <TextInput
-              label={"Mã"}
+              label={"Mã khoa"}
               placeholder={"Nhập mã"}
-              type="text"
               withAsterisk
               {...form.getInputProps("code")}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 8 }}>
             <TextInput
-              label={"Tên"}
-              placeholder={"Nhập tên"}
-              type="text"
+              label={"Tên khoa"}
+              placeholder={"Nhập tên khoa"}
               withAsterisk
               {...form.getInputProps("name")}
             />
@@ -91,7 +107,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
             <Textarea
               label={"Ghi chú"}
               placeholder="Nhập ghi chú"
-              {...form.getInputProps("note")}
+              {...form.getInputProps("description")}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
