@@ -1,4 +1,11 @@
-import { TextInput, Flex, Button, Tooltip, ActionIcon } from "@mantine/core";
+import {
+  TextInput,
+  Flex,
+  Button,
+  Tooltip,
+  ActionIcon,
+  Badge,
+} from "@mantine/core";
 import {
   MRT_ColumnDef,
   MRT_PaginationState,
@@ -10,6 +17,9 @@ import React, { useEffect, useState } from "react";
 import {
   IconEdit,
   IconEye,
+  IconGenderFemale,
+  IconGenderMale,
+  IconGenderThird,
   IconPlus,
   IconSearch,
   IconTrash,
@@ -21,7 +31,7 @@ import {
 import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import CreateDataView from "./CreateDataView";
+// import CreateDataView from "./CreateDataView";
 import {
   paginationBase,
   PaginationResponseBase,
@@ -32,6 +42,7 @@ import { StudentGraduated } from "../../../interfaces/StudentGraduated";
 import {
   formatDateTime,
   formatDateTransfer,
+  formatYear,
 } from "../../../helpers/FunctionHelper";
 
 const StudentGraduatedView = () => {
@@ -57,6 +68,7 @@ const StudentGraduatedView = () => {
         header: "STT",
         enableColumnActions: false,
         enableColumnFilter: false,
+        size: 1,
         Cell: ({ row }) => Number(row.index) + 1,
       },
       {
@@ -77,6 +89,13 @@ const StudentGraduatedView = () => {
       {
         accessorKey: "gender",
         header: "Giới tính",
+        Cell: ({ renderedCellValue }: any) => (
+          <>
+            <Badge variant="light" color={getColorOfGender(renderedCellValue)}>
+              <Flex align={"center"}>{renderGender(renderedCellValue)}</Flex>
+            </Badge>
+          </>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -95,11 +114,14 @@ const StudentGraduatedView = () => {
       {
         accessorKey: "graduationYear",
         header: "Năm tốt nghiệp",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatYear(renderedCellValue)}</>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "majorId",
+        accessorKey: "majorName",
         header: "Ngành học",
         enableColumnActions: false,
         enableColumnFilter: false,
@@ -113,6 +135,9 @@ const StudentGraduatedView = () => {
       {
         accessorKey: "honors",
         header: "Loại tốt nghiệp",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{getHonors(renderedCellValue)}</>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -148,6 +173,42 @@ const StudentGraduatedView = () => {
     ],
     []
   );
+  const getColorOfGender = (gender: boolean) => {
+    return gender ? "pink" : "green";
+  };
+
+  const renderGender = (gender: boolean) => {
+    return gender ? (
+      <>
+        <IconGenderFemale size={14} color={"pink"}></IconGenderFemale>
+        Nữ
+      </>
+    ) : (
+      <>
+        <IconGenderMale size={14} color={"green"}></IconGenderMale>
+        Nam
+      </>
+    );
+  };
+
+  const getHonors = (honorId: number) => {
+    switch (honorId) {
+      case 0:
+        return "Kém";
+      case 1:
+        return "Yếu";
+      case 2:
+        return "Trung bình";
+      case 3:
+        return "Khá";
+      case 4:
+        return "Giỏi";
+      case 5:
+        return "Xuất sắc";
+      default:
+        return "Không xác định";
+    }
+  };
 
   async function fetchData() {
     setIsLoading(true);
@@ -175,25 +236,44 @@ const StudentGraduatedView = () => {
     }
   }
 
-  const handleCreate = () => {
-    // setDeleteViewStatus(!deleteViewStatus);
-    modals.openConfirmModal({
-      title: "Tạo mới khoa",
-      size: "auto",
-      children: <CreateDataView />,
-      confirmProps: { display: "none" },
-      cancelProps: { display: "none" },
-    });
-  };
+  // const handleCreate = () => {
+  //   modals.openConfirmModal({
+  //     title: "Tạo mới sinh viên",
+  //     size: "auto",
+  //     children: <CreateDataView />,
+  //     confirmProps: { display: "none" },
+  //     cancelProps: { display: "none" },
+  //   });
+  // };
 
-  useHotkeys([
-    [
-      "F11",
-      () => {
-        handleCreate();
-      },
-    ],
-  ]);
+  // const handleEdit = () => {
+  //   modals.openConfirmModal({
+  //     title: "Sửa sinh viên",
+  //     size: "auto",
+  //     children: <CreateDataView />,
+  //     confirmProps: { display: "none" },
+  //     cancelProps: { display: "none" },
+  //   });
+  // };
+
+  // const handleDetail = () => {
+  //   modals.openConfirmModal({
+  //     title: "Xem chi tiết sinh viên",
+  //     size: "auto",
+  //     children: <CreateDataView />,
+  //     confirmProps: { display: "none" },
+  //     cancelProps: { display: "none" },
+  //   });
+  // };
+
+  // useHotkeys([
+  //   [
+  //     "F11",
+  //     () => {
+  //       handleCreate();
+  //     },
+  //   ],
+  // ]);
 
   useEffect(() => {
     fetchData();
@@ -226,7 +306,7 @@ const StudentGraduatedView = () => {
         <Flex gap="md">
           <Button
             leftSection={<IconPlus size={"15px"} />}
-            onClick={() => handleCreate()}
+            // onClick={() => handleCreate()}
           >
             Thêm mới
           </Button>
@@ -244,7 +324,7 @@ const StudentGraduatedView = () => {
     initialState: {
       showColumnFilters: false,
       columnPinning: {
-        left: ["mrt-row-select", "code"],
+        left: ["mrt-row-select", "index", "fullName"],
         right: ["action"],
       },
       columnVisibility: { id: false },
