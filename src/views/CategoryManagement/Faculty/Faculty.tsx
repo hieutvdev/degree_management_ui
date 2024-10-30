@@ -5,6 +5,8 @@ import {
   Badge,
   Tooltip,
   ActionIcon,
+  Text,
+  Title,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -45,10 +47,13 @@ const Faculty = () => {
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
-        accessorKey: "name",
-        header: "Tên khoa",
+        header: "STT",
+        Cell: ({ row }) => (
+          <Text fw={500} size="12.5px">
+            {row.index === -1 ? "" : row.index + 1}
+          </Text>
+        ),
         enableColumnActions: false,
-        enableColumnFilter: false,
       },
       {
         accessorKey: "code",
@@ -63,6 +68,12 @@ const Faculty = () => {
             {renderedCellValue === null ? null : renderedCellValue}
           </Badge>
         ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "name",
+        header: "Tên khoa",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -119,35 +130,38 @@ const Faculty = () => {
     []
   );
 
-  const fetchData = async () => {
+  async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
-    setIsError(false);
-    setData([]);
-    setRowCount(0);
-
-    // let url = `?Skip=${pagination?.pageIndex * pagination?.pageSize}&Take=${
-    //   pagination.pageSize
-    // }`;
-
-    const fetchFacultyList = async () => {
-      try {
-        const response = new DegreeRepository<FacultyModelQuery>();
-        const getData = await response.get(API_ROUTER.GET_LIST_FACULTY);
-      } catch (error) {
-        console.error("Error fetching faculty list:", error);
+    try {
+      const url = `${API_ROUTER.GET_LIST_FACULTY}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<FacultyModelQuery>();
+      const dataApi = await repo.getLists(url);
+      if (dataApi && dataApi.isSuccess) {
+        const result = dataApi?.data;
+        if (result) {
+          setData(result.data);
+          setRowCount(result?.count ?? 0);
+        } else {
+          setData([]);
+          setRowCount(0);
+        }
+        setSelectIds([]);
+        table.resetRowSelection();
+        setIsLoading(false);
+        setIsRefetching(false);
       }
-    };
-
-    fetchFacultyList();
-  };
+    } catch (error) {
+      console.error("Error fetching student list:", error);
+    }
+  }
 
   const handleCreate = () => {
-    // setDeleteViewStatus(!deleteViewStatus);
+    setDeleteViewStatus(!deleteViewStatus);
     modals.openConfirmModal({
-      title: "Tạo mới khoa",
+      title: <Title order={5}>Thêm khoa</Title>,
       size: "auto",
-      children: <CreateDataView />,
+      children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
@@ -155,7 +169,7 @@ const Faculty = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [deleteViewStatus]);
 
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
@@ -201,10 +215,6 @@ const Faculty = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
-      columnPinning: {
-        left: ["mrt-row-select", "code"],
-        right: ["action"],
-      },
       columnVisibility: { id: false },
       density: "xs",
     },
