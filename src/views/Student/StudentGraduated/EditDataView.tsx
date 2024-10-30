@@ -14,7 +14,10 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconCheck, IconWindow, IconX } from "@tabler/icons-react";
-import { StudentGraduatedModelQuery } from "../../../interfaces/StudentGraduated";
+import {
+  StudentGraduated,
+  StudentGraduatedModelQuery,
+} from "../../../interfaces/StudentGraduated";
 import { hasLength, useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
@@ -29,8 +32,9 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { notifications } from "@mantine/notifications";
 
-const CreateDataView = ({ onClose }: CreateDataViewProps) => {
+const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   const entity = {
+    id: 0,
     fullName: null,
     dateOfBirth: null,
     gender: null,
@@ -45,7 +49,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const [visible, { toggle, close, open }] = useDisclosure(false);
   const [dataMajors, setDataMajors] = useState<ComboboxItem[]>([]);
 
-  const form = useForm<StudentGraduatedModelQuery>({
+  const form = useForm<StudentGraduated>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
@@ -145,24 +149,61 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     }
   };
 
-  const handleCreateTblDMInventory = async (
-    dataSubmit: StudentGraduatedModelQuery
-  ) => {
+  const callApiGetData = async () => {
     open();
-    const url = `${API_ROUTER.CREATE_STUDENT}`;
-    const repo = new DegreeRepository<StudentGraduatedModelQuery>();
-    const dataApi = await repo.post(url, dataSubmit);
+    const url = `${API_ROUTER.GET_DETAIL_STUDENT}?id=${id}`;
+    const repo = new DegreeRepository<StudentGraduated>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi) {
+      const result = dataApi?.data;
+      if (result != null) {
+        form.setValues(result);
+        form.resetDirty(result);
+      }
+      close();
+    } else {
+      notifications.show({
+        color: "red",
+        message: "Dữ liệu không tồn tại !",
+      });
+      modals.closeAll();
+    }
+  };
+
+  const handleEditStudent = async (dataSubmit: StudentGraduated) => {
+    open();
+    const url = `${API_ROUTER.UPDATE_STUDENT}`;
+    const repo = new DegreeRepository<StudentGraduated>();
+    const dataApi = await repo.put(url, dataSubmit);
 
     if (dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Thêm sinh viên thành công !",
+        message: "Cập nhật sinh viên thành công !",
       });
       modals.closeAll();
     }
     close();
   };
+
+  const parseISODateWithoutTimezone = (dateString: string | null) => {
+    if (!dateString) return null;
+
+    // Tách phần ngày và tháng
+    const [date, time] = dateString.split("T");
+    const [year, month, day] = date.split("-").map(Number);
+
+    // Trả về đối tượng Date mà không cộng thêm giờ
+    return new Date(Date.UTC(year, month - 1, day)); // -1 vì tháng trong JS là 0-11
+  };
+
+  useEffect(() => {
+    if (id) {
+      Promise.all([getSelectMajor(), callApiGetData()]);
+    }
+  }, [id]);
 
   return (
     <>
@@ -170,8 +211,8 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: StudentGraduatedModelQuery) => {
-          handleCreateTblDMInventory(e);
+        onSubmit={form.onSubmit((e: StudentGraduated) => {
+          handleEditStudent(e);
         })}
         style={{ position: "relative" }}
       >
@@ -207,14 +248,19 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
               }}
               value={
                 form.getValues().dateOfBirth
-                  ? new Date(form.getValues().dateOfBirth ?? "")
+                  ? parseISODateWithoutTimezone(
+                      form.getValues().dateOfBirth ?? ""
+                    )
                   : undefined
               }
               {...form.getInputProps("dateOfBirth")}
               onChange={(value) => {
+                const formattedDate = value
+                  ? value.toISOString().split("T")[0]
+                  : null;
                 form.setValues((prev) => ({
                   ...prev,
-                  dateOfBirth: value?.toISOString(),
+                  dateOfBirth: formattedDate,
                 }));
               }}
             />
@@ -239,17 +285,28 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid>
           <Grid.Col span={6}>
             <YearPickerInput
+              locale="vi"
               label={"Năm tốt nghiệp"}
               placeholder={"Chọn năm tốt nghiệp"}
               withAsterisk
               clearable
+              value={
+                form.getValues().graduationYear
+                  ? parseISODateWithoutTimezone(
+                      form.getValues().graduationYear ?? ""
+                    )
+                  : undefined
+              }
               {...form.getInputProps("graduationYear")}
-              onChange={(value) =>
+              onChange={(value) => {
+                const formattedDate = value
+                  ? value.toISOString().split("T")[0]
+                  : null;
                 form.setValues((prev) => ({
                   ...prev,
-                  graduationYear: value?.toISOString(),
-                }))
-              }
+                  graduationYear: formattedDate,
+                }));
+              }}
             />
           </Grid.Col>
           <Grid.Col span={6}>
@@ -260,6 +317,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
               onClick={() => {
                 if (dataMajors?.length === 0) getSelectMajor();
               }}
+              value={form.getValues()?.majorId.toString()}
               {...form.getInputProps("majorId")}
             />
           </Grid.Col>
@@ -350,8 +408,9 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   );
 };
 
-export default CreateDataView;
+export default EditDataView;
 
-type CreateDataViewProps = {
+type EditDataViewProps = {
+  id: string | number;
   onClose: any;
 };

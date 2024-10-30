@@ -2,6 +2,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "mantine-react-table/styles.css";
 import "@mantine/notifications/styles.css";
+import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./views/Home/Home";
 import Faculty from "./views/CategoryManagement/Faculty/Faculty";

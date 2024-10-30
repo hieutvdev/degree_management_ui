@@ -1,4 +1,4 @@
-export interface SelectBase {
-  label: string;
+export interface SelectResponseBase {
+  text: string;
   value: string;
 }

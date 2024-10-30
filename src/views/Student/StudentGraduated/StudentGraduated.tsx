@@ -45,6 +45,7 @@ import {
   formatYear,
 } from "../../../helpers/FunctionHelper";
 import CreateDataView from "./CreateDataView";
+import EditDataView from "./EditDataView";
 
 const StudentGraduatedView = () => {
   //data and fetching state
@@ -146,10 +147,14 @@ const StudentGraduatedView = () => {
         accessorKey: "action",
         header: "Thao tác",
         size: 10,
-        Cell: () => (
+        Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
             <Tooltip label="Chỉnh sửa">
-              <ActionIcon variant="light" color="orange">
+              <ActionIcon
+                onClick={() => handleEdit(row.original.id)}
+                variant="light"
+                color="orange"
+              >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -247,15 +252,15 @@ const StudentGraduatedView = () => {
     });
   };
 
-  // const handleEdit = () => {
-  //   modals.openConfirmModal({
-  //     title: "Sửa sinh viên",
-  //     size: "auto",
-  //     children: <CreateDataView />,
-  //     confirmProps: { display: "none" },
-  //     cancelProps: { display: "none" },
-  //   });
-  // };
+  const handleEdit = (id: number | string) => {
+    modals.openConfirmModal({
+      title: "Sửa sinh viên",
+      size: "auto",
+      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
 
   // const handleDetail = () => {
   //   modals.openConfirmModal({
