@@ -1,6 +1,7 @@
 import { TextInput, Flex, Button, Tooltip, ActionIcon } from "@mantine/core";
 import {
   MRT_ColumnDef,
+  MRT_PaginationState,
   MRT_RowSelectionState,
   MantineReactTable,
   useMantineReactTable,
@@ -13,40 +14,63 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { RepositoryBase } from "../../../services/RepositoryBase";
+import {
+  DegreeRepository,
+  RepositoryBase,
+} from "../../../services/RepositoryBase";
 import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
-import { paginationBase } from "../../../interfaces/PaginationResponseBase";
+import {
+  paginationBase,
+  PaginationResponseBase,
+} from "../../../interfaces/PaginationResponseBase";
 import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import { StudentGraduated } from "../../../interfaces/StudentGraduated";
+import {
+  formatDateTime,
+  formatDateTransfer,
+} from "../../../helpers/FunctionHelper";
 
-const StudentGraduated = () => {
+const StudentGraduatedView = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<DegreeTypeModelQuery[]>([]);
+  const [data, setData] = useState<StudentGraduated[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
   const [rowCount, setRowCount] = useState(0);
   const [height, setHeight] = useState(0);
-  const [pagination, setPagination] = useState(paginationBase);
+  const [pagination, setPagination] =
+    useState<MRT_PaginationState>(paginationBase);
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
-  const columns = React.useMemo<MRT_ColumnDef<any>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<StudentGraduated>[]>(
     () => [
       {
+        accessorKey: "index",
+        header: "STT",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+        Cell: ({ row }) => Number(row.index) + 1,
+      },
+      {
         accessorKey: "fullName",
-        header: "Họ tên sinh viên",
+        header: "Họ và tên sinh viên",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
         accessorKey: "dateOfBirth",
         header: "Ngày sinh",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -125,40 +149,31 @@ const StudentGraduated = () => {
     []
   );
 
-  const fetchData = async () => {
+  async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
-    setIsError(false);
-    setData([]);
-    setRowCount(0);
-
-    // let url = `?Skip=${pagination?.pageIndex * pagination?.pageSize}&Take=${
-    //   pagination.pageSize
-    // }`;
-
-    const fetchDataGetList = async () => {
-      try {
-        const url = "/api/StudentGraduated/get-list?PageIndex=0&PageSize=50";
-        const repo = new RepositoryBase<ResponseBase<any>>(
-          "https://localhost:7190"
-        );
-        const dataApi = await repo.get(url);
-        if (dataApi && dataApi.isSuccess) {
-          const result = dataApi?.data;
-          setData(result?.data ? result?.data : []);
-          setRowCount(result.count);
-          setSelectIds([]);
-          table.resetRowSelection();
-          setIsLoading(false);
-          setIsRefetching(false);
+    try {
+      const url = `${API_ROUTER.GET_LIST_STUDENTS}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<StudentGraduated>();
+      const dataApi = await repo.getLists(url);
+      if (dataApi && dataApi.isSuccess) {
+        const result = dataApi?.data;
+        if (result) {
+          setData(result.data);
+          setRowCount(result?.count ?? 0);
+        } else {
+          setData([]);
+          setRowCount(0);
         }
-      } catch (error) {
-        console.error("Error fetching faculty list:", error);
+        setSelectIds([]);
+        table.resetRowSelection();
+        setIsLoading(false);
+        setIsRefetching(false);
       }
-    };
-
-    fetchDataGetList();
-  };
+    } catch (error) {
+      console.error("Error fetching student list:", error);
+    }
+  }
 
   const handleCreate = () => {
     // setDeleteViewStatus(!deleteViewStatus);
@@ -187,16 +202,14 @@ const StudentGraduated = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      // 190 là chiều cao của phần phân trang
-      // headerHeight là chiều cao của phần header
       setHeight(window.innerHeight - (140 + headerHeight));
     };
 
-    handleResize(); // Set initial height
-    window.addEventListener("resize", handleResize); // Update height on window resize
+    handleResize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize); // Clean up event listener
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -285,4 +298,4 @@ const StudentGraduated = () => {
   return <MantineReactTable table={table} />;
 };
 
-export default StudentGraduated;
+export default StudentGraduatedView;
