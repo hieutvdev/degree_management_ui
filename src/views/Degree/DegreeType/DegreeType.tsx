@@ -5,6 +5,8 @@ import {
   Badge,
   Tooltip,
   ActionIcon,
+  Title,
+  Text,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -21,12 +23,19 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { RepositoryBase } from "../../../services/RepositoryBase";
+import {
+  DegreeRepository,
+  RepositoryBase,
+} from "../../../services/RepositoryBase";
 import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
 import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import EditDataView from "./EditDataView";
+import DeleteDataView from "./DeleteDataView";
+import DetailDataView from "./DetailDataView";
 
 const DegreeType = () => {
   //data and fetching state
@@ -45,6 +54,14 @@ const DegreeType = () => {
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
+      {
+        accessorKey: "index",
+        header: "STT",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+        size: 1,
+        Cell: ({ row }) => Number(row.index) + 1,
+      },
       {
         accessorKey: "name",
         header: "Tên loại văn bằng",
@@ -70,6 +87,7 @@ const DegreeType = () => {
       {
         accessorKey: "duration",
         header: "Thời gian học",
+        Cell: ({ renderedCellValue }) => <Text>{renderedCellValue} năm</Text>,
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -111,22 +129,34 @@ const DegreeType = () => {
         accessorKey: "action",
         header: "Thao tác",
         size: 10,
-        Cell: () => (
+        Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
             <Tooltip label="Chỉnh sửa">
-              <ActionIcon variant="light" color="orange">
+              <ActionIcon
+                onClick={() => handleEdit(row.original.id)}
+                variant="light"
+                color="orange"
+              >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Chi tiết">
-              <ActionIcon variant="light" color="cyan">
+              <ActionIcon
+                onClick={() => handleDetail(row.original.id)}
+                variant="light"
+                color="cyan"
+              >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Xóa">
-              <ActionIcon variant="light" color="red">
+              <ActionIcon
+                onClick={() => handleDelete(row.original.id)}
+                variant="light"
+                color="red"
+              >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -140,47 +170,67 @@ const DegreeType = () => {
     []
   );
 
-  const fetchData = async () => {
+  async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
-    setIsError(false);
-    setData([]);
-    setRowCount(0);
-
-    // let url = `?Skip=${pagination?.pageIndex * pagination?.pageSize}&Take=${
-    //   pagination.pageSize
-    // }`;
-
-    const fetchDataGetList = async () => {
-      try {
-        const url = "/api/DegreeType/get-list?PageIndex=0&PageSize=50";
-        const repo = new RepositoryBase<ResponseBase<any>>(
-          "https://localhost:7190"
-        );
-        const dataApi = await repo.get(url);
-        if (dataApi && dataApi.isSuccess) {
-          const result = dataApi?.data;
-          setData(result?.data ? result?.data : []);
-          setRowCount(result.count);
-          setSelectIds([]);
-          table.resetRowSelection();
-          setIsLoading(false);
-          setIsRefetching(false);
+    try {
+      const url = `${API_ROUTER.GET_LIST_DEGREETYPE}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<DegreeTypeModelQuery>();
+      const dataApi = await repo.getLists(url);
+      if (dataApi && dataApi.isSuccess) {
+        const result = dataApi?.data;
+        if (result) {
+          setData(result.data);
+          setRowCount(result?.count ?? 0);
+        } else {
+          setData([]);
+          setRowCount(0);
         }
-      } catch (error) {
-        console.error("Error fetching faculty list:", error);
+        setSelectIds([]);
+        table.resetRowSelection();
+        setIsLoading(false);
+        setIsRefetching(false);
       }
-    };
-
-    fetchDataGetList();
-  };
+    } catch (error) {
+      console.error("Error fetching student list:", error);
+    }
+  }
 
   const handleCreate = () => {
-    // setDeleteViewStatus(!deleteViewStatus);
     modals.openConfirmModal({
-      title: "Tạo mới khoa",
+      title: <Title order={5}>Tạo mới loại văn bằng</Title>,
       size: "auto",
-      children: <CreateDataView />,
+      children: <CreateDataView onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleEdit = (id: number | string) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Sửa loại văn bằng</Title>,
+      size: "auto",
+      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDetail = (id: number | string) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xem chi tiết loại văn bằng</Title>,
+      size: "auto",
+      children: <DetailDataView id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDelete = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xóa loại văn bằng</Title>,
+      size: "auto",
+      children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
@@ -197,7 +247,7 @@ const DegreeType = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [deleteViewStatus]);
 
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
@@ -246,7 +296,7 @@ const DegreeType = () => {
     initialState: {
       showColumnFilters: false,
       columnPinning: {
-        left: ["mrt-row-select", "code"],
+        left: ["mrt-row-select", "index", "code"],
         right: ["action"],
       },
       columnVisibility: { id: false },
