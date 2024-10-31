@@ -5,6 +5,8 @@ import {
   Badge,
   Tooltip,
   ActionIcon,
+  Title,
+  Text,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -20,10 +22,14 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { RepositoryBase } from "../../../services/RepositoryBase";
-import { ResponseBase } from "../../../interfaces/ResponseBase";
+import { DegreeRepository } from "../../../services/RepositoryBase";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import { MajorModelQuery } from "../../../interfaces/Major";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import { modals } from "@mantine/modals";
+import CreateDataView from "./CreateDataView";
+import EditDataView from "./EditDataView";
+import DeleteView from "./DeleteDataView";
 
 const Major = () => {
   //data and fetching state
@@ -43,10 +49,13 @@ const Major = () => {
   const columns = React.useMemo<MRT_ColumnDef<MajorModelQuery>[]>(
     () => [
       {
-        accessorKey: "name",
-        header: "Tên chuyên ngành",
+        header: "STT",
+        Cell: ({ row }) => (
+          <Text fw={500} size="12.5px">
+            {row.index === -1 ? "" : row.index + 1}
+          </Text>
+        ),
         enableColumnActions: false,
-        enableColumnFilter: false,
       },
       {
         accessorKey: "code",
@@ -65,7 +74,13 @@ const Major = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "facultyId",
+        accessorKey: "name",
+        header: "Tên chuyên ngành",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "facultyName",
         header: "Khoa",
         enableColumnActions: false,
         enableColumnFilter: false,
@@ -94,10 +109,14 @@ const Major = () => {
         accessorKey: "action",
         header: "Thao tác",
         size: 10,
-        Cell: () => (
+        Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
             <Tooltip label="Chỉnh sửa">
-              <ActionIcon variant="light" color="orange">
+              <ActionIcon
+                variant="light"
+                color="orange"
+                onClick={() => handleUpdate(row.original.id)}
+              >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -109,7 +128,11 @@ const Major = () => {
             </Tooltip>
 
             <Tooltip label="Xóa">
-              <ActionIcon variant="light" color="red">
+              <ActionIcon
+                variant="light"
+                color="red"
+                onClick={() => handleDelete(row.original.id)}
+              >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -123,58 +146,77 @@ const Major = () => {
     []
   );
 
-  const fetchData = async () => {
+  async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
-    setIsError(false);
-    setData([]);
-    setRowCount(0);
-
-    // let url = `?Skip=${pagination?.pageIndex * pagination?.pageSize}&Take=${
-    //   pagination.pageSize
-    // }`;
-
-    const fetchMajorList = async () => {
-      try {
-        const url = "/api/Major/get-list?PageIndex=0&PageSize=50";
-        const repo = new RepositoryBase<ResponseBase<any>>(
-          "https://localhost:7190"
-        );
-        const majorList = await repo.get(url);
-        if (majorList && majorList.isSuccess) {
-          const result = majorList?.data;
-          setData(result?.data ? result?.data : []);
-          setRowCount(result.count);
-          setSelectIds([]);
-          table.resetRowSelection();
-          setIsLoading(false);
-          setIsRefetching(false);
+    try {
+      const url = `${API_ROUTER.GET_LIST_MAJOR}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<MajorModelQuery>();
+      const dataApi = await repo.getLists(url);
+      if (dataApi && dataApi.isSuccess) {
+        const result = dataApi?.data;
+        if (result) {
+          setData(result.data);
+          setRowCount(result?.count ?? 0);
+        } else {
+          setData([]);
+          setRowCount(0);
         }
-      } catch (error) {
-        console.error("Error fetching faculty list:", error);
+        setSelectIds([]);
+        table.resetRowSelection();
+        setIsLoading(false);
+        setIsRefetching(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching student list:", error);
+    }
+  }
 
-    fetchMajorList();
+  const handleCreate = () => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Thêm chuyên ngành</Title>,
+      size: "auto",
+      children: <CreateDataView onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleUpdate = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chỉnh sửa chuyên ngành</Title>,
+      size: "auto",
+      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDelete = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xóa chuyên ngành</Title>,
+      size: "auto",
+      children: <DeleteView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [deleteViewStatus]);
 
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      // 190 là chiều cao của phần phân trang
-      // headerHeight là chiều cao của phần header
       setHeight(window.innerHeight - (140 + headerHeight));
     };
 
-    handleResize(); // Set initial height
-    window.addEventListener("resize", handleResize); // Update height on window resize
+    handleResize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize); // Clean up event listener
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -189,7 +231,12 @@ const Major = () => {
           <Button leftSection={<IconSearch size={"15px"} />}>Tìm kiếm</Button>
         </Flex>
         <Flex gap="md">
-          <Button leftSection={<IconPlus size={"15px"} />}>Thêm mới</Button>
+          <Button
+            leftSection={<IconPlus size={"15px"} />}
+            onClick={() => handleCreate()}
+          >
+            Thêm mới
+          </Button>
         </Flex>
       </Flex>
     ),
@@ -203,10 +250,6 @@ const Major = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
-      columnPinning: {
-        left: ["mrt-row-select", "code"],
-        right: ["action"],
-      },
       columnVisibility: { id: false },
       density: "xs",
     },

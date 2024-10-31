@@ -16,10 +16,10 @@ function App() {
   return (
     <BrowserRouter>
       <Flex w={"100%"}>
-        <Box w={"20%"}>
+        <Box w={"17.5%"}>
           <NavbarNested />
         </Box>
-        <Box w={"80%"} p={10}>
+        <Box w={"82.5%"} p={10}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/faculty" element={<Faculty />} />
