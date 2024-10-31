@@ -59,9 +59,12 @@ export class RepositoryBase<T> {
     }
   }
 
-  async get(url: string, config?: AxiosRequestConfig): Promise<T> {
+  async get(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ResponseBase<T>> {
     const response: AxiosResponse<T> = await this.httpClient.get(url, config);
-    return response.data;
+    return response.data as ResponseBase<T>;
   }
 
   async post(

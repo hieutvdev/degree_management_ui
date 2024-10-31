@@ -45,3 +45,12 @@ export const formatDateTime = (
   if (date.getFullYear() < 1900) return "";
   return moment(date).format("DD-MM-YYYY");
 };
+
+export const formatYear = (
+  dateString: string | Date | undefined | null
+): string => {
+  if (!dateString) return "";
+  const date = new Date(dayjs(dateString).add(0, "hour").toDate());
+  if (date.getFullYear() < 1900) return "";
+  return moment(date).format("YYYY");
+};
