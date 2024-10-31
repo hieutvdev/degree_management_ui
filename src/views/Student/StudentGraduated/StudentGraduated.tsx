@@ -1,51 +1,40 @@
 import {
-  TextInput,
-  Flex,
-  Button,
-  Tooltip,
   ActionIcon,
   Badge,
+  Button,
+  Flex,
+  TextInput,
+  Title,
+  Tooltip,
 } from "@mantine/core";
-import {
-  MRT_ColumnDef,
-  MRT_PaginationState,
-  MRT_RowSelectionState,
-  MantineReactTable,
-  useMantineReactTable,
-} from "mantine-react-table";
-import React, { useEffect, useState } from "react";
+import { modals } from "@mantine/modals";
 import {
   IconEdit,
   IconEye,
   IconGenderFemale,
   IconGenderMale,
-  IconGenderThird,
   IconPlus,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
 import {
-  DegreeRepository,
-  RepositoryBase,
-} from "../../../services/RepositoryBase";
-import { ResponseBase } from "../../../interfaces/ResponseBase";
-import { useHotkeys } from "@mantine/hooks";
-import { modals } from "@mantine/modals";
+  MantineReactTable,
+  MRT_ColumnDef,
+  MRT_PaginationState,
+  MRT_RowSelectionState,
+  useMantineReactTable,
+} from "mantine-react-table";
+import React, { useEffect, useState } from "react";
+import { DegreeRepository } from "../../../services/RepositoryBase";
 // import CreateDataView from "./CreateDataView";
-import {
-  paginationBase,
-  PaginationResponseBase,
-} from "../../../interfaces/PaginationResponseBase";
-import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
 import { API_ROUTER } from "../../../constants/api/api_router";
+import { formatDateTime, formatYear } from "../../../helpers/FunctionHelper";
+import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import { StudentGraduated } from "../../../interfaces/StudentGraduated";
-import {
-  formatDateTime,
-  formatDateTransfer,
-  formatYear,
-} from "../../../helpers/FunctionHelper";
 import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
+import DetailDataView from "./DetailDataView";
+import DeleteDataView from "./DeleteDataView";
 
 const StudentGraduatedView = () => {
   //data and fetching state
@@ -160,13 +149,21 @@ const StudentGraduatedView = () => {
             </Tooltip>
 
             <Tooltip label="Chi tiết">
-              <ActionIcon variant="light" color="cyan">
+              <ActionIcon
+                onClick={() => handleDetail(row.original.id)}
+                variant="light"
+                color="cyan"
+              >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Xóa">
-              <ActionIcon variant="light" color="red">
+              <ActionIcon
+                onClick={() => handleDelete(row.original.id)}
+                variant="light"
+                color="red"
+              >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -244,7 +241,7 @@ const StudentGraduatedView = () => {
 
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: "Tạo mới sinh viên",
+      title: <Title order={5}>Tạo mới sinh viên</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -254,7 +251,7 @@ const StudentGraduatedView = () => {
 
   const handleEdit = (id: number | string) => {
     modals.openConfirmModal({
-      title: "Sửa sinh viên",
+      title: <Title order={5}>Sửa sinh viên</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -262,15 +259,25 @@ const StudentGraduatedView = () => {
     });
   };
 
-  // const handleDetail = () => {
-  //   modals.openConfirmModal({
-  //     title: "Xem chi tiết sinh viên",
-  //     size: "auto",
-  //     children: <CreateDataView />,
-  //     confirmProps: { display: "none" },
-  //     cancelProps: { display: "none" },
-  //   });
-  // };
+  const handleDetail = (id: number | string) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xem chi tiết sinh viên</Title>,
+      size: "auto",
+      children: <DetailDataView id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDelete = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xóa sinh viên</Title>,
+      size: "auto",
+      children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
 
   // useHotkeys([
   //   [

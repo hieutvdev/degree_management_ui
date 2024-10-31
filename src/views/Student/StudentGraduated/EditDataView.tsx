@@ -1,36 +1,25 @@
 import {
   Box,
   Button,
-  Checkbox,
   ComboboxItem,
-  Flex,
   Grid,
   Group,
   LoadingOverlay,
   NumberInput,
   Select,
   TextInput,
-  Textarea,
 } from "@mantine/core";
-import { modals } from "@mantine/modals";
-import { IconCheck, IconWindow, IconX } from "@tabler/icons-react";
-import {
-  StudentGraduated,
-  StudentGraduatedModelQuery,
-} from "../../../interfaces/StudentGraduated";
+import { DateInput, YearPickerInput } from "@mantine/dates";
 import { hasLength, useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import { useEffect, useState } from "react";
-import {
-  DateInput,
-  DatePickerInput,
-  DateTimePicker,
-  YearPickerInput,
-} from "@mantine/dates";
-import { SelectResponseBase } from "../../../interfaces/SelectBase";
-import { API_ROUTER } from "../../../constants/api/api_router";
-import { DegreeRepository } from "../../../services/RepositoryBase";
+import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
+import { IconCheck, IconX } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import { SelectResponseBase } from "../../../interfaces/SelectBase";
+import { StudentGraduated } from "../../../interfaces/StudentGraduated";
+import { DegreeRepository } from "../../../services/RepositoryBase";
 
 const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   const entity = {
@@ -273,7 +262,13 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
                 { value: "0", label: "Nam" },
                 { value: "1", label: "Nữ" },
               ]}
-              value={form.getValues()?.gender ? "1" : "0"}
+              value={
+                form.getValues()?.gender
+                  ? form.getValues()?.gender
+                    ? "1"
+                    : "0"
+                  : null
+              }
               {...form.getInputProps("gender")}
               onChange={(value) =>
                 form.setValues((prev) => ({ ...prev, gender: value === "1" }))
@@ -346,7 +341,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
           </Grid.Col>
           <Grid.Col span={6}>
             <TextInput
-              disabled
+              readOnly
               label={"Xếp loại"}
               type="text"
               value={getHonorsByGPA(form?.getValues()?.gpa ?? 0).type}
