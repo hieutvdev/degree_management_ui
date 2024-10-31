@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_URL } from "../constants/api";
 import { PaginationResponseBase } from "../interfaces/PaginationResponseBase";
+import { ResponseBase } from "../interfaces/ResponseBase";
 
 export class RepositoryBase<T> {
   protected readonly httpClient: AxiosInstance;
@@ -92,8 +93,8 @@ export class RepositoryBase<T> {
   async getLists(
     url: string,
     config?: AxiosRequestConfig
-  ): Promise<PaginationResponseBase<T[]>> {
-    const response: AxiosResponse<PaginationResponseBase<T[]>> =
+  ): Promise<ResponseBase<PaginationResponseBase<T>>> {
+    const response: AxiosResponse<ResponseBase<PaginationResponseBase<T>>> =
       await this.httpClient.get(url, config);
     return response.data;
   }

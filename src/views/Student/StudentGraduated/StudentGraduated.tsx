@@ -13,7 +13,10 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { RepositoryBase } from "../../../services/RepositoryBase";
+import {
+  DegreeRepository,
+  RepositoryBase,
+} from "../../../services/RepositoryBase";
 import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
@@ -138,15 +141,12 @@ const StudentGraduated = () => {
 
     const fetchDataGetList = async () => {
       try {
-        const url = "/api/StudentGraduated/get-list?PageIndex=0&PageSize=50";
-        const repo = new RepositoryBase<ResponseBase<any>>(
-          "https://localhost:7190"
-        );
-        const dataApi = await repo.get(url);
+        const repo = new DegreeRepository<DegreeTypeModelQuery>();
+        const dataApi = await repo.getLists("aaa");
+
         if (dataApi && dataApi.isSuccess) {
-          const result = dataApi?.data;
-          setData(result?.data ? result?.data : []);
-          setRowCount(result.count);
+          const result = dataApi.data;
+          setData(result?.items && result.items ? result.items : []);
           setSelectIds([]);
           table.resetRowSelection();
           setIsLoading(false);

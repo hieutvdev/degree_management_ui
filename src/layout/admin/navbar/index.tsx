@@ -11,11 +11,8 @@ export function NavbarNested() {
   return (
     <nav className={classes.navbar}>
       <div className={classes.header}>
-        <Group justify="center">
+        <Group p={10}>
           <img src={logo} style={{ width: rem(50) }} />
-          <Text fw={"bold"} c={"#F27423"} size="18px">
-            Quản lý văn bằng
-          </Text>
         </Group>
       </div>
 
@@ -24,15 +21,15 @@ export function NavbarNested() {
       </ScrollArea>
 
       <div className={classes.footer}>
-        <Avatar radius={"xl"} color="#F27423" />
+        <Avatar radius={"lg"} size={40} color="#F27423" />
         <Flex align={"center"} className={classes.logout} gap={"sm"} p={"sm"}>
-          <Text fw={500} size="12px">
+          <Text fw={500} size="14px">
             Đăng xuất
           </Text>
           <IconLogout
             style={{
-              width: rem(16),
-              height: rem(16),
+              width: rem(20),
+              height: rem(20),
             }}
             stroke={1.5}
           />
