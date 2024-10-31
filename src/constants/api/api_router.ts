@@ -4,6 +4,8 @@ export const API_ROUTER = {
   CREATE_STUDENT: "/StudentGraduated/create",
   UPDATE_STUDENT: "/StudentGraduated/update",
   GET_DETAIL_STUDENT: "/StudentGraduated/get-detail",
+  DELETE_STUDENT: "/StudentGraduated/delete",
+
   // Faculty
   GET_LIST_FACULTY: "/Faculty/get-list",
   CREATE_FACULTY: "/Faculty/create",
