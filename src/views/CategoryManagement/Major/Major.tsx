@@ -30,7 +30,6 @@ import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
-import DetailDataView from "./DetailDataView";
 
 const Major = () => {
   //data and fetching state
@@ -123,11 +122,7 @@ const Major = () => {
             </Tooltip>
 
             <Tooltip label="Chi tiết">
-              <ActionIcon
-                variant="light"
-                color="cyan"
-                onClick={() => handleDetail(row.original.id)}
-              >
+              <ActionIcon variant="light" color="cyan">
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -192,16 +187,6 @@ const Major = () => {
       title: <Title order={5}>Chỉnh sửa chuyên ngành</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
-      confirmProps: { display: "none" },
-      cancelProps: { display: "none" },
-    });
-  };
-
-  const handleDetail = (id: string | number) => {
-    modals.openConfirmModal({
-      title: <Title order={5}>Chi tiết chuyên ngành</Title>,
-      size: "auto",
-      children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
