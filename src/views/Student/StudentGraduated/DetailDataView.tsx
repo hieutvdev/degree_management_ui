@@ -160,7 +160,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
               readOnly
               variant="filled"
               locale="vi"
-              label={"Ngày Sinh"}
+              label={"Ngày sinh"}
               placeholder={"Chọn ngày sinh"}
               valueFormat="DD/MM/YYYY"
               dateParser={(input) => {
@@ -188,7 +188,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
                 { value: "1", label: "Nữ" },
               ]}
               value={
-                form.getValues()?.gender
+                form.getValues()?.gender !== null
                   ? form.getValues()?.gender
                     ? "1"
                     : "0"
