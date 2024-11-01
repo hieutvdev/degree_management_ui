@@ -7,6 +7,7 @@ import {
   ActionIcon,
   Title,
   Text,
+  ComboboxItem,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -24,43 +25,54 @@ import {
 } from "@tabler/icons-react";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
-import { MajorModelQuery } from "../../../interfaces/Major";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
+import { ModelDegreeManagementQuery } from "../../../interfaces/DegreeManagement";
+import { getValueById } from "../../../helpers/FunctionHelper";
 
-const Major = () => {
+const DegreeManagement = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<MajorModelQuery[]>([]);
+  const [data, setData] = useState<ModelDegreeManagementQuery[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
   const [rowCount, setRowCount] = useState(0);
   const [height, setHeight] = useState(0);
   const [pagination, setPagination] = useState(paginationBase);
+
+  const [dataStudentSelect, setDataStudentSelect] = useState<ComboboxItem[]>(
+    []
+  );
+  const [dataDegreeTypeSelect, setDataDegreeTypeSelect] = useState<
+    ComboboxItem[]
+  >([]);
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
-  const columns = React.useMemo<MRT_ColumnDef<MajorModelQuery>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<ModelDegreeManagementQuery>[]>(
     () => [
       {
+        accessorKey: "stt",
         header: "STT",
         Cell: ({ row }) => (
           <Text fw={500} size="12.5px">
             {row.index === -1 ? "" : row.index + 1}
           </Text>
         ),
+        size: 50,
         enableColumnActions: false,
+        enableColumnFilter: false,
       },
       {
         accessorKey: "code",
-        header: "Mã chuyên ngành",
+        header: "Số hiệu",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -71,32 +83,68 @@ const Major = () => {
             {renderedCellValue === null ? null : renderedCellValue}
           </Badge>
         ),
+        size: 175,
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "name",
-        header: "Tên chuyên ngành",
+        accessorKey: "regNo",
+        header: "Số vào sổ",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "facultyName",
-        header: "Khoa",
+        accessorKey: "stundentId",
+        header: "Sinh viên",
+        Cell: ({ renderedCellValue }) => (
+          <Text size="12.5px" fw={500}>
+            {getValueById(
+              renderedCellValue?.toString() ?? "",
+              dataStudentSelect,
+              "label"
+            )}
+          </Text>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "active",
-        header: "Hoạt động",
-        Cell: ({ row }) => (
+        accessorKey: "creditsRequired",
+        header: "Số tín chỉ tích lũy",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "degreeTypeId",
+        header: "Loại văn bằng",
+        Cell: ({ renderedCellValue }) => (
+          <Text size="12.5px" fw={500}>
+            {getValueById(
+              renderedCellValue?.toString() ?? "",
+              dataDegreeTypeSelect,
+              "label"
+            )}
+          </Text>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        Cell: ({ renderedCellValue }) => (
           <Badge
-            color={row.original.active === true ? "green" : "red"}
+            color={getColorStatus(Number(renderedCellValue))}
             radius={"sm"}
           >
-            {row.original.active === true ? "Đang hoạt động" : "Dừng hoạt động"}
+            {renderedCellValue === 0
+              ? "Chưa cấp văn bằng"
+              : renderedCellValue === 1
+              ? "Đang cấp văn bằng"
+              : "Đã cấp văn bằng"}
           </Badge>
         ),
+        size: 175,
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -109,7 +157,7 @@ const Major = () => {
       {
         accessorKey: "action",
         header: "Thao tác",
-        size: 10,
+        size: 50,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
             <Tooltip label="Chỉnh sửa">
@@ -148,21 +196,33 @@ const Major = () => {
         enableColumnFilter: false,
       },
     ],
-    []
+    [dataDegreeTypeSelect, dataStudentSelect]
   );
+
+  const getColorStatus = (value: number) => {
+    switch (value) {
+      case 0:
+        return "red";
+      case 1:
+        return "yellow";
+      case 2:
+        return "green";
+    }
+  };
 
   async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_MAJOR}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<MajorModelQuery>();
+      const url = `${API_ROUTER.GET_LIST_DEGREE}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<ModelDegreeManagementQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
         if (result) {
           setData(result.data);
           setRowCount(result?.count ?? 0);
+          Promise.all([getSelectDegreeType(), getSelectStudentGraduated()]);
         } else {
           setData([]);
           setRowCount(0);
@@ -177,9 +237,45 @@ const Major = () => {
     }
   }
 
+  const getSelectStudentGraduated = async () => {
+    const url = `${API_ROUTER.GET_SELECT_STUDENT}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataStudentSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  const getSelectDegreeType = async () => {
+    const url = `${API_ROUTER.GET_SELECT_DEGREETYPE}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataDegreeTypeSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm chuyên ngành</Title>,
+      title: <Title order={5}>Thêm văn bằng</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -189,7 +285,7 @@ const Major = () => {
 
   const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chỉnh sửa chuyên ngành</Title>,
+      title: <Title order={5}>Chỉnh sửa văn bằng</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -199,7 +295,7 @@ const Major = () => {
 
   const handleDetail = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chi tiết chuyên ngành</Title>,
+      title: <Title order={5}>Chi tiết văn bằng</Title>,
       size: "auto",
       children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
@@ -209,7 +305,7 @@ const Major = () => {
 
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa chuyên ngành</Title>,
+      title: <Title order={5}>Xóa văn bằng</Title>,
       size: "auto",
       children: <DeleteView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -265,6 +361,10 @@ const Major = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
+      columnPinning: {
+        left: ["mrt-row-select", "stt", "code"],
+        right: ["status", "action"],
+      },
       columnVisibility: { id: false },
       density: "xs",
     },
@@ -320,4 +420,4 @@ const Major = () => {
   );
 };
 
-export default Major;
+export default DegreeManagement;

@@ -5,17 +5,17 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { notifications } from "@mantine/notifications";
 
-const DeleteView = ({ id, onClose }: DeleteProduct) => {
+const DeleteDataView = ({ id, onClose }: DeleteProduct) => {
   const handleDelete = async () => {
-    const url = `${API_ROUTER.DELETE_MAJOR}`;
+    const url = `${API_ROUTER.DELETE_DEGREE}`;
     const repo = new DegreeRepository<any>();
-    const dataApi = await repo.delete(url + `?Id=${id}`);
+    const dataApi = await repo.delete(url + `?id=${id}`);
 
     if (dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Xóa chuyên ngành thành công !",
+        message: "Xóa văn bằng thành công !",
       });
       modals.closeAll();
     }
@@ -24,7 +24,7 @@ const DeleteView = ({ id, onClose }: DeleteProduct) => {
   return (
     <Box size={"auto"}>
       <Text size="20px" mt={5}>
-        Bạn có chắc chắn muốn xóa chuyên ngành này ?
+        Bạn có chắc chắn muốn xóa văn bằng này ?
       </Text>
       <Group justify="center" mt="lg">
         <Button
@@ -48,9 +48,9 @@ const DeleteView = ({ id, onClose }: DeleteProduct) => {
   );
 };
 
-export default DeleteView;
-
 type DeleteProduct = {
   id: any;
   onClose: any;
 };
+
+export default DeleteDataView;
