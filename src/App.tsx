@@ -11,6 +11,7 @@ import StudentGraduated from "./views/Student/StudentGraduated/StudentGraduated"
 import DegreeType from "./views/Degree/DegreeType/DegreeType";
 import { Box, Flex } from "@mantine/core";
 import NavbarNested from "./layout/admin/navbar";
+import DegreeManagement from "./views/Degree/DegreeManagement/DegreeManagement";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/major" element={<Major />} />
             <Route path="/student-graduated" element={<StudentGraduated />} />
             <Route path="/degree-type" element={<DegreeType />} />
+            <Route path="/degree-management" element={<DegreeManagement />} />
           </Routes>
         </Box>
       </Flex>

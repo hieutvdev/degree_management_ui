@@ -32,7 +32,7 @@ import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
 
-const Major = () => {
+const DegreeManagement = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<MajorModelQuery[]>([]);
@@ -320,4 +320,4 @@ const Major = () => {
   );
 };
 
-export default Major;
+export default DegreeManagement;

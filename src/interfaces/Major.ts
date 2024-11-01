@@ -5,6 +5,7 @@ export interface MajorModelQuery {
   active: boolean | null;
   description: string | null;
   facultyId: number;
+  facultyName?: string;
 }
 
 export interface CreateMajorModel {
