@@ -54,21 +54,3 @@ export const formatYear = (
   if (date.getFullYear() < 1900) return "";
   return moment(date).format("YYYY");
 };
-
-export const handleKeyDownNumber = (event: any) => {
-  if (event.key === "-" || event.code === "Space") {
-    event.preventDefault();
-  }
-};
-
-export const getValueById = (id: number | string, data: any, value: any) => {
-  if (Array.isArray(data)) {
-    const item = data.find(
-      (d: any) => d.id === id || d.itemId === id || d.value === id
-    );
-    if (item) {
-      return `${item[value]}`;
-    }
-  }
-  return "";
-};
