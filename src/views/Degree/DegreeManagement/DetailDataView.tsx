@@ -21,8 +21,7 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import { handleKeyDownNumber } from "../../../helpers/FunctionHelper";
-import { IconCheck, IconWindow } from "@tabler/icons-react";
+import { IconWindow } from "@tabler/icons-react";
 
 const DetailDataView = ({ id }: DetailDataViewProps) => {
   const entity = {

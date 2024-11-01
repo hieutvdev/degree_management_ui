@@ -48,9 +48,9 @@ const DeleteView = ({ id, onClose }: DeleteProduct) => {
   );
 };
 
-export default DeleteView;
-
 type DeleteProduct = {
   id: any;
   onClose: any;
 };
+
+export default DeleteView;
