@@ -5,6 +5,8 @@ import {
   Badge,
   Tooltip,
   ActionIcon,
+  Text,
+  Title,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -20,12 +22,15 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { RepositoryBase } from "../../../services/RepositoryBase";
-import { ResponseBase } from "../../../interfaces/ResponseBase";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import { FacultyModelQuery } from "../../../interfaces/Faculty";
+import { DegreeRepository } from "../../../services/RepositoryBase";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import DeleteDataView from "./DeleteDataView";
+import DetailDataView from "./DetailDataView";
+import EditDataView from "./EditDataView";
 
 const Faculty = () => {
   //data and fetching state
@@ -45,10 +50,13 @@ const Faculty = () => {
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
-        accessorKey: "name",
-        header: "Tên khoa",
+        header: "STT",
+        Cell: ({ row }) => (
+          <Text fw={500} size="12.5px">
+            {row.index === -1 ? "" : row.index + 1}
+          </Text>
+        ),
         enableColumnActions: false,
-        enableColumnFilter: false,
       },
       {
         accessorKey: "code",
@@ -63,6 +71,12 @@ const Faculty = () => {
             {renderedCellValue === null ? null : renderedCellValue}
           </Badge>
         ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "name",
+        header: "Tên khoa",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -90,22 +104,34 @@ const Faculty = () => {
         accessorKey: "action",
         header: "Thao tác",
         size: 10,
-        Cell: () => (
+        Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
             <Tooltip label="Chỉnh sửa">
-              <ActionIcon variant="light" color="orange">
+              <ActionIcon
+                variant="light"
+                color="orange"
+                onClick={() => handleUpdate(row.original.id)}
+              >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Chi tiết">
-              <ActionIcon variant="light" color="cyan">
+              <ActionIcon
+                variant="light"
+                color="cyan"
+                onClick={() => handleDetail(row.original.id)}
+              >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
             <Tooltip label="Xóa">
-              <ActionIcon variant="light" color="red">
+              <ActionIcon
+                variant="light"
+                color="red"
+                onClick={() => handleDelete(row.original.id)}
+              >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -119,47 +145,67 @@ const Faculty = () => {
     []
   );
 
-  const fetchData = async () => {
+  async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
-    setIsError(false);
-    setData([]);
-    setRowCount(0);
-
-    // let url = `?Skip=${pagination?.pageIndex * pagination?.pageSize}&Take=${
-    //   pagination.pageSize
-    // }`;
-
-    const fetchFacultyList = async () => {
-      try {
-        const url = "/api/Faculty/get-list?PageIndex=0&PageSize=50";
-        const repo = new RepositoryBase<ResponseBase<any>>(
-          "https://localhost:7190"
-        );
-        const facultyList = await repo.get(url);
-        if (facultyList && facultyList.isSuccess) {
-          const result = facultyList?.data;
-          setData(result?.data ? result?.data : []);
-          setRowCount(result.count);
-          setSelectIds([]);
-          table.resetRowSelection();
-          setIsLoading(false);
-          setIsRefetching(false);
+    try {
+      const url = `${API_ROUTER.GET_LIST_FACULTY}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<FacultyModelQuery>();
+      const dataApi = await repo.getLists(url);
+      if (dataApi && dataApi.isSuccess) {
+        const result = dataApi?.data;
+        if (result) {
+          setData(result.data);
+          setRowCount(result?.count ?? 0);
+        } else {
+          setData([]);
+          setRowCount(0);
         }
-      } catch (error) {
-        console.error("Error fetching faculty list:", error);
+        setSelectIds([]);
+        table.resetRowSelection();
+        setIsLoading(false);
+        setIsRefetching(false);
       }
-    };
-
-    fetchFacultyList();
-  };
+    } catch (error) {
+      console.error("Error fetching student list:", error);
+    }
+  }
 
   const handleCreate = () => {
-    // setDeleteViewStatus(!deleteViewStatus);
     modals.openConfirmModal({
-      title: "Tạo mới khoa",
+      title: <Title order={5}>Thêm khoa</Title>,
       size: "auto",
-      children: <CreateDataView />,
+      children: <CreateDataView onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleUpdate = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chỉnh sửa khoa</Title>,
+      size: "auto",
+      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDetail = (id: string | null) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chi tiết khoa</Title>,
+      size: "auto",
+      children: <DetailDataView id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDelete = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xóa khoa</Title>,
+      size: "auto",
+      children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
@@ -167,7 +213,7 @@ const Faculty = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [deleteViewStatus]);
 
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
@@ -196,7 +242,7 @@ const Faculty = () => {
         <Flex gap="md">
           <Button
             leftSection={<IconPlus size={"15px"} />}
-            //onClick={() => handleCreate()}
+            onClick={() => handleCreate()}
           >
             Thêm mới
           </Button>
@@ -213,10 +259,6 @@ const Faculty = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
-      columnPinning: {
-        left: ["mrt-row-select", "code"],
-        right: ["action"],
-      },
       columnVisibility: { id: false },
       density: "xs",
     },

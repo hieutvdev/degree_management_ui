@@ -2,6 +2,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "mantine-react-table/styles.css";
 import "@mantine/notifications/styles.css";
+import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./views/Home/Home";
 import Faculty from "./views/CategoryManagement/Faculty/Faculty";
@@ -15,10 +16,10 @@ function App() {
   return (
     <BrowserRouter>
       <Flex w={"100%"}>
-        <Box w={"20%"}>
+        <Box w={"17.5%"}>
           <NavbarNested />
         </Box>
-        <Box w={"80%"} p={10}>
+        <Box w={"82.5%"} p={10}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/faculty" element={<Faculty />} />

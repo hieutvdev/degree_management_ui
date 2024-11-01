@@ -15,14 +15,15 @@ import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { SelectResponseBase } from "../../../interfaces/SelectBase";
-import { StudentGraduatedModelQuery } from "../../../interfaces/StudentGraduated";
+import { StudentGraduated } from "../../../interfaces/StudentGraduated";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 
-const CreateDataView = ({ onClose }: CreateDataViewProps) => {
+const DetailDataView = ({ id }: DetailDataViewProps) => {
   const entity = {
+    id: 0,
     fullName: null,
     dateOfBirth: null,
     gender: null,
@@ -37,61 +38,11 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const [visible, { toggle, close, open }] = useDisclosure(false);
   const [dataMajors, setDataMajors] = useState<ComboboxItem[]>([]);
 
-  const form = useForm<StudentGraduatedModelQuery>({
+  const form = useForm<StudentGraduated>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       ...entity,
-    },
-
-    validate: {
-      fullName: (value: string | null) => {
-        if (!value) {
-          return "Vui lòng nhập tên sinh viên!";
-        }
-        return hasLength(
-          { min: 5, max: 50 },
-          "Tên phải từ 5-50 kí tự!"
-        )(value as string);
-      },
-      dateOfBirth: (value: string | null) => {
-        if (!value) {
-          return "Vui lòng chọn ngày sinh!";
-        }
-      },
-      graduationYear: (value: string | null) => {
-        if (!value) {
-          return "Vui lòng chọn năm tốt nghiệp!";
-        }
-      },
-      gender: (value: boolean | null) => {
-        if (value === null || value === undefined) {
-          return "Vui lòng chọn giới tính!";
-        }
-      },
-      gpa: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng nhập điểm gpa hệ 4.0!";
-        }
-      },
-      majorId: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng chọn ngành học!";
-        }
-      },
-
-      phoneNumber: (value: string | null) => {
-        if (value && !/^\d{8,10}$/.test(value)) {
-          return "Số điện thoại phải có từ 8 đến 10 chữ số!";
-        }
-      },
-      contactEmail: (value: string | null) => {
-        const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
-        if (value && !emailRegex.test(value)) {
-          return "Email không hợp lệ!";
-        }
-        return null;
-      },
     },
   });
 
@@ -137,24 +88,44 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     }
   };
 
-  const handleCreateTblDMInventory = async (
-    dataSubmit: StudentGraduatedModelQuery
-  ) => {
+  const callApiGetData = async () => {
     open();
-    const url = `${API_ROUTER.CREATE_STUDENT}`;
-    const repo = new DegreeRepository<StudentGraduatedModelQuery>();
-    const dataApi = await repo.post(url, dataSubmit);
+    const url = `${API_ROUTER.GET_DETAIL_STUDENT}?id=${id}`;
+    const repo = new DegreeRepository<StudentGraduated>();
+    const dataApi = await repo.get(url);
 
-    if (dataApi?.isSuccess) {
-      onClose((prev: any) => !prev);
+    if (dataApi) {
+      const result = dataApi?.data;
+      if (result != null) {
+        form.setValues(result);
+        form.resetDirty(result);
+      }
+      close();
+    } else {
       notifications.show({
-        color: "green",
-        message: "Thêm sinh viên thành công !",
+        color: "red",
+        message: "Dữ liệu không tồn tại !",
       });
       modals.closeAll();
     }
-    close();
   };
+
+  const parseISODateWithoutTimezone = (dateString: string | null) => {
+    if (!dateString) return null;
+
+    // Tách phần ngày và tháng
+    const [date, time] = dateString.split("T");
+    const [year, month, day] = date.split("-").map(Number);
+
+    // Trả về đối tượng Date mà không cộng thêm giờ
+    return new Date(Date.UTC(year, month - 1, day)); // -1 vì tháng trong JS là 0-11
+  };
+
+  useEffect(() => {
+    if (id) {
+      Promise.all([getSelectMajor(), callApiGetData()]);
+    }
+  }, [id]);
 
   return (
     <>
@@ -162,9 +133,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: StudentGraduatedModelQuery) => {
-          handleCreateTblDMInventory(e);
-        })}
         style={{ position: "relative" }}
       >
         <LoadingOverlay
@@ -176,10 +144,11 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid mt={10}>
           <Grid.Col>
             <TextInput
+              readOnly
+              variant="filled"
               label={"Họ và tên"}
               placeholder={"Nhập họ và tên"}
               type="text"
-              withAsterisk
               {...form.getInputProps("fullName")}
             />
           </Grid.Col>
@@ -188,10 +157,11 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid>
           <Grid.Col span={6}>
             <DateInput
+              readOnly
+              variant="filled"
               locale="vi"
               label={"Ngày Sinh"}
               placeholder={"Chọn ngày sinh"}
-              withAsterisk
               valueFormat="DD/MM/YYYY"
               dateParser={(input) => {
                 const [day, month, year] = input.split("/").map(Number);
@@ -199,20 +169,18 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
               }}
               value={
                 form.getValues().dateOfBirth
-                  ? new Date(form.getValues().dateOfBirth ?? "")
+                  ? parseISODateWithoutTimezone(
+                      form.getValues().dateOfBirth ?? ""
+                    )
                   : undefined
               }
               {...form.getInputProps("dateOfBirth")}
-              onChange={(value) => {
-                form.setValues((prev) => ({
-                  ...prev,
-                  dateOfBirth: value?.toISOString(),
-                }));
-              }}
             />
           </Grid.Col>
           <Grid.Col span={6}>
             <Select
+              readOnly
+              variant="filled"
               label={"Giới tính"}
               placeholder={"Chọn giới tính"}
               data={[
@@ -227,9 +195,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
                   : null
               }
               {...form.getInputProps("gender")}
-              onChange={(value) =>
-                form.setValues((prev) => ({ ...prev, gender: value === "1" }))
-              }
             />
           </Grid.Col>
         </Grid>
@@ -237,27 +202,33 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid>
           <Grid.Col span={6}>
             <YearPickerInput
+              readOnly
+              variant="filled"
+              locale="vi"
               label={"Năm tốt nghiệp"}
               placeholder={"Chọn năm tốt nghiệp"}
-              withAsterisk
               clearable
-              {...form.getInputProps("graduationYear")}
-              onChange={(value) =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  graduationYear: value?.toISOString(),
-                }))
+              value={
+                form.getValues().graduationYear
+                  ? parseISODateWithoutTimezone(
+                      form.getValues().graduationYear ?? ""
+                    )
+                  : undefined
               }
+              {...form.getInputProps("graduationYear")}
             />
           </Grid.Col>
           <Grid.Col span={6}>
             <Select
+              readOnly
+              variant="filled"
               label={"Ngành học"}
               placeholder={"Chọn ngành học"}
               data={dataMajors}
               onClick={() => {
                 if (dataMajors?.length === 0) getSelectMajor();
               }}
+              value={form.getValues()?.majorId.toString()}
               {...form.getInputProps("majorId")}
             />
           </Grid.Col>
@@ -273,20 +244,16 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
               hideControls
               decimalScale={2}
               allowDecimal
+              readOnly
+              variant="filled"
               value={Number(form.getValues()?.gpa) ?? 0}
               {...form.getInputProps("gpa")}
-              onChange={(value) =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  gpa: Number(value) ?? 0,
-                  honors: getHonorsByGPA(Number(value)).value,
-                }))
-              }
             />
           </Grid.Col>
           <Grid.Col span={6}>
             <TextInput
               readOnly
+              variant="filled"
               label={"Xếp loại"}
               type="text"
               value={getHonorsByGPA(form?.getValues()?.gpa ?? 0).type}
@@ -297,6 +264,8 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid align="center">
           <Grid.Col span={6}>
             <TextInput
+              readOnly
+              variant="filled"
               label={"Số điện thoại"}
               placeholder={"Nhập số điện thoại"}
               type="text"
@@ -305,6 +274,8 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
           </Grid.Col>
           <Grid.Col span={6}>
             <TextInput
+              readOnly
+              variant="filled"
               label={"Email"}
               placeholder={"Nhập email"}
               type="text"
@@ -333,14 +304,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
           >
             Đóng
           </Button>
-          <Button
-            type="submit"
-            color={"blue"}
-            loading={visible}
-            leftSection={!visible ? <IconCheck size={18} /> : undefined}
-          >
-            Lưu
-          </Button>
           <></>
         </Group>
       </Box>
@@ -348,8 +311,8 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   );
 };
 
-export default CreateDataView;
+export default DetailDataView;
 
-type CreateDataViewProps = {
-  onClose: any;
+type DetailDataViewProps = {
+  id: string | number;
 };

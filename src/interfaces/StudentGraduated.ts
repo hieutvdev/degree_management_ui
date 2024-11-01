@@ -9,3 +9,16 @@ export interface StudentGraduatedModelQuery {
   contactEmail: string | null;
   phoneNumber: string | null;
 }
+
+export interface StudentGraduated {
+  id: number;
+  fullName: string | null;
+  dateOfBirth: string | null;
+  gender: boolean | null;
+  graduationYear: string | null;
+  majorId: number;
+  gpa: number | null;
+  honors: number | null;
+  contactEmail: string | null;
+  phoneNumber: string | null;
+}
