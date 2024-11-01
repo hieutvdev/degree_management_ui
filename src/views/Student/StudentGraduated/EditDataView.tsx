@@ -227,7 +227,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
           <Grid.Col span={6}>
             <DateInput
               locale="vi"
-              label={"Ngày Sinh"}
+              label={"Ngày sinh"}
               placeholder={"Chọn ngày sinh"}
               withAsterisk
               valueFormat="DD/MM/YYYY"
@@ -263,7 +263,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
                 { value: "1", label: "Nữ" },
               ]}
               value={
-                form.getValues()?.gender
+                form.getValues()?.gender !== null
                   ? form.getValues()?.gender
                     ? "1"
                     : "0"

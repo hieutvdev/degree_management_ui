@@ -23,4 +23,12 @@ export const API_ROUTER = {
   DETAIL_MAJOR: "/Major/get-detail",
   DELETE_MAJOR: "/Major/delete",
   GET_SELECT_MAJOR: "/Major/get-select",
+
+  //Degree Type
+  GET_LIST_DEGREETYPE: "/DegreeType/get-list",
+  CREATE_DEGREETYPE: "/DegreeType/create",
+  UPDATE_DEGREETYPE: "/DegreeType/update",
+  DETAIL_DEGREETYPE: "/DegreeType/get-detail",
+  DELETE_DEGREETYPE: "/DegreeType/delete",
+  GET_SELECT_DEGREETYPE: "/DegreeType/get-select",
 };
