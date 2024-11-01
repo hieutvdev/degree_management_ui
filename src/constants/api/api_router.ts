@@ -5,6 +5,7 @@ export const API_ROUTER = {
   UPDATE_STUDENT: "/StudentGraduated/update",
   GET_DETAIL_STUDENT: "/StudentGraduated/get-detail",
   DELETE_STUDENT: "/StudentGraduated/delete",
+  GET_SELECT_STUDENT: "/StudentGraduated/get-select",
 
   // Faculty
   GET_LIST_FACULTY: "/Faculty/get-list",
@@ -29,4 +30,12 @@ export const API_ROUTER = {
   DETAIL_DEGREETYPE: "/DegreeType/get-detail",
   DELETE_DEGREETYPE: "/DegreeType/delete",
   GET_SELECT_DEGREETYPE: "/DegreeType/get-select",
+
+  //Degree Management
+  GET_LIST_DEGREE: "/Degree/get-list",
+  CREATE_DEGREE: "/Degree/create",
+  UPDATE_DEGREE: "/Degree/update",
+  DELETE_DEGREE: "/Degree/delete",
+  DETAIL_DEGREE: "/Degree/get-detail",
+  GET_SELECT: "/Degree/get-select",
 };
