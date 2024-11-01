@@ -3,6 +3,7 @@ import {
   IconHome,
   IconCertificate,
   IconSchool,
+  IconBuildingWarehouse,
 } from "@tabler/icons-react";
 
 export const router = [
@@ -37,5 +38,11 @@ export const router = [
     icon: IconCertificate,
     initiallyOpened: true,
     links: [{ label: "Loại văn bằng", link: "/degree-type" }],
+  },
+  {
+    label: "Kho",
+    icon: IconBuildingWarehouse,
+    initiallyOpened: true,
+    links: [{ label: "Kho văn bằng", link: "/warehouse" }],
   },
 ];
