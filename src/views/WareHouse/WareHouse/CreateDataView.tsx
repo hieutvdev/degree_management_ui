@@ -2,12 +2,9 @@ import {
   Box,
   Button,
   Checkbox,
-  ComboboxItem,
   Grid,
   Group,
   LoadingOverlay,
-  NumberInput,
-  Select,
   TextInput,
   Textarea,
 } from "@mantine/core";
@@ -18,8 +15,6 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useEffect, useState } from "react";
-import { handleKeyDownNumber } from "../../../helpers/FunctionHelper";
 import { CreateWareHouseModel } from "../../../interfaces/WareHouse";
 
 const CreateDataView = ({ onClose }: CreateDataViewProps) => {
@@ -30,12 +25,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     description: "",
   };
 
-  const [dataStudentSelect, setDataStudentSelect] = useState<ComboboxItem[]>(
-    []
-  );
-  const [dataDegreeTypeSelect, setDataDegreeTypeSelect] = useState<
-    ComboboxItem[]
-  >([]);
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
   const form = useForm<CreateWareHouseModel>({

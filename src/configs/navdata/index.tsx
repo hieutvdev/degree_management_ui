@@ -37,7 +37,10 @@ export const router = [
     label: "Văn bằng",
     icon: IconCertificate,
     initiallyOpened: true,
-    links: [{ label: "Loại văn bằng", link: "/degree-type" }],
+    links: [
+      { label: "Loại văn bằng", link: "/degree-type" },
+      { label: "Quản lý văn bằng", link: "/degree-management" },
+    ],
   },
   {
     label: "Kho",

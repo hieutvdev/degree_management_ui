@@ -1,165 +1,87 @@
 import {
   Box,
   Button,
-  ComboboxItem,
+  Checkbox,
   Grid,
   Group,
   LoadingOverlay,
-  NumberInput,
-  Select,
   Textarea,
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useEffect, useState } from "react";
-import {
-  ModelDegreeManagementQuery,
-  UpdateDegreeManagementModel,
-} from "../../../interfaces/DegreeManagement";
 import { useForm } from "@mantine/form";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import { handleKeyDownNumber } from "../../../helpers/FunctionHelper";
 import { IconCheck, IconWindow } from "@tabler/icons-react";
+import { UpdateWareHouseModel } from "../../../interfaces/WareHouse";
+import { useEffect } from "react";
 
 const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   const entity = {
     id: id,
-    stundentId: null,
-    degreeTypeId: null,
+    name: null,
     code: null,
-    regNo: null,
-    creditsRequired: null,
-    status: 0,
+    active: false,
     description: "",
   };
 
-  const [dataStudentSelect, setDataStudentSelect] = useState<ComboboxItem[]>(
-    []
-  );
-  const [dataDegreeTypeSelect, setDataDegreeTypeSelect] = useState<
-    ComboboxItem[]
-  >([]);
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<UpdateDegreeManagementModel>({
+  const form = useForm<UpdateWareHouseModel>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       ...entity,
     },
 
-    transformValues: (values) => ({
-      ...values,
-      stundentId: Number(values.stundentId),
-      degreeTypeId: Number(values.degreeTypeId),
-    }),
-
     validate: {
       code: (value: string | null) => {
         if (!value) {
-          return "Vui lòng nhập số hiệu !";
+          return "Vui lòng nhập mã kho !";
         }
       },
-      creditsRequired: (value: number | null) => {
+      name: (value: string | null) => {
         if (!value) {
-          return "Vui lòng nhập số tín chỉ cần tích lũy !";
-        }
-      },
-      stundentId: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng nhập sinh viên cần cấp văn bằng !";
-        }
-      },
-      degreeTypeId: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng chọn loại văn bằng !";
+          return "Vui lòng nhập tên kho !";
         }
       },
     },
   });
 
-  const callApiGetData = async () => {
+  const handleUpdate = async (dataSubmit: UpdateWareHouseModel) => {
     open();
-    const url = `${API_ROUTER.DETAIL_DEGREE}?id=${id}`;
-    const repo = new DegreeRepository<ModelDegreeManagementQuery>();
-    const dataApi = await repo.get(url);
-
-    if (dataApi) {
-      const result = dataApi?.data;
-      if (result != null) {
-        form.setValues(result);
-        form.resetDirty(result);
-        Promise.all([getSelectStudentGraduated(), getSelectDegreeType()]);
-      }
-      close();
-    } else {
-      notifications.show({
-        color: "red",
-        message: "Dữ liệu không tồn tại !",
-      });
-      modals.closeAll();
-    }
-  };
-
-  const handleUpdate = async (dataSubmit: UpdateDegreeManagementModel) => {
-    open();
-    const url = `${API_ROUTER.UPDATE_DEGREE}`;
-    const repo = new DegreeRepository<UpdateDegreeManagementModel>();
+    const url = `${API_ROUTER.UPDATE_WAREHOUSE}`;
+    const repo = new DegreeRepository<UpdateWareHouseModel>();
     const dataApi = await repo.put(url, dataSubmit);
 
     if (dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Chỉnh sửa văn bằng thành công !",
+        message: "Chỉnh sửa kho văn bằng thành công !",
       });
       modals.closeAll();
     }
     close();
   };
 
-  const getSelectStudentGraduated = async () => {
-    const url = `${API_ROUTER.GET_SELECT_STUDENT}`;
+  const getDataDetail = async () => {
+    const url = `${API_ROUTER.DETAIL_WAREHOUSE}`;
     const repo = new DegreeRepository<any>();
-    const dataApi = await repo.get(url);
+    const dataApi = await repo.get(url + `?id=${id}`);
 
     if (dataApi?.isSuccess) {
-      const result = dataApi?.data;
-      setDataStudentSelect(
-        result
-          ?.filter((item: any) => item.text != null && item.value != null)
-          ?.map((item: any) => ({
-            label: item.text,
-            value: item.value?.toString(),
-          }))
-      );
-    }
-  };
-
-  const getSelectDegreeType = async () => {
-    const url = `${API_ROUTER.GET_SELECT_DEGREETYPE}`;
-    const repo = new DegreeRepository<any>();
-    const dataApi = await repo.get(url);
-
-    if (dataApi?.isSuccess) {
-      const result = dataApi?.data;
-      setDataDegreeTypeSelect(
-        result
-          ?.filter((item: any) => item.text != null && item.value != null)
-          ?.map((item: any) => ({
-            label: item.text,
-            value: item.value?.toString(),
-          }))
-      );
+      form.setValues(dataApi?.data);
+    } else {
+      modals.closeAll();
     }
   };
 
   useEffect(() => {
     if (id) {
-      callApiGetData();
+      getDataDetail();
     }
   }, [id]);
 
@@ -168,8 +90,8 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
       <Box
         component="form"
         mx="auto"
-        w={{ base: "250px", md: "350px", lg: "500px" }}
-        onSubmit={form.onSubmit((e: UpdateDegreeManagementModel) => {
+        w={{ base: "250px", md: "300px", lg: "400px" }}
+        onSubmit={form.onSubmit((e: UpdateWareHouseModel) => {
           handleUpdate(e);
         })}
         style={{ position: "relative" }}
@@ -181,99 +103,43 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
         />
 
         <Grid mt={10}>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+          <Grid.Col span={{ base: 12, md: 6, lg: 4.5 }}>
             <TextInput
-              label="Số hiệu"
-              placeholder="Nhập số hiệu"
+              label={"Mã kho văn bằng"}
+              placeholder={"Nhập mã kho văn bằng"}
               withAsterisk
               {...form.getInputProps("code")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <NumberInput
-              label="Số tín chỉ tích lũy"
-              placeholder="Nhập số tín chỉ cần tích lũy"
-              key={form.key("creditsRequired")}
-              min={1}
-              hideControls
-              onKeyDown={handleKeyDownNumber}
-              withAsterisk
-              {...form.getInputProps("creditsRequired")}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <Select
-              label="Sinh viên"
-              placeholder="Nhập tên sinh viên"
-              data={dataStudentSelect}
-              value={
-                form.getValues().stundentId
-                  ? form.getValues().stundentId?.toString()
-                  : null
-              }
-              searchable
-              clearable
-              nothingFoundMessage="Không tìm thấy sinh viên !"
-              withAsterisk
-              {...form.getInputProps("stundentId")}
-              onChange={(e) =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  stundentId: e ? Number(e) : null,
-                }))
-              }
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <Select
-              label="Loại văn bằng"
-              placeholder="Chọn loại văn bằng"
-              data={dataDegreeTypeSelect}
-              value={
-                form.getValues().degreeTypeId
-                  ? form.getValues().degreeTypeId?.toString()
-                  : null
-              }
-              withAsterisk
-              {...form.getInputProps("degreeTypeId")}
-              onChange={(e) =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  degreeTypeId: e ? Number(e) : null,
-                }))
-              }
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+          <Grid.Col span={{ base: 12, md: 6, lg: 7.5 }}>
             <TextInput
-              label="Số vào sổ"
-              placeholder="Nhập số vào sổ"
-              {...form.getInputProps("regNo")}
+              label={"Tên kho văn bằng"}
+              placeholder={"Nhập tên kho văn bằng"}
+              withAsterisk
+              {...form.getInputProps("name")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <Select
-              label="Đã cấp văn bằng"
-              data={[
-                { label: "Chưa cấp văn bằng", value: "0" },
-                { label: "Đang cấp văn bằng", value: "1" },
-                { label: "Đã cấp văn bằng", value: "2" },
-              ]}
-              value={form.getValues().status?.toString()}
-              {...form.getInputProps("status")}
-              onChange={(e) =>
+        </Grid>
+
+        <Grid align="center">
+          <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
+            <Textarea
+              label={"Ghi chú"}
+              placeholder="Nhập ghi chú"
+              {...form.getInputProps("description")}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
+            <Checkbox
+              label={"Sử dụng"}
+              checked={form.getValues().active}
+              {...form.getInputProps("active")}
+              onClick={() =>
                 form.setValues((prev) => ({
                   ...prev,
-                  status: e ? Number(e) : 0,
+                  active: !form.getValues().active,
                 }))
               }
-            />
-          </Grid.Col>
-          <Grid.Col span={12}>
-            <Textarea
-              label="Mô tả"
-              placeholder="Nhập mô tả"
-              {...form.getInputProps("description")}
             />
           </Grid.Col>
         </Grid>

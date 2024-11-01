@@ -7,7 +7,7 @@ import { notifications } from "@mantine/notifications";
 
 const DeleteDataView = ({ id, onClose }: DeleteProduct) => {
   const handleDelete = async () => {
-    const url = `${API_ROUTER.DELETE_DEGREE}`;
+    const url = `${API_ROUTER.DELETE_WAREHOUSE}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.delete(url + `?id=${id}`);
 
@@ -15,7 +15,7 @@ const DeleteDataView = ({ id, onClose }: DeleteProduct) => {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Xóa văn bằng thành công !",
+        message: "Xóa kho văn bằng thành công !",
       });
       modals.closeAll();
     }
@@ -24,7 +24,7 @@ const DeleteDataView = ({ id, onClose }: DeleteProduct) => {
   return (
     <Box size={"auto"}>
       <Text size="20px" mt={5}>
-        Bạn có chắc chắn muốn xóa văn bằng này ?
+        Bạn có chắc chắn muốn xóa kho văn bằng này ?
       </Text>
       <Group justify="center" mt="lg">
         <Button
