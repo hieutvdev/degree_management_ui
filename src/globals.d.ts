@@ -32,3 +32,9 @@ declare module "*.css" {
   const value: { [key: string]: string };
   export default value;
 }
+
+declare module "*.module.scss" {
+  const classes: { [key: string]: string };
+
+  export default classes;
+}
