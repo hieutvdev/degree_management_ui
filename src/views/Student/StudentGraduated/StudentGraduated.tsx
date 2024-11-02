@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import {
+  IconDownload,
   IconEdit,
   IconEye,
   IconGenderFemale,
@@ -35,11 +36,12 @@ import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
 import DetailDataView from "./DetailDataView";
 import DeleteDataView from "./DeleteDataView";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 
 const StudentGraduatedView = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<StudentGraduated[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -52,7 +54,7 @@ const StudentGraduatedView = () => {
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
-  const columns = React.useMemo<MRT_ColumnDef<StudentGraduated>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
         accessorKey: "index",
@@ -176,6 +178,24 @@ const StudentGraduatedView = () => {
     ],
     []
   );
+
+  const csvConfig = mkConfig({
+    fieldSeparator: ",",
+    decimalSeparator: ".",
+    useKeysAsHeaders: true,
+  });
+
+  // const handleExportRows = (rows: MRT_Row<any>[]) => {
+  //   const rowData = rows.map((row) => row.original);
+  //   const csv = generateCsv(csvConfig)(rowData);
+  //   download(csvConfig)(csv);
+  // };
+
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
+
   const getColorOfGender = (gender: boolean) => {
     return gender ? "pink" : "green";
   };
@@ -322,6 +342,12 @@ const StudentGraduatedView = () => {
             onClick={() => handleCreate()}
           >
             Thêm mới
+          </Button>
+          <Button
+            onClick={handleExportData}
+            leftSection={<IconDownload size={"15px"} />}
+          >
+            Export Data
           </Button>
         </Flex>
       </Flex>

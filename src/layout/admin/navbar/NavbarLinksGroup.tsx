@@ -10,6 +10,7 @@ import {
 import { IconCalendarStats, IconChevronRight } from "@tabler/icons-react";
 import classes from "./style/NavbarLinksGroup.module.css";
 import { NavLink } from "react-router-dom";
+import { notifications } from "@mantine/notifications";
 
 interface LinksGroupProps {
   icon: React.FC<any>;
