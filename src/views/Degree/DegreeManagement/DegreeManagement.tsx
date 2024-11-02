@@ -17,6 +17,7 @@ import {
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
 import {
+  IconDownload,
   IconEdit,
   IconEye,
   IconPlus,
@@ -33,11 +34,12 @@ import DeleteView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
 import { ModelDegreeManagementQuery } from "../../../interfaces/DegreeManagement";
 import { getValueById } from "../../../helpers/FunctionHelper";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 
 const DegreeManagement = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<ModelDegreeManagementQuery[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -56,7 +58,7 @@ const DegreeManagement = () => {
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
-  const columns = React.useMemo<MRT_ColumnDef<ModelDegreeManagementQuery>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
         accessorKey: "stt",
@@ -83,7 +85,7 @@ const DegreeManagement = () => {
             {renderedCellValue === null ? null : renderedCellValue}
           </Badge>
         ),
-        size: 175,
+        size: 200,
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -198,6 +200,23 @@ const DegreeManagement = () => {
     ],
     [dataDegreeTypeSelect, dataStudentSelect]
   );
+
+  const csvConfig = mkConfig({
+    fieldSeparator: ",",
+    decimalSeparator: ".",
+    useKeysAsHeaders: true,
+  });
+
+  // const handleExportRows = (rows: MRT_Row<any>[]) => {
+  //   const rowData = rows.map((row) => row.original);
+  //   const csv = generateCsv(csvConfig)(rowData);
+  //   download(csvConfig)(csv);
+  // };
+
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
 
   const getColorStatus = (value: number) => {
     switch (value) {
@@ -347,6 +366,12 @@ const DegreeManagement = () => {
             onClick={() => handleCreate()}
           >
             Thêm mới
+          </Button>
+          <Button
+            onClick={handleExportData}
+            leftSection={<IconDownload size={"15px"} />}
+          >
+            Export Data
           </Button>
         </Flex>
       </Flex>

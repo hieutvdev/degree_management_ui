@@ -16,6 +16,7 @@ import {
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
 import {
+  IconDownload,
   IconEdit,
   IconEye,
   IconPlus,
@@ -30,11 +31,12 @@ import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 
 const Major = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<MajorModelQuery[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -46,7 +48,7 @@ const Major = () => {
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
-  const columns = React.useMemo<MRT_ColumnDef<MajorModelQuery>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
         header: "STT",
@@ -146,6 +148,23 @@ const Major = () => {
     []
   );
 
+  const csvConfig = mkConfig({
+    fieldSeparator: ",",
+    decimalSeparator: ".",
+    useKeysAsHeaders: true,
+  });
+
+  // const handleExportRows = (rows: MRT_Row<any>[]) => {
+  //   const rowData = rows.map((row) => row.original);
+  //   const csv = generateCsv(csvConfig)(rowData);
+  //   download(csvConfig)(csv);
+  // };
+
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
+
   async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
@@ -236,6 +255,12 @@ const Major = () => {
             onClick={() => handleCreate()}
           >
             Thêm mới
+          </Button>
+          <Button
+            onClick={handleExportData}
+            leftSection={<IconDownload size={"15px"} />}
+          >
+            Export Data
           </Button>
         </Flex>
       </Flex>
