@@ -27,6 +27,10 @@ export const router = [
         link: "/major",
       },
       {
+        label: "Đợt tốt nghiệp",
+        link: "/period",
+      },
+      {
         label: "Năm tốt nghiệp",
         link: "/year-graduation",
       },

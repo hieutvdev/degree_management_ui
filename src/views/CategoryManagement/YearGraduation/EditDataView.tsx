@@ -43,7 +43,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
     validate: {
       name: (value: string | null) => {
         if (!value) {
-          return "Vui lòng nhập tên khoa!";
+          return "Vui lòng nhập năm tốt nghiệp!";
         }
       },
     },
@@ -104,8 +104,8 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
         <Grid mt={10}>
           <Grid.Col span={12}>
             <YearPickerInput
-              label={"Tên năm tốt nghiệp"}
-              placeholder={"Nhập tên năm tốt nghiệp"}
+              label={"Năm tốt nghiệp"}
+              placeholder={"Nhập năm tốt nghiệp"}
               value={
                 form.getValues().name
                   ? new Date(form.getValues().name ?? "")

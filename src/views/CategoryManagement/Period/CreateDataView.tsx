@@ -5,7 +5,6 @@ import {
   Grid,
   Group,
   LoadingOverlay,
-  TextInput,
   Textarea,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -15,19 +14,22 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { CreateYearGraduationModel } from "../../../interfaces/YearGraduation";
 import { YearPickerInput } from "@mantine/dates";
+import { CreatePeriodModel } from "../../../interfaces/Period";
 
 const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
     name: null,
+    startDate: null,
+    endDate: null,
     active: false,
-    description: "",
+    description: null,
+    yearGraduationId: null,
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<CreateYearGraduationModel>({
+  const form = useForm<CreatePeriodModel>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
@@ -36,22 +38,22 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
 
     transformValues: (values) => ({
       ...values,
-      name: new Date(values.name ?? "").getFullYear()?.toString(),
+      yearGraduationId: Number(values.yearGraduationId),
     }),
 
     validate: {
       name: (value: string | null) => {
         if (!value) {
-          return "Vui lòng nhập năm tốt nghiệp!";
+          return "Vui lòng nhập tên khoa!";
         }
       },
     },
   });
 
-  const handleCreate = async (dataSubmit: CreateYearGraduationModel) => {
+  const handleCreate = async (dataSubmit: CreatePeriodModel) => {
     open();
     const url = `${API_ROUTER.CREATE_YEAR_GRADUATION}`;
-    const repo = new DegreeRepository<CreateYearGraduationModel>();
+    const repo = new DegreeRepository<CreatePeriodModel>();
     const dataApi = await repo.post(url, dataSubmit);
 
     if (dataApi?.isSuccess) {
@@ -71,7 +73,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: CreateYearGraduationModel) => {
+        onSubmit={form.onSubmit((e: CreatePeriodModel) => {
           handleCreate(e);
         })}
         style={{ position: "relative" }}
@@ -85,7 +87,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid mt={10}>
           <Grid.Col span={12}>
             <YearPickerInput
-              label={"Năm tốt nghiệp"}
+              label={"Tên năm tốt nghiệp"}
               placeholder={"Nhập tên năm tốt nghiệp"}
               withAsterisk
               {...form.getInputProps("name")}
