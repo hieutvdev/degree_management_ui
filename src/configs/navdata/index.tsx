@@ -26,6 +26,10 @@ export const router = [
         label: "Danh sách chuyên ngành",
         link: "/major",
       },
+      {
+        label: "Năm tốt nghiệp",
+        link: "/year-graduation",
+      },
     ],
   },
   {

@@ -129,7 +129,7 @@ const DegreeType = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            <Tooltip label="Chỉnh sửa">
+            {/* <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 onClick={() => handleEdit(row.original.id)}
                 variant="light"
@@ -137,7 +137,7 @@ const DegreeType = () => {
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip label="Chi tiết">
               <ActionIcon

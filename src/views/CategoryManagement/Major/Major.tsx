@@ -113,7 +113,7 @@ const Major = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            <Tooltip label="Chỉnh sửa">
+            {/* <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 variant="light"
                 color="orange"
@@ -121,7 +121,7 @@ const Major = () => {
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip label="Chi tiết">
               <ActionIcon variant="light" color="cyan">
