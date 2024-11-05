@@ -82,6 +82,7 @@ const Inventory = () => {
             variant="dot"
             size="lg"
             color={renderedCellValue === null ? "red" : "green"}
+            w={175}
           >
             {getValueById(
               renderedCellValue?.toString() ?? "",
