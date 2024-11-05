@@ -98,7 +98,12 @@ export default function Login() {
             <a>Forgot password?</a>
           </div>
           <div className={cx("login-btn")}>
-            <button>{isLoading ? <Loader /> : "Login"}</button>
+            <button
+              onClick={() => nagiavate("/")}
+              style={{ cursor: "pointer" }}
+            >
+              {isLoading ? <Loader /> : "Login"}
+            </button>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ export const API_ROUTER = {
   GET_DETAIL_STUDENT: "/StudentGraduated/get-detail",
   DELETE_STUDENT: "/StudentGraduated/delete",
   GET_SELECT_STUDENT: "/StudentGraduated/get-select",
+  CREATE_LIST_STUDENT: "/StudentGraduated/create-list",
 
   // Faculty
   GET_LIST_FACULTY: "/Faculty/get-list",
@@ -54,4 +55,12 @@ export const API_ROUTER = {
   DELETE_INVENTORY: "/Invnetory/delete",
   DETAIL_INVENTORY: "/Invnetory/get-detail",
   GET_SELECT_INVENTORY: "/Invnetory/get-select",
+
+  //YearGraduation
+  GET_LIST_YEAR_GRADUATION: "/YearGraduation/get-list",
+  CREATE_YEAR_GRADUATION: "/YearGraduation/create",
+  UPDATE_YEAR_GRADUATION: "/YearGraduation/update",
+  DELETE_YEAR_GRADUATION: "/YearGraduation/delete",
+  GET_DETAIL_YEAR_GRADUATION: "/YearGraduation/get-detail",
+  GET_SELECT_YEAR_GRADUATION: "/YearGraduation/get-select",
 };

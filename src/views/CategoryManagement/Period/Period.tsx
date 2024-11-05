@@ -5,9 +5,10 @@ import {
   Badge,
   Tooltip,
   ActionIcon,
-  Title,
   Text,
-  ComboboxItem,
+  Title,
+  Menu,
+  rem,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -17,43 +18,40 @@ import {
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
 import {
+  IconCaretDown,
   IconDownload,
   IconEdit,
   IconEye,
   IconPlus,
   IconSearch,
   IconTrash,
+  IconUpload,
 } from "@tabler/icons-react";
-import { DegreeRepository } from "../../../services/RepositoryBase";
-import { paginationBase } from "../../../interfaces/PaginationResponseBase";
-import { API_ROUTER } from "../../../constants/api/api_router";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
-import EditDataView from "./EditDataView";
-import DeleteView from "./DeleteDataView";
+import { paginationBase } from "../../../interfaces/PaginationResponseBase";
+import { DegreeRepository } from "../../../services/RepositoryBase";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import DeleteDataView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
+import EditDataView from "./EditDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
-import { ModelInventoryQuery } from "../../../interfaces/Inventory";
-import {
-  formatDateTransfer,
-  getValueById,
-} from "../../../helpers/FunctionHelper";
+import { notifications } from "@mantine/notifications";
+import * as xlsx from "xlsx";
+import DropZoneFile from "../../../utils/extensions/DropZoneFile";
+import { ModelYearGraduationQuery } from "../../../interfaces/YearGraduation";
 
-const Inventory = () => {
+const Period = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
+  const [dataReview, setDataReview] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
   const [rowCount, setRowCount] = useState(0);
   const [height, setHeight] = useState(0);
   const [pagination, setPagination] = useState(paginationBase);
-
-  const [dataDegreeSelect, setDataDegreeSelect] = useState<ComboboxItem[]>([]);
-  const [dataWareHouseSelect, setDataWareHouseSelect] = useState<
-    ComboboxItem[]
-  >([]);
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
@@ -62,86 +60,29 @@ const Inventory = () => {
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
-        accessorKey: "stt",
         header: "STT",
         Cell: ({ row }) => (
           <Text fw={500} size="12.5px">
             {row.index === -1 ? "" : row.index + 1}
           </Text>
         ),
-        size: 50,
+        enableColumnActions: false,
+      },
+      {
+        accessorKey: "name",
+        header: "Năm tốt nghiệp",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "degreeId",
-        header: "Văn bằng",
-        Cell: ({ renderedCellValue }) => (
-          <Badge
-            radius="sm"
-            variant="dot"
-            size="lg"
-            color={renderedCellValue === null ? "red" : "green"}
-            w={175}
-          >
-            {getValueById(
-              renderedCellValue?.toString() ?? "",
-              dataDegreeSelect,
-              "label"
-            )}
-          </Badge>
-        ),
-        size: 175,
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "issueDate",
-        header: "Ngày cấp văn bằng",
-        Cell: ({ renderedCellValue }: any) => (
-          <Text size="12.5px" fw={"500"}>
-            {renderedCellValue && formatDateTransfer(renderedCellValue)}
-          </Text>
-        ),
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "quantity",
-        header: "Số lượng",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "warehouseId",
-        header: "Kho văn bằng",
-        Cell: ({ renderedCellValue }) => (
-          <Badge
-            radius="sm"
-            variant="dot"
-            size="lg"
-            color={renderedCellValue === null ? "red" : "green"}
-          >
-            {getValueById(
-              renderedCellValue?.toString() ?? "",
-              dataWareHouseSelect,
-              "label"
-            )}
-          </Badge>
-        ),
-        size: 200,
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "status",
+        accessorKey: "active",
         header: "Hoạt động",
         Cell: ({ row }) => (
           <Badge
-            color={row.original.status === true ? "green" : "red"}
+            color={row.original.active === true ? "green" : "red"}
             radius={"sm"}
           >
-            {row.original.status === true ? "Đang hoạt động" : "Dừng hoạt động"}
+            {row.original.active === true ? "Đang hoạt động" : "Dừng hoạt động"}
           </Badge>
         ),
         enableColumnActions: false,
@@ -156,10 +97,9 @@ const Inventory = () => {
       {
         accessorKey: "action",
         header: "Thao tác",
-        size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            {/* <Tooltip label="Chỉnh sửa">
+            <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 variant="light"
                 color="orange"
@@ -167,7 +107,7 @@ const Inventory = () => {
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip> */}
+            </Tooltip>
 
             <Tooltip label="Chi tiết">
               <ActionIcon
@@ -195,7 +135,7 @@ const Inventory = () => {
         enableColumnFilter: false,
       },
     ],
-    [dataDegreeSelect, dataWareHouseSelect]
+    []
   );
 
   const csvConfig = mkConfig({
@@ -215,19 +155,90 @@ const Inventory = () => {
     download(csvConfig)(csv);
   };
 
+  const handleImportExcel = async (file: any) => {
+    if (!file) {
+      notifications.show({
+        color: "red",
+        message: "Vui lòng chọn lại tệp !",
+      });
+      return;
+    } else {
+      modals.closeAll();
+      notifications.show({
+        color: "green",
+        message: "Import excel thành công !",
+      });
+    }
+
+    const fileReader = new FileReader();
+    fileReader.onload = async (e) => {
+      const data = e.target?.result;
+      if (data) {
+        const workbook = xlsx.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        let worksheet = workbook.Sheets[sheetName];
+        worksheet = xlsx.utils.sheet_add_aoa(
+          worksheet,
+          [["code", "name", "active", "description"]],
+          { origin: "A1" }
+        );
+        const jsonData = xlsx.utils.sheet_to_json(worksheet);
+        const dataSubmit = jsonData?.map((item: any, index) => ({
+          id: "0",
+          code: item.code,
+          name: item.name,
+          active: item.active,
+          description: item.description,
+        }));
+        setDataReview(dataSubmit);
+        setTimeout(() => {
+          reviewDataImport();
+        }, 1000);
+      }
+    };
+    fileReader.readAsBinaryString(file);
+  };
+
+  const handleOpenFileDrop = () => {
+    try {
+      modals.openConfirmModal({
+        title: null,
+        withCloseButton: false,
+        children: <DropZoneFile onImport={handleImportExcel}></DropZoneFile>,
+        confirmProps: { display: "none" },
+        cancelProps: { display: "none" },
+      });
+    } catch (e) {
+      notifications.show({ color: "red", message: "Import excel thất bại" });
+    }
+  };
+
+  function reviewDataImport() {
+    modals.openConfirmModal({
+      title: (
+        <>
+          <Title order={5}>Xem lại danh sách khoa !</Title>
+        </>
+      ),
+      size: "auto",
+      children: <MantineReactTable table={tableReview} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  }
+
   async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_INVENTORY}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<ModelInventoryQuery>();
+      const url = `${API_ROUTER.GET_LIST_YEAR_GRADUATION}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<ModelYearGraduationQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
         if (result) {
           setData(result.data);
           setRowCount(result?.count ?? 0);
-          Promise.all([getSelectDegree(), getSelectWareHouse()]);
         } else {
           setData([]);
           setRowCount(0);
@@ -242,45 +253,35 @@ const Inventory = () => {
     }
   }
 
-  const getSelectDegree = async () => {
-    const url = `${API_ROUTER.GET_SELECT_DEGREE}`;
+  const createListDebtGroup = async () => {
+    const url = "/api/v1/TblDebtGroup/create-list";
     const repo = new DegreeRepository<any>();
-    const dataApi = await repo.get(url);
 
-    if (dataApi?.isSuccess) {
-      const result = dataApi?.data;
-      setDataDegreeSelect(
-        result
-          ?.filter((item: any) => item.text != null && item.value != null)
-          ?.map((item: any) => ({
-            label: item.text,
-            value: item.value?.toString(),
-          }))
-      );
-    }
-  };
-
-  const getSelectWareHouse = async () => {
-    const url = `${API_ROUTER.GET_SELECT_WAREHOUSE}`;
-    const repo = new DegreeRepository<any>();
-    const dataApi = await repo.get(url);
-
-    if (dataApi?.isSuccess) {
-      const result = dataApi?.data;
-      setDataWareHouseSelect(
-        result
-          ?.filter((item: any) => item.text != null && item.value != null)
-          ?.map((item: any) => ({
-            label: item.text,
-            value: item.value?.toString(),
-          }))
-      );
+    try {
+      if (dataReview.length > 0) {
+        const response = await repo.post(url, dataReview);
+        if (response?.isSuccess) {
+          notifications.show({
+            color: "green",
+            message: "Tạo mới thành công!",
+          });
+          modals.closeAll();
+        }
+      } else {
+        notifications.show({
+          color: "red",
+          message: "Vui lòng thêm nhóm công nợ!",
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      return;
     }
   };
 
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm kho lưu tồn văn bằng</Title>,
+      title: <Title order={5}>Thêm năm tốt nghiệp</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -290,7 +291,7 @@ const Inventory = () => {
 
   const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chỉnh sửa kho lưu tồn văn bằng</Title>,
+      title: <Title order={5}>Chỉnh sửa năm tốt nghiệp</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -298,9 +299,9 @@ const Inventory = () => {
     });
   };
 
-  const handleDetail = (id: string | number) => {
+  const handleDetail = (id: string | null) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chi tiết kho lưu tồn văn bằng</Title>,
+      title: <Title order={5}>Chi tiết năm tốt nghiệp</Title>,
       size: "auto",
       children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
@@ -310,9 +311,9 @@ const Inventory = () => {
 
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa kho lưu tồn văn bằng</Title>,
+      title: <Title order={5}>Xóa năm tốt nghiệp</Title>,
       size: "auto",
-      children: <DeleteView id={id} onClose={setDeleteViewStatus} />,
+      children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
@@ -328,17 +329,93 @@ const Inventory = () => {
       setHeight(window.innerHeight - (140 + headerHeight));
     };
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
+    handleResize(); // Set initial height
+    window.addEventListener("resize", handleResize); // Update height on window resize
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleResize); // Clean up event listener
     };
   }, []);
 
-  const table = useMantineReactTable({
+  const tableReview = useMantineReactTable({
     columns,
-    data,
+    data: dataReview,
+    positionToolbarAlertBanner: "bottom",
+    enableTopToolbar: false,
+    mantineTopToolbarProps: {
+      style: {
+        borderBottom: "3px solid rgba(128, 128, 128, 0.5)",
+        marginBottom: 5,
+      },
+    },
+    renderBottomToolbar: (
+      <>
+        <Flex w={"100%"} my={"10px"} pr={"20px"} justify={"flex-end"}>
+          <Button
+            onClick={() => {
+              createListDebtGroup();
+            }}
+          >
+            Tạo mới
+          </Button>
+        </Flex>
+      </>
+    ),
+    enableRowSelection: true,
+    initialState: {
+      columnPinning: {
+        left: ["mrt-row-select", "groupCode"],
+      },
+      showColumnFilters: false,
+      columnVisibility: { id: false, action: false },
+      density: "xs",
+    },
+    mantineTableContainerProps: {
+      style: { maxHeight: height, minHeight: height },
+    },
+    enableStickyHeader: true,
+    onRowSelectionChange: setRowSelection,
+    manualFiltering: false,
+    manualPagination: true,
+    manualSorting: false,
+    rowCount,
+    mantineTableBodyCellProps: ({ row }) => ({
+      style: {
+        fontWeight: "normal",
+        fontSize: "12.5px",
+        padding: "5px 15px",
+      },
+    }),
+    state: {
+      isLoading,
+      showAlertBanner: isError,
+      showProgressBars: isRefetching,
+      showSkeletons: isLoading,
+      rowSelection,
+    },
+    mantineToolbarAlertBannerProps: isError
+      ? { color: "red", children: "Lỗi tải dữ liệu !" }
+      : undefined,
+    mantinePaginationProps: {
+      showRowsPerPage: true,
+      withEdges: true,
+      rowsPerPageOptions: ["10", "50", "100"],
+    },
+    paginationDisplayMode: "pages",
+    enableColumnPinning: true,
+    mantineTableProps: {
+      striped: true,
+    },
+    columnFilterDisplayMode: "popover",
+    mantineTableBodyRowProps: ({ row }) => ({
+      onClick: row.getToggleSelectedHandler(),
+      sx: { cursor: "pointer" },
+    }),
+  });
+
+  const table = useMantineReactTable({
+    columns: columns,
+    data: data,
     positionToolbarAlertBanner: "bottom",
     renderTopToolbarCustomActions: () => (
       <Flex justify={"space-between"} w={"100%"}>
@@ -353,12 +430,33 @@ const Inventory = () => {
           >
             Thêm mới
           </Button>
-          <Button
-            onClick={handleExportData}
-            leftSection={<IconDownload size={"15px"} />}
-          >
-            Export Data
-          </Button>
+          <Menu shadow="md" width={200}>
+            <Menu.Target>
+              <Button
+                rightSection={
+                  <IconCaretDown style={{ width: rem(14), height: rem(14) }} />
+                }
+              >
+                Chức năng
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                onClick={handleExportData}
+                leftSection={<IconDownload size={"15px"} />}
+              >
+                Export Data
+              </Menu.Item>
+              {/* <Menu.Item
+                  leftSection={
+                    <IconUpload style={{ width: rem(14), height: rem(14) }} />
+                  }
+                  onClick={() => handleOpenFileDrop()}
+                >
+                  Import Excel
+                </Menu.Item> */}
+            </Menu.Dropdown>
+          </Menu>
         </Flex>
       </Flex>
     ),
@@ -372,10 +470,6 @@ const Inventory = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
-      columnPinning: {
-        left: ["mrt-row-select", "stt", "warehouseId"],
-        right: ["degreeId", "action"],
-      },
       columnVisibility: { id: false },
       density: "xs",
     },
@@ -424,11 +518,7 @@ const Inventory = () => {
     }),
   });
 
-  return (
-    <>
-      <MantineReactTable table={table} />
-    </>
-  );
+  return <MantineReactTable table={table} />;
 };
 
-export default Inventory;
+export default Period;

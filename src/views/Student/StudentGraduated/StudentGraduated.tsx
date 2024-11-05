@@ -3,12 +3,15 @@ import {
   Badge,
   Button,
   Flex,
+  Menu,
+  rem,
   TextInput,
   Title,
   Tooltip,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import {
+  IconCaretDown,
   IconDownload,
   IconEdit,
   IconEye,
@@ -17,6 +20,7 @@ import {
   IconPlus,
   IconSearch,
   IconTrash,
+  IconUpload,
 } from "@tabler/icons-react";
 import {
   MantineReactTable,
@@ -37,11 +41,15 @@ import EditDataView from "./EditDataView";
 import DetailDataView from "./DetailDataView";
 import DeleteDataView from "./DeleteDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import { notifications } from "@mantine/notifications";
+import * as xlsx from "xlsx";
+import DropZoneFile from "../../../utils/extensions/DropZoneFile";
 
 const StudentGraduatedView = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
+  const [dataReview, setDataReview] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -140,7 +148,7 @@ const StudentGraduatedView = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            <Tooltip label="Chỉnh sửa">
+            {/* <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 onClick={() => handleEdit(row.original.id)}
                 variant="light"
@@ -148,7 +156,7 @@ const StudentGraduatedView = () => {
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip label="Chi tiết">
               <ActionIcon
@@ -195,6 +203,104 @@ const StudentGraduatedView = () => {
     const csv = generateCsv(csvConfig)(data);
     download(csvConfig)(csv);
   };
+
+  const handleImportExcel = async (file: any) => {
+    if (!file) {
+      notifications.show({
+        color: "red",
+        message: "Vui lòng chọn lại tệp !",
+      });
+      return;
+    } else {
+      modals.closeAll();
+      notifications.show({
+        color: "green",
+        message: "Import excel thành công !",
+      });
+    }
+
+    const fileReader = new FileReader();
+    fileReader.onload = async (e) => {
+      const data = e.target?.result;
+      if (data) {
+        const workbook = xlsx.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        let worksheet = workbook.Sheets[sheetName];
+        worksheet = xlsx.utils.sheet_add_aoa(worksheet, [
+          [
+            "fullName",
+            "dateOfBirth",
+            "studentCode",
+            "gender",
+            "graduationYear",
+            "specializationId",
+            "preiodId",
+            "birthPlace",
+            "className",
+            "cohort",
+            "status",
+            "gpA10",
+            "gpA4",
+            "honors",
+            "contactEmail",
+            "phoneNumber",
+          ],
+        ]);
+        const jsonData = xlsx.utils.sheet_to_json(worksheet);
+        const dataSubmit = jsonData?.map((item: any) => ({
+          fullName: item.fullName,
+          dateOfBirth: new Date(item.dateOfBirth)?.toISOString(),
+          studentCode: item.studentCode,
+          gender: item.gender,
+          graduationYear: new Date(item.graduationYear)?.toISOString(),
+          specializationId: item.specializationId,
+          preiodId: item.periodId,
+          birthPlace: item.birthPlace,
+          className: item.className,
+          cohort: item.cohort?.toString(),
+          status: item.status,
+          gpA10: item.gpa10,
+          gpA4: item.gpA4,
+          honors: item.honors,
+          contactEmail: item.contactEmail,
+          phoneNumber: item.phoneNumber,
+        }));
+        setDataReview(dataSubmit);
+        setTimeout(() => {
+          reviewDataImport();
+        }, 1000);
+      }
+    };
+    fileReader.readAsBinaryString(file);
+  };
+
+  const handleOpenFileDrop = () => {
+    try {
+      modals.openConfirmModal({
+        title: null,
+        withCloseButton: false,
+        children: <DropZoneFile onImport={handleImportExcel}></DropZoneFile>,
+        confirmProps: { display: "none" },
+        cancelProps: { display: "none" },
+      });
+    } catch (e) {
+      notifications.show({ color: "red", message: "Import excel thất bại" });
+    }
+  };
+
+  function reviewDataImport() {
+    modals.openConfirmModal({
+      title: (
+        <>
+          <Title order={5}>Xem lại danh sách sinh viên !</Title>
+        </>
+      ),
+      size: "auto",
+      children: <MantineReactTable table={tableReview} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  }
 
   const getColorOfGender = (gender: boolean) => {
     return gender ? "pink" : "green";
@@ -258,6 +364,32 @@ const StudentGraduatedView = () => {
       console.error("Error fetching student list:", error);
     }
   }
+
+  const createListStudentGraduated = async () => {
+    const url = `${API_ROUTER.CREATE_LIST_STUDENT}`;
+    const repo = new DegreeRepository<any>();
+
+    try {
+      if (dataReview.length > 0) {
+        const response = await repo.post(url, { students: dataReview });
+        if (response?.isSuccess) {
+          notifications.show({
+            color: "green",
+            message: "Tạo mới thành công!",
+          });
+          modals.closeAll();
+        }
+      } else {
+        notifications.show({
+          color: "red",
+          message: "Vui lòng thêm nhóm công nợ!",
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+  };
 
   const handleCreate = () => {
     modals.openConfirmModal({
@@ -326,6 +458,82 @@ const StudentGraduatedView = () => {
     };
   }, []);
 
+  const tableReview = useMantineReactTable({
+    columns,
+    data: dataReview,
+    positionToolbarAlertBanner: "bottom",
+    enableTopToolbar: false,
+    mantineTopToolbarProps: {
+      style: {
+        borderBottom: "3px solid rgba(128, 128, 128, 0.5)",
+        marginBottom: 5,
+      },
+    },
+    renderBottomToolbar: (
+      <>
+        <Flex w={"100%"} my={"10px"} pr={"20px"} justify={"flex-end"}>
+          <Button
+            onClick={() => {
+              createListStudentGraduated();
+            }}
+          >
+            Tạo mới
+          </Button>
+        </Flex>
+      </>
+    ),
+    enableRowSelection: true,
+    initialState: {
+      columnPinning: {
+        left: ["mrt-row-select", "groupCode"],
+      },
+      showColumnFilters: false,
+      columnVisibility: { id: false, action: false },
+      density: "xs",
+    },
+    mantineTableContainerProps: {
+      style: { maxHeight: height, minHeight: height },
+    },
+    enableStickyHeader: true,
+    onRowSelectionChange: setRowSelection,
+    manualFiltering: false,
+    manualPagination: true,
+    manualSorting: false,
+    rowCount,
+    mantineTableBodyCellProps: ({ row }) => ({
+      style: {
+        fontWeight: "normal",
+        fontSize: "12.5px",
+        padding: "5px 15px",
+      },
+    }),
+    state: {
+      isLoading,
+      showAlertBanner: isError,
+      showProgressBars: isRefetching,
+      showSkeletons: isLoading,
+      rowSelection,
+    },
+    mantineToolbarAlertBannerProps: isError
+      ? { color: "red", children: "Lỗi tải dữ liệu !" }
+      : undefined,
+    mantinePaginationProps: {
+      showRowsPerPage: true,
+      withEdges: true,
+      rowsPerPageOptions: ["10", "50", "100"],
+    },
+    paginationDisplayMode: "pages",
+    enableColumnPinning: true,
+    mantineTableProps: {
+      striped: true,
+    },
+    columnFilterDisplayMode: "popover",
+    mantineTableBodyRowProps: ({ row }) => ({
+      onClick: row.getToggleSelectedHandler(),
+      sx: { cursor: "pointer" },
+    }),
+  });
+
   const table = useMantineReactTable({
     columns: columns,
     data: data,
@@ -343,12 +551,33 @@ const StudentGraduatedView = () => {
           >
             Thêm mới
           </Button>
-          <Button
-            onClick={handleExportData}
-            leftSection={<IconDownload size={"15px"} />}
-          >
-            Export Data
-          </Button>
+          <Menu shadow="md" width={200}>
+            <Menu.Target>
+              <Button
+                rightSection={
+                  <IconCaretDown style={{ width: rem(14), height: rem(14) }} />
+                }
+              >
+                Chức năng
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                onClick={handleExportData}
+                leftSection={<IconDownload size={"15px"} />}
+              >
+                Export Data
+              </Menu.Item>
+              <Menu.Item
+                leftSection={
+                  <IconUpload style={{ width: rem(14), height: rem(14) }} />
+                }
+                onClick={() => handleOpenFileDrop()}
+              >
+                Import Excel
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         </Flex>
       </Flex>
     ),
