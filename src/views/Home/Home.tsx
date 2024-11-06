@@ -1,5 +1,9 @@
 const Home = () => {
-  return <>Trang chủ</>;
+  return (
+    <>
+      <h1>Thống kê</h1>
+    </>
+  );
 };
 
 export default Home;
