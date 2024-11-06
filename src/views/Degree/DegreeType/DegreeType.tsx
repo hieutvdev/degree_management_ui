@@ -17,17 +17,14 @@ import {
 import React, { useEffect, useState } from "react";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import {
+  IconDownload,
   IconEdit,
   IconEye,
   IconPlus,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import {
-  DegreeRepository,
-  RepositoryBase,
-} from "../../../services/RepositoryBase";
-import { ResponseBase } from "../../../interfaces/ResponseBase";
+import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
@@ -36,11 +33,12 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import EditDataView from "./EditDataView";
 import DeleteDataView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 
 const DegreeType = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<DegreeTypeModelQuery[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -131,7 +129,7 @@ const DegreeType = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            <Tooltip label="Chỉnh sửa">
+            {/* <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 onClick={() => handleEdit(row.original.id)}
                 variant="light"
@@ -139,7 +137,7 @@ const DegreeType = () => {
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip label="Chi tiết">
               <ActionIcon
@@ -169,6 +167,23 @@ const DegreeType = () => {
     ],
     []
   );
+
+  const csvConfig = mkConfig({
+    fieldSeparator: ",",
+    decimalSeparator: ".",
+    useKeysAsHeaders: true,
+  });
+
+  // const handleExportRows = (rows: MRT_Row<any>[]) => {
+  //   const rowData = rows.map((row) => row.original);
+  //   const csv = generateCsv(csvConfig)(rowData);
+  //   download(csvConfig)(csv);
+  // };
+
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
 
   async function fetchData() {
     setIsLoading(true);
@@ -281,6 +296,12 @@ const DegreeType = () => {
             onClick={() => handleCreate()}
           >
             Thêm mới
+          </Button>
+          <Button
+            onClick={handleExportData}
+            leftSection={<IconDownload size={"15px"} />}
+          >
+            Export Data
           </Button>
         </Flex>
       </Flex>

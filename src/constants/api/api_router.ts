@@ -6,6 +6,7 @@ export const API_ROUTER = {
   GET_DETAIL_STUDENT: "/StudentGraduated/get-detail",
   DELETE_STUDENT: "/StudentGraduated/delete",
   GET_SELECT_STUDENT: "/StudentGraduated/get-select",
+  CREATE_LIST_STUDENT: "/StudentGraduated/create-list",
 
   // Faculty
   GET_LIST_FACULTY: "/Faculty/get-list",
@@ -37,7 +38,7 @@ export const API_ROUTER = {
   UPDATE_DEGREE: "/Degree/update",
   DELETE_DEGREE: "/Degree/delete",
   DETAIL_DEGREE: "/Degree/get-detail",
-  GET_SELECT: "/Degree/get-select",
+  GET_SELECT_DEGREE: "/Degree/get-select",
 
   //WareHouse
   GET_LIST_WAREHOUSE: "/Warehouse/get-list",
@@ -46,4 +47,20 @@ export const API_ROUTER = {
   DELETE_WAREHOUSE: "/Warehouse/delete",
   DETAIL_WAREHOUSE: "/Warehouse/get-detail",
   GET_SELECT_WAREHOUSE: "/Warehouse/get-select",
+
+  //Inventory
+  GET_LIST_INVENTORY: "/Invnetory/get-list",
+  CREATE_INVENTORY: "/Invnetory/create",
+  UPDATE_INVENTORY: "/Invnetory/update",
+  DELETE_INVENTORY: "/Invnetory/delete",
+  DETAIL_INVENTORY: "/Invnetory/get-detail",
+  GET_SELECT_INVENTORY: "/Invnetory/get-select",
+
+  //YearGraduation
+  GET_LIST_YEAR_GRADUATION: "/YearGraduation/get-list",
+  CREATE_YEAR_GRADUATION: "/YearGraduation/create",
+  UPDATE_YEAR_GRADUATION: "/YearGraduation/update",
+  DELETE_YEAR_GRADUATION: "/YearGraduation/delete",
+  GET_DETAIL_YEAR_GRADUATION: "/YearGraduation/get-detail",
+  GET_SELECT_YEAR_GRADUATION: "/YearGraduation/get-select",
 };

@@ -1,51 +1,47 @@
 import {
-  ActionIcon,
-  Badge,
-  Button,
+  TextInput,
   Flex,
+  Button,
+  Badge,
+  Tooltip,
+  ActionIcon,
+  Text,
+  Title,
   Menu,
   rem,
-  TextInput,
-  Title,
-  Tooltip,
 } from "@mantine/core";
-import { modals } from "@mantine/modals";
+import {
+  MRT_ColumnDef,
+  MRT_RowSelectionState,
+  MantineReactTable,
+  useMantineReactTable,
+} from "mantine-react-table";
+import React, { useEffect, useState } from "react";
 import {
   IconCaretDown,
   IconDownload,
   IconEdit,
   IconEye,
-  IconGenderFemale,
-  IconGenderMale,
   IconPlus,
   IconSearch,
   IconTrash,
   IconUpload,
 } from "@tabler/icons-react";
-import {
-  MantineReactTable,
-  MRT_ColumnDef,
-  MRT_PaginationState,
-  MRT_RowSelectionState,
-  useMantineReactTable,
-} from "mantine-react-table";
-import React, { useEffect, useState } from "react";
-import { DegreeRepository } from "../../../services/RepositoryBase";
-// import CreateDataView from "./CreateDataView";
-import { API_ROUTER } from "../../../constants/api/api_router";
-import { formatDateTime, formatYear } from "../../../helpers/FunctionHelper";
-import { paginationBase } from "../../../interfaces/PaginationResponseBase";
-import { StudentGraduated } from "../../../interfaces/StudentGraduated";
+import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
-import EditDataView from "./EditDataView";
-import DetailDataView from "./DetailDataView";
+import { paginationBase } from "../../../interfaces/PaginationResponseBase";
+import { DegreeRepository } from "../../../services/RepositoryBase";
+import { API_ROUTER } from "../../../constants/api/api_router";
 import DeleteDataView from "./DeleteDataView";
+import DetailDataView from "./DetailDataView";
+import EditDataView from "./EditDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { notifications } from "@mantine/notifications";
 import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
+import { ModelYearGraduationQuery } from "../../../interfaces/YearGraduation";
 
-const StudentGraduatedView = () => {
+const YearGraduation = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
@@ -55,8 +51,7 @@ const StudentGraduatedView = () => {
   const [isRefetching, setIsRefetching] = useState(false);
   const [rowCount, setRowCount] = useState(0);
   const [height, setHeight] = useState(0);
-  const [pagination, setPagination] =
-    useState<MRT_PaginationState>(paginationBase);
+  const [pagination, setPagination] = useState(paginationBase);
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
@@ -65,104 +60,60 @@ const StudentGraduatedView = () => {
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
-        accessorKey: "index",
         header: "STT",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-        size: 1,
-        Cell: ({ row }) => Number(row.index) + 1,
-      },
-      {
-        accessorKey: "fullName",
-        header: "Họ và tên sinh viên",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "dateOfBirth",
-        header: "Ngày sinh",
-        Cell: ({ renderedCellValue }: any) => (
-          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        Cell: ({ row }) => (
+          <Text fw={500} size="12.5px">
+            {row.index === -1 ? "" : row.index + 1}
+          </Text>
         ),
         enableColumnActions: false,
-        enableColumnFilter: false,
       },
       {
-        accessorKey: "gender",
-        header: "Giới tính",
-        Cell: ({ renderedCellValue }: any) => (
-          <>
-            <Badge variant="light" color={getColorOfGender(renderedCellValue)}>
-              <Flex align={"center"}>{renderGender(renderedCellValue)}</Flex>
-            </Badge>
-          </>
-        ),
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "phoneNumber",
-        header: "Số điện thoại",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "contactEmail",
-        header: "Email",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "graduationYear",
+        accessorKey: "name",
         header: "Năm tốt nghiệp",
-        Cell: ({ renderedCellValue }: any) => (
-          <>{renderedCellValue && formatYear(renderedCellValue)}</>
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "active",
+        header: "Hoạt động",
+        Cell: ({ row }) => (
+          <Badge
+            color={row.original.active === true ? "green" : "red"}
+            radius={"sm"}
+          >
+            {row.original.active === true ? "Đang hoạt động" : "Dừng hoạt động"}
+          </Badge>
         ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "majorName",
-        header: "Ngành học",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "gpa",
-        header: "GPA",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "honors",
-        header: "Loại tốt nghiệp",
-        Cell: ({ renderedCellValue }: any) => (
-          <>{getHonors(renderedCellValue)}</>
-        ),
+        accessorKey: "description",
+        header: "Ghi chú",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
         accessorKey: "action",
         header: "Thao tác",
-        size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            {/* <Tooltip label="Chỉnh sửa">
+            <Tooltip label="Chỉnh sửa">
               <ActionIcon
-                onClick={() => handleEdit(row.original.id)}
                 variant="light"
                 color="orange"
+                onClick={() => handleUpdate(row.original.id)}
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip> */}
+            </Tooltip>
 
             <Tooltip label="Chi tiết">
               <ActionIcon
-                onClick={() => handleDetail(row.original.id)}
                 variant="light"
                 color="cyan"
+                onClick={() => handleDetail(row.original.id)}
               >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
@@ -170,9 +121,9 @@ const StudentGraduatedView = () => {
 
             <Tooltip label="Xóa">
               <ActionIcon
-                onClick={() => handleDelete(row.original.id)}
                 variant="light"
                 color="red"
+                onClick={() => handleDelete(row.original.id)}
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
@@ -226,44 +177,18 @@ const StudentGraduatedView = () => {
         const workbook = xlsx.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         let worksheet = workbook.Sheets[sheetName];
-        worksheet = xlsx.utils.sheet_add_aoa(worksheet, [
-          [
-            "fullName",
-            "dateOfBirth",
-            "studentCode",
-            "gender",
-            "graduationYear",
-            "specializationId",
-            "preiodId",
-            "birthPlace",
-            "className",
-            "cohort",
-            "status",
-            "gpA10",
-            "gpA4",
-            "honors",
-            "contactEmail",
-            "phoneNumber",
-          ],
-        ]);
+        worksheet = xlsx.utils.sheet_add_aoa(
+          worksheet,
+          [["code", "name", "active", "description"]],
+          { origin: "A1" }
+        );
         const jsonData = xlsx.utils.sheet_to_json(worksheet);
-        const dataSubmit = jsonData?.map((item: any) => ({
-          fullName: item.fullName,
-          dateOfBirth: new Date(item.dateOfBirth)?.toISOString(),
-          studentCode: item.studentCode,
-          gender: item.gender,
-          graduationYear: new Date(item.graduationYear)?.toISOString(),
-          specializationId: item.specializationId,
-          preiodId: item.periodId,
-          birthPlace: item.birthPlace,
-          className: item.className,
-          cohort: item.cohort?.toString(),
-          status: item.status,
-          gpA10: item.gpa10,
-          gpA4: item.gpA4,
-          honors: item.honors,
-          contactEmail: item.contactEmail,
-          phoneNumber: item.phoneNumber,
+        const dataSubmit = jsonData?.map((item: any, index) => ({
+          id: "0",
+          code: item.code,
+          name: item.name,
+          active: item.active,
+          description: item.description,
         }));
         setDataReview(dataSubmit);
         setTimeout(() => {
@@ -292,7 +217,7 @@ const StudentGraduatedView = () => {
     modals.openConfirmModal({
       title: (
         <>
-          <Title order={5}>Xem lại danh sách sinh viên !</Title>
+          <Title order={5}>Xem lại danh sách khoa !</Title>
         </>
       ),
       size: "auto",
@@ -302,49 +227,12 @@ const StudentGraduatedView = () => {
     });
   }
 
-  const getColorOfGender = (gender: boolean) => {
-    return gender ? "pink" : "green";
-  };
-
-  const renderGender = (gender: boolean) => {
-    return gender ? (
-      <>
-        <IconGenderFemale size={14} color={"pink"}></IconGenderFemale>
-        Nữ
-      </>
-    ) : (
-      <>
-        <IconGenderMale size={14} color={"green"}></IconGenderMale>
-        Nam
-      </>
-    );
-  };
-
-  const getHonors = (honorId: number) => {
-    switch (honorId) {
-      case 0:
-        return "Kém";
-      case 1:
-        return "Yếu";
-      case 2:
-        return "Trung bình";
-      case 3:
-        return "Khá";
-      case 4:
-        return "Giỏi";
-      case 5:
-        return "Xuất sắc";
-      default:
-        return "Không xác định";
-    }
-  };
-
   async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_STUDENTS}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<StudentGraduated>();
+      const url = `${API_ROUTER.GET_LIST_YEAR_GRADUATION}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<ModelYearGraduationQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
@@ -365,13 +253,13 @@ const StudentGraduatedView = () => {
     }
   }
 
-  const createListStudentGraduated = async () => {
-    const url = `${API_ROUTER.CREATE_LIST_STUDENT}`;
+  const createListDebtGroup = async () => {
+    const url = "/api/v1/TblDebtGroup/create-list";
     const repo = new DegreeRepository<any>();
 
     try {
       if (dataReview.length > 0) {
-        const response = await repo.post(url, { students: dataReview });
+        const response = await repo.post(url, dataReview);
         if (response?.isSuccess) {
           notifications.show({
             color: "green",
@@ -393,7 +281,7 @@ const StudentGraduatedView = () => {
 
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Tạo mới sinh viên</Title>,
+      title: <Title order={5}>Thêm năm tốt nghiệp</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -401,9 +289,9 @@ const StudentGraduatedView = () => {
     });
   };
 
-  const handleEdit = (id: number | string) => {
+  const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Sửa sinh viên</Title>,
+      title: <Title order={5}>Chỉnh sửa năm tốt nghiệp</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -411,9 +299,9 @@ const StudentGraduatedView = () => {
     });
   };
 
-  const handleDetail = (id: number | string) => {
+  const handleDetail = (id: string | null) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xem chi tiết sinh viên</Title>,
+      title: <Title order={5}>Chi tiết năm tốt nghiệp</Title>,
       size: "auto",
       children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
@@ -423,22 +311,13 @@ const StudentGraduatedView = () => {
 
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa sinh viên</Title>,
+      title: <Title order={5}>Xóa năm tốt nghiệp</Title>,
       size: "auto",
       children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
   };
-
-  // useHotkeys([
-  //   [
-  //     "F11",
-  //     () => {
-  //       handleCreate();
-  //     },
-  //   ],
-  // ]);
 
   useEffect(() => {
     fetchData();
@@ -450,11 +329,11 @@ const StudentGraduatedView = () => {
       setHeight(window.innerHeight - (140 + headerHeight));
     };
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
+    handleResize(); // Set initial height
+    window.addEventListener("resize", handleResize); // Update height on window resize
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleResize); // Clean up event listener
     };
   }, []);
 
@@ -474,7 +353,7 @@ const StudentGraduatedView = () => {
         <Flex w={"100%"} my={"10px"} pr={"20px"} justify={"flex-end"}>
           <Button
             onClick={() => {
-              createListStudentGraduated();
+              createListDebtGroup();
             }}
           >
             Tạo mới
@@ -568,14 +447,14 @@ const StudentGraduatedView = () => {
               >
                 Export Data
               </Menu.Item>
-              <Menu.Item
+              {/* <Menu.Item
                 leftSection={
                   <IconUpload style={{ width: rem(14), height: rem(14) }} />
                 }
                 onClick={() => handleOpenFileDrop()}
               >
                 Import Excel
-              </Menu.Item>
+              </Menu.Item> */}
             </Menu.Dropdown>
           </Menu>
         </Flex>
@@ -591,10 +470,6 @@ const StudentGraduatedView = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
-      columnPinning: {
-        left: ["mrt-row-select", "index", "fullName"],
-        right: ["action"],
-      },
       columnVisibility: { id: false },
       density: "xs",
     },
@@ -646,4 +521,4 @@ const StudentGraduatedView = () => {
   return <MantineReactTable table={table} />;
 };
 
-export default StudentGraduatedView;
+export default YearGraduation;

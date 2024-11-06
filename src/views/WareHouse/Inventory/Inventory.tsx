@@ -7,6 +7,7 @@ import {
   ActionIcon,
   Title,
   Text,
+  ComboboxItem,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -25,15 +26,20 @@ import {
 } from "@tabler/icons-react";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
-import { MajorModelQuery } from "../../../interfaces/Major";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
+import DetailDataView from "./DetailDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import { ModelInventoryQuery } from "../../../interfaces/Inventory";
+import {
+  formatDateTransfer,
+  getValueById,
+} from "../../../helpers/FunctionHelper";
 
-const Major = () => {
+const Inventory = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
@@ -43,6 +49,11 @@ const Major = () => {
   const [rowCount, setRowCount] = useState(0);
   const [height, setHeight] = useState(0);
   const [pagination, setPagination] = useState(paginationBase);
+
+  const [dataDegreeSelect, setDataDegreeSelect] = useState<ComboboxItem[]>([]);
+  const [dataWareHouseSelect, setDataWareHouseSelect] = useState<
+    ComboboxItem[]
+  >([]);
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
@@ -51,17 +62,59 @@ const Major = () => {
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
+        accessorKey: "stt",
         header: "STT",
         Cell: ({ row }) => (
           <Text fw={500} size="12.5px">
             {row.index === -1 ? "" : row.index + 1}
           </Text>
         ),
+        size: 50,
         enableColumnActions: false,
+        enableColumnFilter: false,
       },
       {
-        accessorKey: "code",
-        header: "Mã chuyên ngành",
+        accessorKey: "degreeId",
+        header: "Văn bằng",
+        Cell: ({ renderedCellValue }) => (
+          <Badge
+            radius="sm"
+            variant="dot"
+            size="lg"
+            color={renderedCellValue === null ? "red" : "green"}
+            w={175}
+          >
+            {getValueById(
+              renderedCellValue?.toString() ?? "",
+              dataDegreeSelect,
+              "label"
+            )}
+          </Badge>
+        ),
+        size: 175,
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "issueDate",
+        header: "Ngày cấp văn bằng",
+        Cell: ({ renderedCellValue }: any) => (
+          <Text size="12.5px" fw={"500"}>
+            {renderedCellValue && formatDateTransfer(renderedCellValue)}
+          </Text>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "quantity",
+        header: "Số lượng",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "warehouseId",
+        header: "Kho văn bằng",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -69,33 +122,26 @@ const Major = () => {
             size="lg"
             color={renderedCellValue === null ? "red" : "green"}
           >
-            {renderedCellValue === null ? null : renderedCellValue}
+            {getValueById(
+              renderedCellValue?.toString() ?? "",
+              dataWareHouseSelect,
+              "label"
+            )}
           </Badge>
         ),
+        size: 200,
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "name",
-        header: "Tên chuyên ngành",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "facultyName",
-        header: "Khoa",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "active",
+        accessorKey: "status",
         header: "Hoạt động",
         Cell: ({ row }) => (
           <Badge
-            color={row.original.active === true ? "green" : "red"}
+            color={row.original.status === true ? "green" : "red"}
             radius={"sm"}
           >
-            {row.original.active === true ? "Đang hoạt động" : "Dừng hoạt động"}
+            {row.original.status === true ? "Đang hoạt động" : "Dừng hoạt động"}
           </Badge>
         ),
         enableColumnActions: false,
@@ -124,7 +170,11 @@ const Major = () => {
             </Tooltip> */}
 
             <Tooltip label="Chi tiết">
-              <ActionIcon variant="light" color="cyan">
+              <ActionIcon
+                variant="light"
+                color="cyan"
+                onClick={() => handleDetail(row.original.id)}
+              >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -145,7 +195,7 @@ const Major = () => {
         enableColumnFilter: false,
       },
     ],
-    []
+    [dataDegreeSelect, dataWareHouseSelect]
   );
 
   const csvConfig = mkConfig({
@@ -169,14 +219,15 @@ const Major = () => {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_MAJOR}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<MajorModelQuery>();
+      const url = `${API_ROUTER.GET_LIST_INVENTORY}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<ModelInventoryQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
         if (result) {
           setData(result.data);
           setRowCount(result?.count ?? 0);
+          Promise.all([getSelectDegree(), getSelectWareHouse()]);
         } else {
           setData([]);
           setRowCount(0);
@@ -191,9 +242,45 @@ const Major = () => {
     }
   }
 
+  const getSelectDegree = async () => {
+    const url = `${API_ROUTER.GET_SELECT_DEGREE}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataDegreeSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  const getSelectWareHouse = async () => {
+    const url = `${API_ROUTER.GET_SELECT_WAREHOUSE}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataWareHouseSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm chuyên ngành</Title>,
+      title: <Title order={5}>Thêm kho lưu tồn văn bằng</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -203,7 +290,7 @@ const Major = () => {
 
   const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chỉnh sửa chuyên ngành</Title>,
+      title: <Title order={5}>Chỉnh sửa kho lưu tồn văn bằng</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -211,9 +298,19 @@ const Major = () => {
     });
   };
 
+  const handleDetail = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chi tiết kho lưu tồn văn bằng</Title>,
+      size: "auto",
+      children: <DetailDataView id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa chuyên ngành</Title>,
+      title: <Title order={5}>Xóa kho lưu tồn văn bằng</Title>,
       size: "auto",
       children: <DeleteView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -275,6 +372,10 @@ const Major = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
+      columnPinning: {
+        left: ["mrt-row-select", "stt", "warehouseId"],
+        right: ["degreeId", "action"],
+      },
       columnVisibility: { id: false },
       density: "xs",
     },
@@ -330,4 +431,4 @@ const Major = () => {
   );
 };
 
-export default Major;
+export default Inventory;

@@ -53,3 +53,16 @@
   border-radius: 10px;
   transition: 0.2s ease-in-out;
 }
+
+@media (max-width: 1200px) {
+  .navbar {
+    width: 100%;
+  }
+}
+@media (max-width: 768px) {
+  .navbar {
+    width: 300px;
+    position: absolute;
+    z-index: 1000;
+  }
+}

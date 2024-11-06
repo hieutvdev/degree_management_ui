@@ -17,6 +17,7 @@ import {
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
 import {
+  IconDownload,
   IconEdit,
   IconEye,
   IconPlus,
@@ -32,11 +33,12 @@ import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
 import { ModelWareHouseQuery } from "../../../interfaces/WareHouse";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 
 const WareHouse = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<ModelWareHouseQuery[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -48,7 +50,7 @@ const WareHouse = () => {
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
-  const columns = React.useMemo<MRT_ColumnDef<ModelWareHouseQuery>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
         header: "STT",
@@ -107,7 +109,7 @@ const WareHouse = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            <Tooltip label="Chỉnh sửa">
+            {/* <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 variant="light"
                 color="orange"
@@ -115,7 +117,7 @@ const WareHouse = () => {
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip label="Chi tiết">
               <ActionIcon
@@ -145,6 +147,23 @@ const WareHouse = () => {
     ],
     []
   );
+
+  const csvConfig = mkConfig({
+    fieldSeparator: ",",
+    decimalSeparator: ".",
+    useKeysAsHeaders: true,
+  });
+
+  // const handleExportRows = (rows: MRT_Row<any>[]) => {
+  //   const rowData = rows.map((row) => row.original);
+  //   const csv = generateCsv(csvConfig)(rowData);
+  //   download(csvConfig)(csv);
+  // };
+
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
 
   async function fetchData() {
     setIsLoading(true);
@@ -246,6 +265,12 @@ const WareHouse = () => {
             onClick={() => handleCreate()}
           >
             Thêm mới
+          </Button>
+          <Button
+            onClick={handleExportData}
+            leftSection={<IconDownload size={"15px"} />}
+          >
+            Export Data
           </Button>
         </Flex>
       </Flex>

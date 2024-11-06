@@ -70,7 +70,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
 
   const getSelectMajor = async () => {
     try {
-      const url = `${API_ROUTER.GET_SELECT_MAJORS}`;
+      const url = `${API_ROUTER.GET_SELECT_MAJOR}`;
       const repo = new DegreeRepository<SelectResponseBase[]>();
       const dataApi = await repo.get(url);
       if (dataApi && dataApi.isSuccess) {

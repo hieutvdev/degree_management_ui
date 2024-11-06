@@ -4,6 +4,7 @@ import {
   IconCertificate,
   IconSchool,
   IconBuildingWarehouse,
+  IconUserCog,
 } from "@tabler/icons-react";
 
 export const router = [
@@ -24,6 +25,14 @@ export const router = [
       {
         label: "Danh sách chuyên ngành",
         link: "/major",
+      },
+      {
+        label: "Đợt tốt nghiệp",
+        link: "/period",
+      },
+      {
+        label: "Năm tốt nghiệp",
+        link: "/year-graduation",
       },
     ],
   },
@@ -46,6 +55,14 @@ export const router = [
     label: "Kho",
     icon: IconBuildingWarehouse,
     initiallyOpened: true,
-    links: [{ label: "Kho văn bằng", link: "/warehouse" }],
+    links: [
+      { label: "Kho văn bằng", link: "/warehouse" },
+      { label: "Kho lưu tồn văn bằng", link: "/inventory" },
+    ],
+  },
+  {
+    label: "Quản trị",
+    icon: IconUserCog,
+    initiallyOpened: true,
   },
 ];
