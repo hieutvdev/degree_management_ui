@@ -134,7 +134,7 @@ const Major = () => {
               </ActionIcon>
             </Tooltip>
 
-            {/* <Tooltip label="Xóa">
+            <Tooltip label="Xóa">
               <ActionIcon
                 variant="light"
                 color="red"
@@ -142,7 +142,7 @@ const Major = () => {
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip> */}
+            </Tooltip>
           </Flex>
         ),
         enableSorting: false,

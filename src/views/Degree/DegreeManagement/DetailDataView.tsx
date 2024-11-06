@@ -197,8 +197,8 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
               readOnly
             />
           </Grid.Col>
-          <Grid.Col span={12}>
-            <Textarea
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <TextInput
               label="Mô tả"
               placeholder="Nhập mô tả"
               {...form.getInputProps("description")}
