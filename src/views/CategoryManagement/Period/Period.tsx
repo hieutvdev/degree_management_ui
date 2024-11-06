@@ -39,7 +39,7 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { notifications } from "@mantine/notifications";
 import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
-import { ModelYearGraduationQuery } from "../../../interfaces/YearGraduation";
+import { ModelPeriodQuery } from "../../../interfaces/Period";
 
 const Period = () => {
   //data and fetching state
@@ -231,8 +231,8 @@ const Period = () => {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_YEAR_GRADUATION}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<ModelYearGraduationQuery>();
+      const url = `${API_ROUTER.GET_LIST_PERIOD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<ModelPeriodQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
@@ -281,7 +281,7 @@ const Period = () => {
 
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm năm tốt nghiệp</Title>,
+      title: <Title order={5}>Thêm đợt tốt nghiệp</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -291,7 +291,7 @@ const Period = () => {
 
   const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chỉnh sửa năm tốt nghiệp</Title>,
+      title: <Title order={5}>Chỉnh sửa đợt tốt nghiệp</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -301,7 +301,7 @@ const Period = () => {
 
   const handleDetail = (id: string | null) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chi tiết năm tốt nghiệp</Title>,
+      title: <Title order={5}>Chi tiết đợt tốt nghiệp</Title>,
       size: "auto",
       children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
@@ -311,7 +311,7 @@ const Period = () => {
 
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa năm tốt nghiệp</Title>,
+      title: <Title order={5}>Xóa đợt tốt nghiệp</Title>,
       size: "auto",
       children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },

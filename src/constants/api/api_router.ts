@@ -63,4 +63,12 @@ export const API_ROUTER = {
   DELETE_YEAR_GRADUATION: "/YearGraduation/delete",
   GET_DETAIL_YEAR_GRADUATION: "/YearGraduation/get-detail",
   GET_SELECT_YEAR_GRADUATION: "/YearGraduation/get-select",
+
+  //Period
+  GET_LIST_PERIOD: "/Period/get-list",
+  CREATE_PERIOD: "/Period/create",
+  UPDATE_PERIOD: "/Period/update",
+  DELETR_PERIOD: "/Period/delete",
+  GET_DETAIL_PERIOD: "/Period/get-detail",
+  GET_SELECT_PERIOD: "/Period/get-select",
 };
