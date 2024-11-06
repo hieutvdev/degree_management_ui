@@ -49,9 +49,9 @@ export const API_ROUTER = {
   GET_SELECT_WAREHOUSE: "/Warehouse/get-select",
 
   //Inventory
-  GET_LIST_INVENTORY: "/Invnetory/get-list",
+  GET_LIST_INVENTORY: "/Inventory/get-list",
   STOCK_IN_INVENTORY: "/Inventory/stock-in",
-  GET_DETAIL_INVENTORY: "/Invnetory/get-detail",
+  GET_DETAIL_INVENTORY: "/Inventory/get-detail",
 
   //YearGraduation
   GET_LIST_YEAR_GRADUATION: "/YearGraduation/get-list",

@@ -26,7 +26,7 @@ const StockInInventory = ({ onClose }: StockInInventoryProps) => {
     warehouseId: null,
     degreeTypeId: null,
     quantity: null,
-    description: null,
+    description: "",
   };
 
   const [dataDegreeTypeSelect, setDataDegreeTypeSelect] = useState<
