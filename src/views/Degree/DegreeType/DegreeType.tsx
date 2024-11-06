@@ -67,6 +67,12 @@ const DegreeType = () => {
         enableColumnFilter: false,
       },
       {
+        accessorKey: "specializationName",
+        header: "Chuyên ngành",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
         accessorKey: "code",
         header: "Mã loại văn bằng",
         Cell: ({ renderedCellValue }) => (

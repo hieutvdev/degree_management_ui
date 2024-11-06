@@ -7,7 +7,6 @@ import {
   LoadingOverlay,
   NumberInput,
   Select,
-  Textarea,
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -269,8 +268,8 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
               }
             />
           </Grid.Col>
-          <Grid.Col span={12}>
-            <Textarea
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <TextInput
               label="Mô tả"
               placeholder="Nhập mô tả"
               {...form.getInputProps("description")}
