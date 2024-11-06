@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styles from "../../assets/styles/Login.module.scss";
 import classNames from "classnames/bind";
 import { BsGoogle, BsTwitter } from "react-icons/bs";
 import { FaFacebook, FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../components/ui/loader";
+import AuthServices from "../../services/AuthServices";
+import { Notifications } from "@mantine/notifications";
 
 const cx = classNames.bind(styles);
 
@@ -15,14 +17,36 @@ export default function Login() {
   const [onPasswordFocus, setOnPasswordFocus] = useState(false);
   const [onShowPassword, setOnShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const nagiavate = useNavigate();
+  const navigate = useNavigate();
 
-  const handleNagivateToSignup = () => {
-    nagiavate("/register");
+  const handleNavigateToSignup = () => {
+    navigate("/register");
   };
+
   const handleShowPassword = () => {
     setOnShowPassword(!onShowPassword);
   };
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await AuthServices.login({ email, password });
+      console.log(response);
+      setIsLoading(false);
+      if (response && response.token) {
+        Notifications.show({
+          title: "Success",
+          message: "Resgiter successfully",
+          color: "green",
+        });
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={cx("login-page")}>
       <div className={cx("login-form")}>
@@ -31,8 +55,8 @@ export default function Login() {
           <span className={cx("form-header-subtitle")}>
             Don&apos;t have an account?{" "}
             <a
-              onClick={handleNagivateToSignup}
-              className={cx("nagivate-sigup")}
+              onClick={handleNavigateToSignup}
+              className={cx("navigate-signup")}
             >
               Get started
             </a>
@@ -98,10 +122,7 @@ export default function Login() {
             <a>Forgot password?</a>
           </div>
           <div className={cx("login-btn")}>
-            <button
-              onClick={() => nagiavate("/")}
-              style={{ cursor: "pointer" }}
-            >
+            <button onClick={handleLogin} style={{ cursor: "pointer" }}>
               {isLoading ? <Loader /> : "Login"}
             </button>
           </div>

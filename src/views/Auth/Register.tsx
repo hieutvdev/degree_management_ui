@@ -5,21 +5,21 @@ import { BsGoogle } from "react-icons/bs";
 import { FaFacebook, FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import logo from "../../assets/svgs/register.svg";
 import { useNavigate } from "react-router-dom";
+import AuthServices from "../../services/AuthServices";
+import { Notifications } from "@mantine/notifications";
+import Loader from "../../components/ui/loader";
 const cx = classNames.bind(styles);
 
 export default function Register() {
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const [cardId, setCardId] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [onShowPassword, setOnShowPassword] = useState(false);
 
   const [onEmailFocus, setOnEmailFocus] = useState(false);
   const [onUserNameFocus, setOnUserNameFocus] = useState(false);
   const [onPasswordFocus, setOnPasswordFocus] = useState(false);
-  const [onCardIdFocus, setOnCardIdFocus] = useState(false);
-  const [onPhoneNumberFocus, setOnPhoneNumberFocus] = useState(false);
   const navigate = useNavigate();
 
   const handleNavigateToLogin = () => {
@@ -29,7 +29,29 @@ export default function Register() {
   const handleShowPassword = () => {
     setOnShowPassword(!onShowPassword);
   };
-
+  const handleRegister = async () => {
+    setIsLoading(true);
+    try {
+      const response = await AuthServices.register({
+        userName: email,
+        fullName: userName,
+        password: password,
+      });
+      console.log(response);
+      setIsLoading(false);
+      if (response && response.token) {
+        Notifications.show({
+          title: "Success",
+          message: "Login successfully",
+          color: "green",
+        });
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
+  };
   return (
     <div className={cx("register-page")}>
       <div className={cx("register-form")}>
@@ -68,7 +90,7 @@ export default function Register() {
                   )}
                   htmlFor="username"
                 >
-                  UserName
+                  FullName
                 </label>
                 <input
                   name="username"
@@ -103,48 +125,12 @@ export default function Register() {
                   {onShowPassword ? <FaRegEyeSlash /> : <FaRegEye />}
                 </button>
               </div>
-              <div className={cx("login-field-cardid-phonenumber")}>
-                <div className={cx("login-field-cardid")}>
-                  <label
-                    className={cx(
-                      `${cardId || onCardIdFocus ? "has-content" : ""}`
-                    )}
-                    htmlFor="cardid"
-                  >
-                    Card ID
-                  </label>
-                  <input
-                    name="cardid"
-                    onFocus={() => setOnCardIdFocus(true)}
-                    onBlur={() => setOnCardIdFocus(false)}
-                    value={cardId}
-                    onChange={(e) => setCardId(e.target.value)}
-                    type="text"
-                  />
-                </div>
-                <div className={cx("login-field-phonenumber")}>
-                  <label
-                    className={cx(
-                      `${
-                        phoneNumber || onPhoneNumberFocus ? "has-content" : ""
-                      }`
-                    )}
-                    htmlFor="username"
-                  >
-                    PhoneNumber
-                  </label>
-                  <input
-                    name="username"
-                    onFocus={() => setOnPhoneNumberFocus(true)}
-                    onBlur={() => setOnPhoneNumberFocus(false)}
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    type="text"
-                  />
-                </div>
-              </div>
+              <div className={cx("login-field-cardid-phonenumber")}></div>
               <div className={cx("register-btn")}>
-                <button>Create account</button>
+                <button onClick={handleRegister}>
+                  {" "}
+                  {isLoading ? <Loader /> : "Login"}
+                </button>
               </div>
             </div>
             <div className={cx("signup-with")}>
