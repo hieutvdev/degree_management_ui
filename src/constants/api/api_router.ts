@@ -71,4 +71,12 @@ export const API_ROUTER = {
   DELETR_PERIOD: "/Period/delete",
   GET_DETAIL_PERIOD: "/Period/get-detail",
   GET_SELECT_PERIOD: "/Period/get-select",
+
+  //Specialization
+  GET_LIST_SPECIALIZATION: "/Specialization/get-list",
+  CREATE_SPECIALIZATION: "/Specialization/create",
+  UPDATE_SPECIALIZATION: "/Specialization/update",
+  DELETE_SPECIALIZATION: "/Specialization/delete",
+  GET_DETAIL_SPECIALIZATION: "/Specialization/get-detail",
+  GET_SELECT_SPECIALIZATION: "/Specialization/get-select",
 };

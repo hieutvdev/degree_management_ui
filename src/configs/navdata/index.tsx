@@ -23,8 +23,12 @@ export const router = [
         link: "/faculty",
       },
       {
-        label: "Danh sách chuyên ngành",
+        label: "Danh sách ngành",
         link: "/major",
+      },
+      {
+        label: "Danh sách chuyên ngành",
+        link: "/specialization",
       },
       {
         label: "Đợt tốt nghiệp",
