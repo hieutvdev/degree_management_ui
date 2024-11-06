@@ -63,4 +63,20 @@ export const API_ROUTER = {
   DELETE_YEAR_GRADUATION: "/YearGraduation/delete",
   GET_DETAIL_YEAR_GRADUATION: "/YearGraduation/get-detail",
   GET_SELECT_YEAR_GRADUATION: "/YearGraduation/get-select",
+
+  //Period
+  GET_LIST_PERIOD: "/Period/get-list",
+  CREATE_PERIOD: "/Period/create",
+  UPDATE_PERIOD: "/Period/update",
+  DELETR_PERIOD: "/Period/delete",
+  GET_DETAIL_PERIOD: "/Period/get-detail",
+  GET_SELECT_PERIOD: "/Period/get-select",
+
+  //Specialization
+  GET_LIST_SPECIALIZATION: "/Specialization/get-list",
+  CREATE_SPECIALIZATION: "/Specialization/create",
+  UPDATE_SPECIALIZATION: "/Specialization/update",
+  DELETE_SPECIALIZATION: "/Specialization/delete",
+  GET_DETAIL_SPECIALIZATION: "/Specialization/get-detail",
+  GET_SELECT_SPECIALIZATION: "/Specialization/get-select",
 };

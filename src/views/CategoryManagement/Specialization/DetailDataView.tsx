@@ -17,24 +17,20 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { DateTimePicker } from "@mantine/dates";
 
 const DetailDataView = ({ id }: DetailDataViewProps) => {
   const entity = {
     id: id,
     name: null,
-    startDate: null,
-    endDate: null,
+    code: null,
     active: false,
     description: null,
-    yearGraduationId: null,
+    majorId: null,
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const [dataYearGraduationSelect, setDataYearGraduationSelect] = useState<
-    ComboboxItem[]
-  >([]);
+  const [dataMajorSelect, setDataMajorSelect] = useState<ComboboxItem[]>([]);
 
   const form = useForm<any>({
     mode: "uncontrolled",
@@ -45,26 +41,26 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
   });
 
   const getDataDetail = async () => {
-    const url = `${API_ROUTER.GET_DETAIL_PERIOD}`;
+    const url = `${API_ROUTER.GET_DETAIL_SPECIALIZATION}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url + `?id=${id}`);
 
     if (dataApi?.isSuccess) {
       form.setValues(dataApi?.data);
-      Promise.all([getYearGraduationSelect()]);
+      Promise.all([getMajorSelect()]);
     } else {
       modals.closeAll();
     }
   };
 
-  const getYearGraduationSelect = async () => {
-    const url = `${API_ROUTER.GET_SELECT_YEAR_GRADUATION}`;
+  const getMajorSelect = async () => {
+    const url = `${API_ROUTER.GET_SELECT_MAJOR}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url);
 
     if (dataApi?.isSuccess) {
       const result = dataApi?.data;
-      setDataYearGraduationSelect(
+      setDataMajorSelect(
         result
           ?.filter((item: any) => item.text != null && item.value != null)
           ?.map((item: any) => ({
@@ -98,56 +94,38 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
         <Grid mt={10}>
           <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <TextInput
-              label={"Đợt tốt nghiệp"}
-              placeholder={"Nhập đợt năm tốt nghiệp"}
+              label={"Mã chuyên ngành"}
+              placeholder={"Nhập mã chuyên ngành"}
+              variant="filled"
+              readOnly
+              {...form.getInputProps("code")}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <TextInput
+              label={"Tên chuyên ngành"}
+              placeholder={"Nhập tên chuyên ngành"}
+              variant="filled"
+              readOnly
               {...form.getInputProps("name")}
-              readOnly
-              variant="filled"
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+          <Grid.Col span={12}>
             <Select
-              label="Năm tốt nghiệp"
-              placeholder="Chọn năm tốt nghiệp"
-              data={dataYearGraduationSelect}
+              label="Ngành"
+              placeholder="Nhập tên ngành"
+              data={dataMajorSelect}
               value={
-                form.getValues().yearGraduationId
-                  ? form.getValues().yearGraduationId?.toString()
+                form.getValues().majorId
+                  ? form.getValues().majorId?.toString()
                   : null
               }
-              {...form.getInputProps("yearGraduationId")}
-              readOnly
-              variant="filled"
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <DateTimePicker
-              label="Ngày bắt đầu"
-              placeholder="Nhập ngày bắt đầu"
-              valueFormat="DD/MM/YYYY"
-              value={
-                form.getValues().startDate
-                  ? new Date(form.getValues().startDate ?? "")
-                  : null
-              }
-              {...form.getInputProps("startDate")}
+              searchable
+              clearable
+              nothingFoundMessage="Không tìm thấy ngành !"
               variant="filled"
               readOnly
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <DateTimePicker
-              label="Ngày kết thúc"
-              placeholder="Nhập ngày kết thúc"
-              valueFormat="DD/MM/YYYY"
-              value={
-                form.getValues().endDate
-                  ? new Date(form.getValues().endDate ?? "")
-                  : null
-              }
-              {...form.getInputProps("endDate")}
-              variant="filled"
-              readOnly
+              {...form.getInputProps("majorId")}
             />
           </Grid.Col>
           <Grid.Col span={12}>

@@ -25,7 +25,6 @@ import {
   IconPlus,
   IconSearch,
   IconTrash,
-  IconUpload,
 } from "@tabler/icons-react";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
@@ -40,12 +39,9 @@ import { notifications } from "@mantine/notifications";
 import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
 import { ModelPeriodQuery } from "../../../interfaces/Period";
-import {
-  formatDateTime,
-  formatDateTransfer,
-} from "../../../helpers/FunctionHelper";
+import { formatDateTime } from "../../../helpers/FunctionHelper";
 
-const Period = () => {
+const Specialization = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
@@ -73,8 +69,8 @@ const Period = () => {
         enableColumnActions: false,
       },
       {
-        accessorKey: "name",
-        header: "Đợt tốt nghiệp",
+        accessorKey: "code",
+        header: "Mã chuyên ngành",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -89,26 +85,14 @@ const Period = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "startDate",
-        header: "Ngày bắt đầu",
-        Cell: ({ renderedCellValue }: any) => (
-          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
-        ),
+        accessorKey: "name",
+        header: "Tên chuyên ngành",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "endDate",
-        header: "Ngày kết thúc",
-        Cell: ({ renderedCellValue }: any) => (
-          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
-        ),
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "yearGraduationName",
-        header: "Năm tốt nghiệp",
+        accessorKey: "majorName",
+        header: "Ngành",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -269,7 +253,7 @@ const Period = () => {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_PERIOD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const url = `${API_ROUTER.GET_LIST_SPECIALIZATION}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
       const repo = new DegreeRepository<ModelPeriodQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
@@ -319,7 +303,7 @@ const Period = () => {
 
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm đợt tốt nghiệp</Title>,
+      title: <Title order={5}>Thêm chuyên ngành</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -329,7 +313,7 @@ const Period = () => {
 
   const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chỉnh sửa đợt tốt nghiệp</Title>,
+      title: <Title order={5}>Chỉnh sửa chuyên ngành</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -339,7 +323,7 @@ const Period = () => {
 
   const handleDetail = (id: string | null) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chi tiết đợt tốt nghiệp</Title>,
+      title: <Title order={5}>Chi tiết chuyên ngành</Title>,
       size: "auto",
       children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
@@ -349,7 +333,7 @@ const Period = () => {
 
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa đợt tốt nghiệp</Title>,
+      title: <Title order={5}>Xóa chuyên ngành</Title>,
       size: "auto",
       children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },
@@ -486,13 +470,13 @@ const Period = () => {
                 Export Data
               </Menu.Item>
               {/* <Menu.Item
-                  leftSection={
-                    <IconUpload style={{ width: rem(14), height: rem(14) }} />
-                  }
-                  onClick={() => handleOpenFileDrop()}
-                >
-                  Import Excel
-                </Menu.Item> */}
+                    leftSection={
+                      <IconUpload style={{ width: rem(14), height: rem(14) }} />
+                    }
+                    onClick={() => handleOpenFileDrop()}
+                  >
+                    Import Excel
+                  </Menu.Item> */}
             </Menu.Dropdown>
           </Menu>
         </Flex>
@@ -559,4 +543,4 @@ const Period = () => {
   return <MantineReactTable table={table} />;
 };
 
-export default Period;
+export default Specialization;

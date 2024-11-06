@@ -17,27 +17,24 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { CreatePeriodModel } from "../../../interfaces/Period";
 import { useEffect, useState } from "react";
-import { DateTimePicker } from "@mantine/dates";
+import { UpdateSpecializationModel } from "../../../interfaces/Specialization";
 
-const CreateDataView = ({ onClose }: CreateDataViewProps) => {
+const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   const entity = {
+    id: id,
     name: null,
-    startDate: null,
-    endDate: null,
+    code: null,
     active: false,
     description: null,
-    yearGraduationId: null,
+    majorId: null,
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const [dataYearGraduationSelect, setDataYearGraduationSelect] = useState<
-    ComboboxItem[]
-  >([]);
+  const [dataMajorSelect, setDataMajorSelect] = useState<ComboboxItem[]>([]);
 
-  const form = useForm<CreatePeriodModel>({
+  const form = useForm<UpdateSpecializationModel>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
@@ -46,58 +43,66 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
 
     transformValues: (values) => ({
       ...values,
-      yearGraduationId: Number(values.yearGraduationId),
+      majorId: Number(values.majorId),
     }),
 
     validate: {
+      code: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng nhập mã chuyên ngành !";
+        }
+      },
       name: (value: string | null) => {
         if (!value) {
-          return "Vui lòng nhập tên khoa !";
+          return "Vui lòng nhập tên chuyên ngành !";
         }
       },
-      startDate: (value: string | null) => {
+      majorId: (value: number | null) => {
         if (!value) {
-          return "Vui lòng nhập ngày bắt đầu !";
-        }
-      },
-      endDate: (value: string | null) => {
-        if (!value) {
-          return "Vui lòng chọn ngày kết thúc !";
-        }
-      },
-      yearGraduationId: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng chọn năm tốt nghiệp !";
+          return "Vui lòng nhập ngành !";
         }
       },
     },
   });
 
-  const handleCreate = async (dataSubmit: CreatePeriodModel) => {
+  const handleUpdate = async (dataSubmit: UpdateSpecializationModel) => {
     open();
-    const url = `${API_ROUTER.CREATE_PERIOD}`;
-    const repo = new DegreeRepository<CreatePeriodModel>();
-    const dataApi = await repo.post(url, dataSubmit);
+    const url = `${API_ROUTER.UPDATE_SPECIALIZATION}`;
+    const repo = new DegreeRepository<UpdateSpecializationModel>();
+    const dataApi = await repo.put(url, dataSubmit);
 
     if (dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Thêm đợt tốt nghiệp thành công !",
+        message: "Chỉnh sửa chuyên ngành thành công !",
       });
       modals.closeAll();
     }
     close();
   };
 
-  const getYearGraduationSelect = async () => {
-    const url = `${API_ROUTER.GET_SELECT_YEAR_GRADUATION}`;
+  const getDataDetail = async () => {
+    const url = `${API_ROUTER.GET_DETAIL_SPECIALIZATION}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url + `?id=${id}`);
+
+    if (dataApi?.isSuccess) {
+      form.setValues(dataApi?.data);
+      Promise.all([getMajorSelect()]);
+    } else {
+      modals.closeAll();
+    }
+  };
+
+  const getMajorSelect = async () => {
+    const url = `${API_ROUTER.GET_SELECT_MAJOR}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url);
 
     if (dataApi?.isSuccess) {
       const result = dataApi?.data;
-      setDataYearGraduationSelect(
+      setDataMajorSelect(
         result
           ?.filter((item: any) => item.text != null && item.value != null)
           ?.map((item: any) => ({
@@ -109,8 +114,10 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   };
 
   useEffect(() => {
-    Promise.all([getYearGraduationSelect()]);
-  }, []);
+    if (id) {
+      getDataDetail();
+    }
+  }, [id]);
 
   return (
     <>
@@ -118,8 +125,8 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: CreatePeriodModel) => {
-          handleCreate(e);
+        onSubmit={form.onSubmit((e: UpdateSpecializationModel) => {
+          handleUpdate(e);
         })}
         style={{ position: "relative" }}
       >
@@ -132,59 +139,41 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid mt={10}>
           <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <TextInput
-              label={"Đợt tốt nghiệp"}
-              placeholder={"Nhập đợt năm tốt nghiệp"}
+              label={"Mã chuyên ngành"}
+              placeholder={"Nhập mã chuyên ngành"}
+              withAsterisk
+              {...form.getInputProps("code")}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <TextInput
+              label={"Tên chuyên ngành"}
+              placeholder={"Nhập tên chuyên ngành"}
               withAsterisk
               {...form.getInputProps("name")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+          <Grid.Col span={12}>
             <Select
-              label="Năm tốt nghiệp"
-              placeholder="Chọn năm tốt nghiệp"
-              data={dataYearGraduationSelect}
-              withAsterisk
-              {...form.getInputProps("yearGraduationId")}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <DateTimePicker
-              label="Ngày bắt đầu"
-              placeholder="Nhập ngày bắt đầu"
-              valueFormat="DD/MM/YYYY"
+              label="Ngành"
+              placeholder="Nhập tên ngành"
+              data={dataMajorSelect}
               value={
-                form.getValues().startDate
-                  ? new Date(form.getValues().startDate ?? "")
+                form.getValues().majorId
+                  ? form.getValues().majorId?.toString()
                   : null
               }
-              {...form.getInputProps("startDate")}
+              searchable
+              clearable
+              nothingFoundMessage="Không tìm thấy ngành !"
+              withAsterisk
+              {...form.getInputProps("majorId")}
               onChange={(e) =>
                 form.setValues((prev) => ({
                   ...prev,
-                  startDate: e ? new Date(e ?? "").toISOString() : null,
+                  majorId: e ? Number(e) : null,
                 }))
               }
-              withAsterisk
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <DateTimePicker
-              label="Ngày kết thúc"
-              placeholder="Nhập ngày kết thúc"
-              valueFormat="DD/MM/YYYY"
-              value={
-                form.getValues().endDate
-                  ? new Date(form.getValues().endDate ?? "")
-                  : null
-              }
-              {...form.getInputProps("endDate")}
-              onChange={(e) =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  endDate: e ? new Date(e ?? "").toISOString() : null,
-                }))
-              }
-              withAsterisk
             />
           </Grid.Col>
           <Grid.Col span={12}>
@@ -195,7 +184,17 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
             />
           </Grid.Col>
           <Grid.Col span={12}>
-            <Checkbox label={"Sử dụng"} {...form.getInputProps("active")} />
+            <Checkbox
+              label={"Sử dụng"}
+              checked={form.getValues().active}
+              {...form.getInputProps("active")}
+              onClick={() =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  active: !form.getValues().active,
+                }))
+              }
+            />
           </Grid.Col>
         </Grid>
 
@@ -232,8 +231,9 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   );
 };
 
-export default CreateDataView;
+export default EditDataView;
 
-type CreateDataViewProps = {
+type EditDataViewProps = {
+  id: any;
   onClose: any;
 };
