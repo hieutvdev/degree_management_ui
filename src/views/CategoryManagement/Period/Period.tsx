@@ -137,7 +137,7 @@ const Period = () => {
         header: "Thao tác",
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            <Tooltip label="Chỉnh sửa">
+            {/* <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 variant="light"
                 color="orange"
@@ -165,7 +165,7 @@ const Period = () => {
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
           </Flex>
         ),
         enableSorting: false,

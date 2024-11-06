@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { AgCharts } from "ag-charts-react";
-import { Box, Flex } from "@mantine/core";
+import { Box, Flex, Grid } from "@mantine/core";
 
 const Home = () => {
-  // Options for the graduation rate by department
   const [departmentOptions, setDepartmentOptions] = useState<any>({
     data: [
       { department: "Engineering", gradRate: 85 },
@@ -15,7 +14,6 @@ const Home = () => {
     series: [{ type: "bar", xKey: "department", yKey: "gradRate" }],
   });
 
-  // Options for the graduation rate by year
   const [yearOptions, setYearOptions] = useState<any>({
     data: [
       { year: 2018, gradRate: 75 },
@@ -40,22 +38,45 @@ const Home = () => {
     series: [{ type: "line", xKey: "semester", yKey: "gradRate" }],
   });
 
-  return (
-    <div>
-      <Flex w={"100%"} gap={30}>
-        <Box w={"50%"}>
-          <h2>Graduation Rate by Department</h2>
-          <AgCharts options={departmentOptions} />
-        </Box>
-        <Box w={"50%"}>
-          <h2>Graduation Rate by Year</h2>
-          <AgCharts options={yearOptions} />
-        </Box>
-      </Flex>
+  const [pieData, setPieData] = useState<any>({
+    title: { text: "Asset Allocation" },
+    data: [
+      { asset: "Stocks", amount: 60000 },
+      { asset: "Bonds", amount: 40000 },
+      { asset: "Cash", amount: 7000 },
+      { asset: "Real Estate", amount: 5000 },
+      { asset: "Commodities", amount: 3000 },
+    ],
+    series: [{ type: "pie", angleKey: "amount", labelKey: "asset" }],
+  });
 
-      <h2>Graduation Rate by Semester</h2>
-      <AgCharts options={semesterOptions} />
-    </div>
+  return (
+    <>
+      <Grid>
+        <Grid.Col span={4}>
+          <AgCharts options={pieData} />
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <AgCharts options={pieData} />
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <AgCharts options={pieData} />
+        </Grid.Col>
+        <Grid.Col>
+          <p>Graduation Rate by Department</p>
+          <AgCharts options={departmentOptions} />
+        </Grid.Col>
+        <Grid.Col>
+          <p>Graduation Rate by Year</p>
+          <AgCharts options={yearOptions} />
+        </Grid.Col>
+
+        <Grid.Col>
+          <p>Graduation Rate by Semester</p>
+          <AgCharts options={semesterOptions} />
+        </Grid.Col>
+      </Grid>
+    </>
   );
 };
 
