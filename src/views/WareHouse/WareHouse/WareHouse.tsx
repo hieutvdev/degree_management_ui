@@ -238,7 +238,7 @@ const WareHouse = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      setHeight(window.innerHeight - (140 + headerHeight));
+      setHeight(window.innerHeight - (190 + headerHeight));
     };
 
     handleResize();

@@ -18,17 +18,14 @@ import {
 import React, { useEffect, useState } from "react";
 import {
   IconDownload,
-  IconEdit,
   IconEye,
-  IconPlus,
   IconSearch,
-  IconTrash,
+  IconTransferIn,
 } from "@tabler/icons-react";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { modals } from "@mantine/modals";
-import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
@@ -38,6 +35,7 @@ import {
   formatDateTransfer,
   getValueById,
 } from "../../../helpers/FunctionHelper";
+import StockInInventory from "./StockInInventory";
 
 const Inventory = () => {
   //data and fetching state
@@ -179,7 +177,7 @@ const Inventory = () => {
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label="Xóa">
+            {/* <Tooltip label="Xóa">
               <ActionIcon
                 variant="light"
                 color="red"
@@ -187,7 +185,7 @@ const Inventory = () => {
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
           </Flex>
         ),
         enableSorting: false,
@@ -278,11 +276,11 @@ const Inventory = () => {
     }
   };
 
-  const handleCreate = () => {
+  const handleStockIn = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm kho lưu tồn văn bằng</Title>,
+      title: <Title order={5}>Nhập kho</Title>,
       size: "auto",
-      children: <CreateDataView onClose={setDeleteViewStatus} />,
+      children: <StockInInventory onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
@@ -325,7 +323,7 @@ const Inventory = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      setHeight(window.innerHeight - (140 + headerHeight));
+      setHeight(window.innerHeight - (190 + headerHeight));
     };
 
     handleResize();
@@ -348,10 +346,10 @@ const Inventory = () => {
         </Flex>
         <Flex gap="md">
           <Button
-            leftSection={<IconPlus size={"15px"} />}
-            onClick={() => handleCreate()}
+            leftSection={<IconTransferIn size={"15px"} />}
+            onClick={() => handleStockIn()}
           >
-            Thêm mới
+            Nhập kho
           </Button>
           <Button
             onClick={handleExportData}

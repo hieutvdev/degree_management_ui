@@ -32,6 +32,7 @@ import CreateDataView from "./CreateDataView";
 import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import DetailDataView from "./DetailDataView";
 
 const Major = () => {
   //data and fetching state
@@ -61,7 +62,7 @@ const Major = () => {
       },
       {
         accessorKey: "code",
-        header: "Mã chuyên ngành",
+        header: "Mã ngành",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -77,7 +78,7 @@ const Major = () => {
       },
       {
         accessorKey: "name",
-        header: "Tên chuyên ngành",
+        header: "Tên ngành",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -124,12 +125,16 @@ const Major = () => {
             </Tooltip> */}
 
             <Tooltip label="Chi tiết">
-              <ActionIcon variant="light" color="cyan">
+              <ActionIcon
+                variant="light"
+                color="cyan"
+                onClick={() => handleDetail(row.original.id)}
+              >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label="Xóa">
+            {/* <Tooltip label="Xóa">
               <ActionIcon
                 variant="light"
                 color="red"
@@ -137,7 +142,7 @@ const Major = () => {
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
           </Flex>
         ),
         enableSorting: false,
@@ -193,7 +198,7 @@ const Major = () => {
 
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm chuyên ngành</Title>,
+      title: <Title order={5}>Thêm ngành</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -203,7 +208,7 @@ const Major = () => {
 
   const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chỉnh sửa chuyên ngành</Title>,
+      title: <Title order={5}>Chỉnh sửa ngành</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -211,9 +216,19 @@ const Major = () => {
     });
   };
 
+  const handleDetail = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chi tiết ngành</Title>,
+      size: "auto",
+      children: <DetailDataView id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa chuyên ngành</Title>,
+      title: <Title order={5}>Xóa ngành</Title>,
       size: "auto",
       children: <DeleteView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -228,7 +243,7 @@ const Major = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      setHeight(window.innerHeight - (140 + headerHeight));
+      setHeight(window.innerHeight - (190 + headerHeight));
     };
 
     handleResize();

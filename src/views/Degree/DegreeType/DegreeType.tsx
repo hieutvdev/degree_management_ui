@@ -149,7 +149,7 @@ const DegreeType = () => {
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label="Xóa">
+            {/* <Tooltip label="Xóa">
               <ActionIcon
                 onClick={() => handleDelete(row.original.id)}
                 variant="light"
@@ -157,7 +157,7 @@ const DegreeType = () => {
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
           </Flex>
         ),
         enableSorting: false,
@@ -269,7 +269,7 @@ const DegreeType = () => {
     const handleResize = () => {
       // 190 là chiều cao của phần phân trang
       // headerHeight là chiều cao của phần header
-      setHeight(window.innerHeight - (140 + headerHeight));
+      setHeight(window.innerHeight - (190 + headerHeight));
     };
 
     handleResize(); // Set initial height

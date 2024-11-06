@@ -15,7 +15,7 @@ const DeleteView = ({ id, onClose }: DeleteProduct) => {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Xóa chuyên ngành thành công !",
+        message: "Xóa ngành thành công !",
       });
       modals.closeAll();
     }
@@ -24,7 +24,7 @@ const DeleteView = ({ id, onClose }: DeleteProduct) => {
   return (
     <Box size={"auto"}>
       <Text size="20px" mt={5}>
-        Bạn có chắc chắn muốn xóa chuyên ngành này ?
+        Bạn có chắc chắn muốn xóa ngành này ?
       </Text>
       <Group justify="center" mt="lg">
         <Button

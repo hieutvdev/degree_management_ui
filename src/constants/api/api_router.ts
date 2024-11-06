@@ -50,11 +50,8 @@ export const API_ROUTER = {
 
   //Inventory
   GET_LIST_INVENTORY: "/Invnetory/get-list",
-  CREATE_INVENTORY: "/Invnetory/create",
-  UPDATE_INVENTORY: "/Invnetory/update",
-  DELETE_INVENTORY: "/Invnetory/delete",
-  DETAIL_INVENTORY: "/Invnetory/get-detail",
-  GET_SELECT_INVENTORY: "/Invnetory/get-select",
+  STOCK_IN_INVENTORY: "/Inventory/stock-in",
+  GET_DETAIL_INVENTORY: "/Invnetory/get-detail",
 
   //YearGraduation
   GET_LIST_YEAR_GRADUATION: "/YearGraduation/get-list",

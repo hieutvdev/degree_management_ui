@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Checkbox,
+  ComboboxItem,
   Grid,
   Group,
   LoadingOverlay,
@@ -14,8 +15,8 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX } from "@tabler/icons-react";
-import { useEffect } from "react";
+import { IconX } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
 import { DegreeRepository } from "../../../services/RepositoryBase";
@@ -29,11 +30,16 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
     duration: null,
     descripion: "",
     level: null,
+    specializationId: null,
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<DegreeTypeModelQuery>({
+  const [dataSpecializationSelect, setDataSpecializationSelect] = useState<
+    ComboboxItem[]
+  >([]);
+
+  const form = useForm<any>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
@@ -44,14 +50,14 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
   const callApiGetData = async () => {
     open();
     const url = `${API_ROUTER.DETAIL_DEGREETYPE}?id=${id}`;
-    const repo = new DegreeRepository<DegreeTypeModelQuery>();
+    const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url);
 
     if (dataApi) {
       const result = dataApi?.data;
       if (result != null) {
         form.setValues(result);
-        form.resetDirty(result);
+        Promise.all([getSelectSpecialization()]);
       }
       close();
     } else {
@@ -60,6 +66,24 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
         message: "Dữ liệu không tồn tại !",
       });
       modals.closeAll();
+    }
+  };
+
+  const getSelectSpecialization = async () => {
+    const url = `${API_ROUTER.GET_SELECT_SPECIALIZATION}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataSpecializationSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
     }
   };
 
@@ -131,6 +155,27 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
             ]}
             value={form.getValues().level?.toString()}
             {...form.getInputProps("level")}
+          />
+        </Grid.Col>
+      </Grid>
+
+      <Grid>
+        <Grid.Col span={12}>
+          <Select
+            label="Chuyên ngành"
+            placeholder="Nhập tên chuyên ngành"
+            data={dataSpecializationSelect}
+            value={
+              form.getValues().specializationId
+                ? form.getValues().specializationId?.toString()
+                : null
+            }
+            searchable
+            clearable
+            nothingFoundMessage="Không tìm thấy chuyên ngành !"
+            {...form.getInputProps("specializationId")}
+            variant="filled"
+            readOnly
           />
         </Grid.Col>
       </Grid>

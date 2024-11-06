@@ -71,7 +71,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Thêm chuyên ngành thành công !",
+        message: "Thêm ngành thành công !",
       });
       modals.closeAll();
     }
@@ -122,16 +122,16 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         <Grid mt={10}>
           <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
             <TextInput
-              label={"Mã chuyên ngành"}
-              placeholder={"Nhập mã chuyên ngành"}
+              label={"Mã ngành"}
+              placeholder={"Nhập mã ngành"}
               withAsterisk
               {...form.getInputProps("code")}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 6, lg: 8 }}>
             <TextInput
-              label={"Tên chuyên ngành"}
-              placeholder={"Nhập tên chuyên ngành"}
+              label={"Tên ngành"}
+              placeholder={"Nhập tên ngành"}
               withAsterisk
               {...form.getInputProps("name")}
             />
