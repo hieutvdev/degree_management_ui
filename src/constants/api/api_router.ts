@@ -49,12 +49,9 @@ export const API_ROUTER = {
   GET_SELECT_WAREHOUSE: "/Warehouse/get-select",
 
   //Inventory
-  GET_LIST_INVENTORY: "/Invnetory/get-list",
-  CREATE_INVENTORY: "/Invnetory/create",
-  UPDATE_INVENTORY: "/Invnetory/update",
-  DELETE_INVENTORY: "/Invnetory/delete",
-  DETAIL_INVENTORY: "/Invnetory/get-detail",
-  GET_SELECT_INVENTORY: "/Invnetory/get-select",
+  GET_LIST_INVENTORY: "/Inventory/get-list",
+  STOCK_IN_INVENTORY: "/Inventory/stock-in",
+  GET_DETAIL_INVENTORY: "/Inventory/get-detail",
 
   //YearGraduation
   GET_LIST_YEAR_GRADUATION: "/YearGraduation/get-list",
@@ -63,4 +60,20 @@ export const API_ROUTER = {
   DELETE_YEAR_GRADUATION: "/YearGraduation/delete",
   GET_DETAIL_YEAR_GRADUATION: "/YearGraduation/get-detail",
   GET_SELECT_YEAR_GRADUATION: "/YearGraduation/get-select",
+
+  //Period
+  GET_LIST_PERIOD: "/Period/get-list",
+  CREATE_PERIOD: "/Period/create",
+  UPDATE_PERIOD: "/Period/update",
+  DELETR_PERIOD: "/Period/delete",
+  GET_DETAIL_PERIOD: "/Period/get-detail",
+  GET_SELECT_PERIOD: "/Period/get-select",
+
+  //Specialization
+  GET_LIST_SPECIALIZATION: "/Specialization/get-list",
+  CREATE_SPECIALIZATION: "/Specialization/create",
+  UPDATE_SPECIALIZATION: "/Specialization/update",
+  DELETE_SPECIALIZATION: "/Specialization/delete",
+  GET_DETAIL_SPECIALIZATION: "/Specialization/get-detail",
+  GET_SELECT_SPECIALIZATION: "/Specialization/get-select",
 };

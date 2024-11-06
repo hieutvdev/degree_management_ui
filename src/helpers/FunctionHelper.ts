@@ -20,7 +20,7 @@ export function formatDateNotTimeZone(
 
 export const formatDateTransfer = (
   dateString: string | Date | undefined | null,
-  house: number = 0
+  house: number = 7
 ): string => {
   if (!dateString) return "";
   const date = new Date(dayjs(dateString).add(house, "hour").toDate());
@@ -41,7 +41,7 @@ export const formatDateTime = (
   dateString: string | Date | undefined | null
 ): string => {
   if (!dateString) return "";
-  const date = new Date(dayjs(dateString).add(0, "hour").toDate());
+  const date = new Date(dayjs(dateString).add(7, "hour").toDate());
   if (date.getFullYear() < 1900) return "";
   return moment(date).format("DD-MM-YYYY");
 };

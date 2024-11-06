@@ -3,7 +3,6 @@ export interface CreateDegreeManagementModel {
   degreeTypeId: number | null;
   code: string | null;
   regNo: string | null;
-  creditsRequired: number | null;
   status: number | null;
   description: string | null;
 }
@@ -14,7 +13,6 @@ export interface UpdateDegreeManagementModel {
   degreeTypeId: number | null;
   code: string | null;
   regNo: string | null;
-  creditsRequired: number | null;
   status: number | null;
   description: string | null;
 }
@@ -25,7 +23,6 @@ export interface ModelDegreeManagementQuery {
   degreeTypeId: number | null;
   code: string | null;
   regNo: string | null;
-  creditsRequired: number | null;
   status: number | null;
   description: string | null;
 }

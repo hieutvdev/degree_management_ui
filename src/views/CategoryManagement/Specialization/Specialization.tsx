@@ -5,8 +5,10 @@ import {
   Badge,
   Tooltip,
   ActionIcon,
-  Title,
   Text,
+  Title,
+  Menu,
+  rem,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -15,8 +17,8 @@ import {
   useMantineReactTable,
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
-import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import {
+  IconCaretDown,
   IconDownload,
   IconEdit,
   IconEye,
@@ -24,21 +26,26 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { DegreeRepository } from "../../../services/RepositoryBase";
-import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import CreateDataView from "./CreateDataView";
-import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
+import { paginationBase } from "../../../interfaces/PaginationResponseBase";
+import { DegreeRepository } from "../../../services/RepositoryBase";
 import { API_ROUTER } from "../../../constants/api/api_router";
-import EditDataView from "./EditDataView";
 import DeleteDataView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
+import EditDataView from "./EditDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import { notifications } from "@mantine/notifications";
+import * as xlsx from "xlsx";
+import DropZoneFile from "../../../utils/extensions/DropZoneFile";
+import { ModelPeriodQuery } from "../../../interfaces/Period";
+import { formatDateTime } from "../../../helpers/FunctionHelper";
 
-const DegreeType = () => {
+const Specialization = () => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
+  const [dataReview, setDataReview] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -53,22 +60,17 @@ const DegreeType = () => {
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
-        accessorKey: "index",
         header: "STT",
+        Cell: ({ row }) => (
+          <Text fw={500} size="12.5px">
+            {row.index === -1 ? "" : row.index + 1}
+          </Text>
+        ),
         enableColumnActions: false,
-        enableColumnFilter: false,
-        size: 1,
-        Cell: ({ row }) => Number(row.index) + 1,
-      },
-      {
-        accessorKey: "name",
-        header: "Tên loại văn bằng",
-        enableColumnActions: false,
-        enableColumnFilter: false,
       },
       {
         accessorKey: "code",
-        header: "Mã loại văn bằng",
+        header: "Mã chuyên ngành",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -83,23 +85,14 @@ const DegreeType = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "duration",
-        header: "Thời gian học",
-        Cell: ({ renderedCellValue }) => <Text>{renderedCellValue} năm</Text>,
+        accessorKey: "name",
+        header: "Tên chuyên ngành",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "level",
-        header: "Cấp bậc",
-        Cell: ({ row }) => (
-          <Badge
-            color={row.original.level === 0 ? "#09b8ff" : "#fc8c0c"}
-            radius={"sm"}
-          >
-            {row.original.level === 0 ? "Đại học" : "Sau đại học"}
-          </Badge>
-        ),
+        accessorKey: "majorName",
+        header: "Ngành",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -126,38 +119,37 @@ const DegreeType = () => {
       {
         accessorKey: "action",
         header: "Thao tác",
-        size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            {/* <Tooltip label="Chỉnh sửa">
+            <Tooltip label="Chỉnh sửa">
               <ActionIcon
-                onClick={() => handleEdit(row.original.id)}
                 variant="light"
                 color="orange"
+                onClick={() => handleUpdate(row.original.id)}
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip> */}
+            </Tooltip>
 
             <Tooltip label="Chi tiết">
               <ActionIcon
-                onClick={() => handleDetail(row.original.id)}
                 variant="light"
                 color="cyan"
+                onClick={() => handleDetail(row.original.id)}
               >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
-            {/* <Tooltip label="Xóa">
+            <Tooltip label="Xóa">
               <ActionIcon
-                onClick={() => handleDelete(row.original.id)}
                 variant="light"
                 color="red"
+                onClick={() => handleDelete(row.original.id)}
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip> */}
+            </Tooltip>
           </Flex>
         ),
         enableSorting: false,
@@ -185,12 +177,84 @@ const DegreeType = () => {
     download(csvConfig)(csv);
   };
 
+  const handleImportExcel = async (file: any) => {
+    if (!file) {
+      notifications.show({
+        color: "red",
+        message: "Vui lòng chọn lại tệp !",
+      });
+      return;
+    } else {
+      modals.closeAll();
+      notifications.show({
+        color: "green",
+        message: "Import excel thành công !",
+      });
+    }
+
+    const fileReader = new FileReader();
+    fileReader.onload = async (e) => {
+      const data = e.target?.result;
+      if (data) {
+        const workbook = xlsx.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        let worksheet = workbook.Sheets[sheetName];
+        worksheet = xlsx.utils.sheet_add_aoa(
+          worksheet,
+          [["code", "name", "active", "description"]],
+          { origin: "A1" }
+        );
+        const jsonData = xlsx.utils.sheet_to_json(worksheet);
+        const dataSubmit = jsonData?.map((item: any, index) => ({
+          id: "0",
+          code: item.code,
+          name: item.name,
+          active: item.active,
+          description: item.description,
+        }));
+        setDataReview(dataSubmit);
+        setTimeout(() => {
+          reviewDataImport();
+        }, 1000);
+      }
+    };
+    fileReader.readAsBinaryString(file);
+  };
+
+  const handleOpenFileDrop = () => {
+    try {
+      modals.openConfirmModal({
+        title: null,
+        withCloseButton: false,
+        children: <DropZoneFile onImport={handleImportExcel}></DropZoneFile>,
+        confirmProps: { display: "none" },
+        cancelProps: { display: "none" },
+      });
+    } catch (e) {
+      notifications.show({ color: "red", message: "Import excel thất bại" });
+    }
+  };
+
+  function reviewDataImport() {
+    modals.openConfirmModal({
+      title: (
+        <>
+          <Title order={5}>Xem lại danh sách khoa !</Title>
+        </>
+      ),
+      size: "auto",
+      children: <MantineReactTable table={tableReview} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  }
+
   async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_DEGREETYPE}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<DegreeTypeModelQuery>();
+      const url = `${API_ROUTER.GET_LIST_SPECIALIZATION}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<ModelPeriodQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
@@ -211,9 +275,35 @@ const DegreeType = () => {
     }
   }
 
+  const createListDebtGroup = async () => {
+    const url = "/api/v1/TblDebtGroup/create-list";
+    const repo = new DegreeRepository<any>();
+
+    try {
+      if (dataReview.length > 0) {
+        const response = await repo.post(url, dataReview);
+        if (response?.isSuccess) {
+          notifications.show({
+            color: "green",
+            message: "Tạo mới thành công!",
+          });
+          modals.closeAll();
+        }
+      } else {
+        notifications.show({
+          color: "red",
+          message: "Vui lòng thêm nhóm công nợ!",
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+  };
+
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Tạo mới loại văn bằng</Title>,
+      title: <Title order={5}>Thêm chuyên ngành</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -221,9 +311,9 @@ const DegreeType = () => {
     });
   };
 
-  const handleEdit = (id: number | string) => {
+  const handleUpdate = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Sửa loại văn bằng</Title>,
+      title: <Title order={5}>Chỉnh sửa chuyên ngành</Title>,
       size: "auto",
       children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -231,9 +321,9 @@ const DegreeType = () => {
     });
   };
 
-  const handleDetail = (id: number | string) => {
+  const handleDetail = (id: string | null) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xem chi tiết loại văn bằng</Title>,
+      title: <Title order={5}>Chi tiết chuyên ngành</Title>,
       size: "auto",
       children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
@@ -243,22 +333,13 @@ const DegreeType = () => {
 
   const handleDelete = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Xóa loại văn bằng</Title>,
+      title: <Title order={5}>Xóa chuyên ngành</Title>,
       size: "auto",
       children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
   };
-
-  useHotkeys([
-    [
-      "F11",
-      () => {
-        handleCreate();
-      },
-    ],
-  ]);
 
   useEffect(() => {
     fetchData();
@@ -267,8 +348,6 @@ const DegreeType = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      // 190 là chiều cao của phần phân trang
-      // headerHeight là chiều cao của phần header
       setHeight(window.innerHeight - (190 + headerHeight));
     };
 
@@ -279,6 +358,82 @@ const DegreeType = () => {
       window.removeEventListener("resize", handleResize); // Clean up event listener
     };
   }, []);
+
+  const tableReview = useMantineReactTable({
+    columns,
+    data: dataReview,
+    positionToolbarAlertBanner: "bottom",
+    enableTopToolbar: false,
+    mantineTopToolbarProps: {
+      style: {
+        borderBottom: "3px solid rgba(128, 128, 128, 0.5)",
+        marginBottom: 5,
+      },
+    },
+    renderBottomToolbar: (
+      <>
+        <Flex w={"100%"} my={"10px"} pr={"20px"} justify={"flex-end"}>
+          <Button
+            onClick={() => {
+              createListDebtGroup();
+            }}
+          >
+            Tạo mới
+          </Button>
+        </Flex>
+      </>
+    ),
+    enableRowSelection: true,
+    initialState: {
+      columnPinning: {
+        left: ["mrt-row-select", "groupCode"],
+      },
+      showColumnFilters: false,
+      columnVisibility: { id: false, action: false },
+      density: "xs",
+    },
+    mantineTableContainerProps: {
+      style: { maxHeight: height, minHeight: height },
+    },
+    enableStickyHeader: true,
+    onRowSelectionChange: setRowSelection,
+    manualFiltering: false,
+    manualPagination: true,
+    manualSorting: false,
+    rowCount,
+    mantineTableBodyCellProps: ({ row }) => ({
+      style: {
+        fontWeight: "normal",
+        fontSize: "12.5px",
+        padding: "5px 15px",
+      },
+    }),
+    state: {
+      isLoading,
+      showAlertBanner: isError,
+      showProgressBars: isRefetching,
+      showSkeletons: isLoading,
+      rowSelection,
+    },
+    mantineToolbarAlertBannerProps: isError
+      ? { color: "red", children: "Lỗi tải dữ liệu !" }
+      : undefined,
+    mantinePaginationProps: {
+      showRowsPerPage: true,
+      withEdges: true,
+      rowsPerPageOptions: ["10", "50", "100"],
+    },
+    paginationDisplayMode: "pages",
+    enableColumnPinning: true,
+    mantineTableProps: {
+      striped: true,
+    },
+    columnFilterDisplayMode: "popover",
+    mantineTableBodyRowProps: ({ row }) => ({
+      onClick: row.getToggleSelectedHandler(),
+      sx: { cursor: "pointer" },
+    }),
+  });
 
   const table = useMantineReactTable({
     columns: columns,
@@ -297,12 +452,33 @@ const DegreeType = () => {
           >
             Thêm mới
           </Button>
-          <Button
-            onClick={handleExportData}
-            leftSection={<IconDownload size={"15px"} />}
-          >
-            Export Data
-          </Button>
+          <Menu shadow="md" width={200}>
+            <Menu.Target>
+              <Button
+                rightSection={
+                  <IconCaretDown style={{ width: rem(14), height: rem(14) }} />
+                }
+              >
+                Chức năng
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                onClick={handleExportData}
+                leftSection={<IconDownload size={"15px"} />}
+              >
+                Export Data
+              </Menu.Item>
+              {/* <Menu.Item
+                    leftSection={
+                      <IconUpload style={{ width: rem(14), height: rem(14) }} />
+                    }
+                    onClick={() => handleOpenFileDrop()}
+                  >
+                    Import Excel
+                  </Menu.Item> */}
+            </Menu.Dropdown>
+          </Menu>
         </Flex>
       </Flex>
     ),
@@ -316,10 +492,6 @@ const DegreeType = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
-      columnPinning: {
-        left: ["mrt-row-select", "index", "code"],
-        right: ["action"],
-      },
       columnVisibility: { id: false },
       density: "xs",
     },
@@ -371,4 +543,4 @@ const DegreeType = () => {
   return <MantineReactTable table={table} />;
 };
 
-export default DegreeType;
+export default Specialization;

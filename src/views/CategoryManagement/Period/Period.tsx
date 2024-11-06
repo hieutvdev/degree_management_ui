@@ -39,7 +39,11 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { notifications } from "@mantine/notifications";
 import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
-import { ModelYearGraduationQuery } from "../../../interfaces/YearGraduation";
+import { ModelPeriodQuery } from "../../../interfaces/Period";
+import {
+  formatDateTime,
+  formatDateTransfer,
+} from "../../../helpers/FunctionHelper";
 
 const Period = () => {
   //data and fetching state
@@ -70,6 +74,40 @@ const Period = () => {
       },
       {
         accessorKey: "name",
+        header: "Đợt tốt nghiệp",
+        Cell: ({ renderedCellValue }) => (
+          <Badge
+            radius="sm"
+            variant="dot"
+            size="lg"
+            color={renderedCellValue === null ? "red" : "green"}
+          >
+            {renderedCellValue === null ? null : renderedCellValue}
+          </Badge>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "startDate",
+        header: "Ngày bắt đầu",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "endDate",
+        header: "Ngày kết thúc",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "yearGraduationName",
         header: "Năm tốt nghiệp",
         enableColumnActions: false,
         enableColumnFilter: false,
@@ -231,8 +269,8 @@ const Period = () => {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_YEAR_GRADUATION}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<ModelYearGraduationQuery>();
+      const url = `${API_ROUTER.GET_LIST_PERIOD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const repo = new DegreeRepository<ModelPeriodQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
         const result = dataApi?.data;
@@ -281,7 +319,7 @@ const Period = () => {
 
   const handleCreate = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Thêm năm tốt nghiệp</Title>,
+      title: <Title order={5}>Thêm đợt tốt nghiệp</Title>,
       size: "auto",
       children: <CreateDataView onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
@@ -289,35 +327,35 @@ const Period = () => {
     });
   };
 
-  // const handleUpdate = (id: string | number) => {
-  //   modals.openConfirmModal({
-  //     title: <Title order={5}>Chỉnh sửa năm tốt nghiệp</Title>,
-  //     size: "auto",
-  //     children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
-  //     confirmProps: { display: "none" },
-  //     cancelProps: { display: "none" },
-  //   });
-  // };
+  const handleUpdate = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chỉnh sửa đợt tốt nghiệp</Title>,
+      size: "auto",
+      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
 
-  // const handleDetail = (id: string | null) => {
-  //   modals.openConfirmModal({
-  //     title: <Title order={5}>Chi tiết năm tốt nghiệp</Title>,
-  //     size: "auto",
-  //     children: <DetailDataView id={id} />,
-  //     confirmProps: { display: "none" },
-  //     cancelProps: { display: "none" },
-  //   });
-  // };
+  const handleDetail = (id: string | null) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Chi tiết đợt tốt nghiệp</Title>,
+      size: "auto",
+      children: <DetailDataView id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
 
-  // const handleDelete = (id: string | number) => {
-  //   modals.openConfirmModal({
-  //     title: <Title order={5}>Xóa năm tốt nghiệp</Title>,
-  //     size: "auto",
-  //     children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
-  //     confirmProps: { display: "none" },
-  //     cancelProps: { display: "none" },
-  //   });
-  // };
+  const handleDelete = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xóa đợt tốt nghiệp</Title>,
+      size: "auto",
+      children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
 
   useEffect(() => {
     fetchData();
@@ -326,7 +364,7 @@ const Period = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      setHeight(window.innerHeight - (140 + headerHeight));
+      setHeight(window.innerHeight - (190 + headerHeight));
     };
 
     handleResize(); // Set initial height

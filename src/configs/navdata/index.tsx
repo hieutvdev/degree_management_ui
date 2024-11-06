@@ -23,8 +23,12 @@ export const router = [
         link: "/faculty",
       },
       {
-        label: "Danh sách chuyên ngành",
+        label: "Danh sách ngành",
         link: "/major",
+      },
+      {
+        label: "Danh sách chuyên ngành",
+        link: "/specialization",
       },
       {
         label: "Đợt tốt nghiệp",
@@ -57,7 +61,7 @@ export const router = [
     initiallyOpened: true,
     links: [
       { label: "Kho văn bằng", link: "/warehouse" },
-      { label: "Kho lưu tồn văn bằng", link: "/inventory" },
+      { label: "Quản lý số lượng phôi", link: "/inventory" },
     ],
   },
   {

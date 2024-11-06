@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Checkbox,
+  ComboboxItem,
   Grid,
   Group,
   LoadingOverlay,
@@ -16,28 +17,39 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { API_ROUTER } from "../../../constants/api/api_router";
-import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
+import { CreateDegreeTypeModel } from "../../../interfaces/DegreeType";
 import { DegreeRepository } from "../../../services/RepositoryBase";
+import { useEffect, useState } from "react";
 
 const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
-    id: 0,
     code: null,
     name: null,
     active: false,
     duration: null,
-    descripion: "",
     level: null,
+    specializationId: null,
+    description: null,
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<DegreeTypeModelQuery>({
+  const [dataSpecializationSelect, setDataSpecializationSelect] = useState<
+    ComboboxItem[]
+  >([]);
+
+  const form = useForm<CreateDegreeTypeModel>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       ...entity,
     },
+
+    transformValues: (values) => ({
+      ...values,
+      specializationId: Number(values.specializationId),
+    }),
+
     validate: {
       code: (value: string | null) => {
         if (value === null || value === undefined) {
@@ -59,13 +71,18 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
           return "Vui lòng chọn cấp độ!";
         }
       },
+      specializationId: (value: number | null) => {
+        if (!value) {
+          return "Vui lòng chọn chuyên ngành !";
+        }
+      },
     },
   });
 
-  const handleCreateDegreeType = async (dataSubmit: DegreeTypeModelQuery) => {
+  const handleCreateDegreeType = async (dataSubmit: CreateDegreeTypeModel) => {
     open();
     const url = `${API_ROUTER.CREATE_DEGREETYPE}`;
-    const repo = new DegreeRepository<DegreeTypeModelQuery>();
+    const repo = new DegreeRepository<CreateDegreeTypeModel>();
     const dataApi = await repo.post(url, dataSubmit);
 
     if (dataApi?.isSuccess) {
@@ -79,13 +96,35 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     close();
   };
 
+  const getSelectSpecialization = async () => {
+    const url = `${API_ROUTER.GET_SELECT_SPECIALIZATION}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataSpecializationSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  useEffect(() => {
+    Promise.all([getSelectSpecialization()]);
+  }, []);
+
   return (
     <>
       <Box
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: DegreeTypeModelQuery) => {
+        onSubmit={form.onSubmit((e: CreateDegreeTypeModel) => {
           handleCreateDegreeType(e);
         })}
         style={{ position: "relative" }}
@@ -146,6 +185,20 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
                   level: Number(value),
                 }));
               }}
+            />
+          </Grid.Col>
+        </Grid>
+
+        <Grid>
+          <Grid.Col span={12}>
+            <Select
+              label="Chuyên ngành"
+              placeholder="Nhập tên chuyên ngành"
+              data={dataSpecializationSelect}
+              searchable
+              clearable
+              nothingFoundMessage="Không tìm thấy chuyên ngành !"
+              {...form.getInputProps("specializationId")}
             />
           </Grid.Col>
         </Grid>

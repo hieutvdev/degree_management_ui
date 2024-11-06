@@ -30,7 +30,6 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
     degreeTypeId: null,
     code: null,
     regNo: null,
-    creditsRequired: null,
     status: 0,
     description: "",
   };
@@ -139,7 +138,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
               {...form.getInputProps("code")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+          {/* <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <NumberInput
               label="Số tín chỉ tích lũy"
               placeholder="Nhập số tín chỉ cần tích lũy"
@@ -148,7 +147,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
               readOnly
               {...form.getInputProps("creditsRequired")}
             />
-          </Grid.Col>
+          </Grid.Col> */}
           <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <Select
               label="Sinh viên"

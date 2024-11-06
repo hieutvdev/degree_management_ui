@@ -7,35 +7,32 @@ import {
   Group,
   LoadingOverlay,
   Select,
-  TextInput,
   Textarea,
+  TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { IconCheck, IconWindow } from "@tabler/icons-react";
+import { IconWindow } from "@tabler/icons-react";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
-import { UpdateMajorModel } from "../../../interfaces/Major";
 
-const DetailDataView = ({ id }: EditDataViewProps) => {
+const DetailDataView = ({ id }: DetailDataViewProps) => {
   const entity = {
     id: id,
     name: null,
     code: null,
-    active: null,
+    active: false,
     description: null,
-    facultyId: 0,
+    majorId: null,
   };
 
-  const [dataFacultySelect, setDataFacultySelect] = useState<ComboboxItem[]>(
-    []
-  );
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<UpdateMajorModel>({
+  const [dataMajorSelect, setDataMajorSelect] = useState<ComboboxItem[]>([]);
+
+  const form = useForm<any>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
@@ -44,26 +41,26 @@ const DetailDataView = ({ id }: EditDataViewProps) => {
   });
 
   const getDataDetail = async () => {
-    const url = `${API_ROUTER.DETAIL_MAJOR}`;
+    const url = `${API_ROUTER.GET_DETAIL_SPECIALIZATION}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url + `?id=${id}`);
 
     if (dataApi?.isSuccess) {
       form.setValues(dataApi?.data);
-      Promise.all([getSelectFaculty()]);
+      Promise.all([getMajorSelect()]);
     } else {
       modals.closeAll();
     }
   };
 
-  const getSelectFaculty = async () => {
-    const url = `${API_ROUTER.GET_SELECT_FACULTY}`;
+  const getMajorSelect = async () => {
+    const url = `${API_ROUTER.GET_SELECT_MAJOR}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url);
 
     if (dataApi?.isSuccess) {
       const result = dataApi?.data;
-      setDataFacultySelect(
+      setDataMajorSelect(
         result
           ?.filter((item: any) => item.text != null && item.value != null)
           ?.map((item: any) => ({
@@ -95,57 +92,52 @@ const DetailDataView = ({ id }: EditDataViewProps) => {
         />
 
         <Grid mt={10}>
-          <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <TextInput
-              label={"Mã ngành"}
-              placeholder={"Nhập mã ngành"}
-              readOnly
+              label={"Mã chuyên ngành"}
+              placeholder={"Nhập mã chuyên ngành"}
               variant="filled"
+              readOnly
               {...form.getInputProps("code")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 8 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <TextInput
-              label={"Tên ngành"}
-              placeholder={"Nhập tên ngành"}
-              readOnly
+              label={"Tên chuyên ngành"}
+              placeholder={"Nhập tên chuyên ngành"}
               variant="filled"
+              readOnly
               {...form.getInputProps("name")}
             />
           </Grid.Col>
-        </Grid>
-        <Grid>
           <Grid.Col span={12}>
             <Select
-              label="Khoa"
-              placeholder="Chọn khoa"
-              data={dataFacultySelect}
+              label="Ngành"
+              placeholder="Nhập tên ngành"
+              data={dataMajorSelect}
               value={
-                form.getValues().facultyId
-                  ? form.getValues().facultyId?.toString()
+                form.getValues().majorId
+                  ? form.getValues().majorId?.toString()
                   : null
               }
               searchable
               clearable
-              nothingFoundMessage="Không tìm thấy dữ liệu !"
-              {...form.getInputProps("facultyId")}
+              nothingFoundMessage="Không tìm thấy ngành !"
               variant="filled"
               readOnly
+              {...form.getInputProps("majorId")}
             />
           </Grid.Col>
-        </Grid>
-        <Grid>
           <Grid.Col span={12}>
             <Textarea
               label={"Ghi chú"}
               placeholder="Nhập ghi chú"
-              value={form.getValues().description}
               {...form.getInputProps("description")}
               variant="filled"
               readOnly
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
+          <Grid.Col span={12}>
             <Checkbox
               label={"Sử dụng"}
               checked={form.getValues().active}
@@ -175,13 +167,6 @@ const DetailDataView = ({ id }: EditDataViewProps) => {
           >
             Đóng
           </Button>
-          <Button
-            type="submit"
-            loading={visible}
-            leftSection={!visible ? <IconCheck size={18} /> : undefined}
-          >
-            Lưu
-          </Button>
         </Group>
       </Box>
     </>
@@ -190,6 +175,6 @@ const DetailDataView = ({ id }: EditDataViewProps) => {
 
 export default DetailDataView;
 
-type EditDataViewProps = {
+type DetailDataViewProps = {
   id: any;
 };

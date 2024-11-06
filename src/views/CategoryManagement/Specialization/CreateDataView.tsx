@@ -7,8 +7,8 @@ import {
   Group,
   LoadingOverlay,
   Select,
-  TextInput,
   Textarea,
+  TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
@@ -18,30 +18,32 @@ import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState } from "react";
-import { UpdateMajorModel } from "../../../interfaces/Major";
+import { CreateSpecializationModel } from "../../../interfaces/Specialization";
 
-const EditDataView = ({ id, onClose }: EditDataViewProps) => {
+const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
-    id: id,
     name: null,
     code: null,
-    active: null,
+    active: false,
     description: null,
-    facultyId: 0,
+    majorId: null,
   };
 
-  const [dataFacultySelect, setDataFacultySelect] = useState<ComboboxItem[]>(
-    []
-  );
-  console.log(dataFacultySelect);
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<UpdateMajorModel>({
+  const [dataMajorSelect, setDataMajorSelect] = useState<ComboboxItem[]>([]);
+
+  const form = useForm<CreateSpecializationModel>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       ...entity,
     },
+
+    transformValues: (values) => ({
+      ...values,
+      majorId: Number(values.majorId),
+    }),
 
     validate: {
       code: (value: string | null) => {
@@ -54,52 +56,39 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
           return "Vui lòng nhập tên chuyên ngành !";
         }
       },
-      facultyId: (value: number) => {
-        if (!value || value === 0) {
-          return "Vui lòng chọn khoa của chuyên ngành !";
+      majorId: (value: number | null) => {
+        if (!value) {
+          return "Vui lòng nhập ngành !";
         }
       },
     },
   });
 
-  const handleUpdate = async (dataSubmit: UpdateMajorModel) => {
+  const handleCreate = async (dataSubmit: CreateSpecializationModel) => {
     open();
-    const url = `${API_ROUTER.UPDATE_MAJOR}`;
-    const repo = new DegreeRepository<UpdateMajorModel>();
-    const dataApi = await repo.put(url, dataSubmit);
+    const url = `${API_ROUTER.CREATE_SPECIALIZATION}`;
+    const repo = new DegreeRepository<CreateSpecializationModel>();
+    const dataApi = await repo.post(url, dataSubmit);
 
     if (dataApi?.isSuccess) {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Sửa ngành thành công !",
+        message: "Thêm chuyên ngành thành công !",
       });
       modals.closeAll();
     }
     close();
   };
 
-  const getDataDetail = async () => {
-    const url = `${API_ROUTER.DETAIL_MAJOR}`;
-    const repo = new DegreeRepository<any>();
-    const dataApi = await repo.get(url + `?id=${id}`);
-
-    if (dataApi?.isSuccess) {
-      form.setValues(dataApi?.data);
-      Promise.all([getSelectFaculty()]);
-    } else {
-      modals.closeAll();
-    }
-  };
-
-  const getSelectFaculty = async () => {
-    const url = `${API_ROUTER.GET_SELECT_FACULTY}`;
+  const getMajorSelect = async () => {
+    const url = `${API_ROUTER.GET_SELECT_MAJOR}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url);
 
     if (dataApi?.isSuccess) {
       const result = dataApi?.data;
-      setDataFacultySelect(
+      setDataMajorSelect(
         result
           ?.filter((item: any) => item.text != null && item.value != null)
           ?.map((item: any) => ({
@@ -111,10 +100,8 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   };
 
   useEffect(() => {
-    if (id) {
-      getDataDetail();
-    }
-  }, [id]);
+    Promise.all([getMajorSelect()]);
+  }, []);
 
   return (
     <>
@@ -122,8 +109,8 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
         component="form"
         mx="auto"
         w={{ base: "250px", md: "300px", lg: "400px" }}
-        onSubmit={form.onSubmit((e: UpdateMajorModel) => {
-          handleUpdate(e);
+        onSubmit={form.onSubmit((e: CreateSpecializationModel) => {
+          handleCreate(e);
         })}
         style={{ position: "relative" }}
       >
@@ -134,74 +121,43 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
         />
 
         <Grid mt={10}>
-          <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <TextInput
-              label={"Mã ngành"}
-              placeholder={"Nhập mã ngành"}
+              label={"Mã chuyên ngành"}
+              placeholder={"Nhập mã chuyên ngành"}
               withAsterisk
               {...form.getInputProps("code")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 8 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <TextInput
-              label={"Tên ngành"}
-              placeholder={"Nhập tên ngành"}
+              label={"Tên chuyên ngành"}
+              placeholder={"Nhập tên chuyên ngành"}
               withAsterisk
               {...form.getInputProps("name")}
             />
           </Grid.Col>
-        </Grid>
-        <Grid>
           <Grid.Col span={12}>
             <Select
-              label="Khoa"
-              placeholder="Chọn khoa"
-              data={dataFacultySelect}
-              value={
-                form.getValues().facultyId
-                  ? form.getValues().facultyId?.toString()
-                  : null
-              }
+              label="Ngành"
+              placeholder="Nhập tên ngành"
+              data={dataMajorSelect}
               searchable
               clearable
-              nothingFoundMessage="Không tìm thấy dữ liệu !"
-              {...form.getInputProps("facultyId")}
-              onChange={(e) =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  facultyId: e ? Number(e) : 0,
-                }))
-              }
+              nothingFoundMessage="Không tìm thấy ngành !"
+              withAsterisk
+              {...form.getInputProps("majorId")}
             />
           </Grid.Col>
-        </Grid>
-        <Grid>
           <Grid.Col span={12}>
             <Textarea
               label={"Ghi chú"}
               placeholder="Nhập ghi chú"
-              value={form.getValues().description}
               {...form.getInputProps("description")}
-              onChange={(e) =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  description: e.currentTarget.value,
-                }))
-              }
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
-            <Checkbox
-              label={"Sử dụng"}
-              checked={form.getValues().active}
-              {...form.getInputProps("active")}
-              onClick={() =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  active: !form.getValues().active,
-                }))
-              }
-            />
+          <Grid.Col span={12}>
+            <Checkbox label={"Sử dụng"} {...form.getInputProps("active")} />
           </Grid.Col>
         </Grid>
 
@@ -238,9 +194,8 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   );
 };
 
-export default EditDataView;
+export default CreateDataView;
 
-type EditDataViewProps = {
-  id: any;
+type CreateDataViewProps = {
   onClose: any;
 };

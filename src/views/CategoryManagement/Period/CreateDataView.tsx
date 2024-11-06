@@ -2,10 +2,13 @@ import {
   Box,
   Button,
   Checkbox,
+  ComboboxItem,
   Grid,
   Group,
   LoadingOverlay,
+  Select,
   Textarea,
+  TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
@@ -14,8 +17,9 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { YearPickerInput } from "@mantine/dates";
 import { CreatePeriodModel } from "../../../interfaces/Period";
+import { useEffect, useState } from "react";
+import { DateTimePicker } from "@mantine/dates";
 
 const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
@@ -28,6 +32,10 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   };
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
+
+  const [dataYearGraduationSelect, setDataYearGraduationSelect] = useState<
+    ComboboxItem[]
+  >([]);
 
   const form = useForm<CreatePeriodModel>({
     mode: "uncontrolled",
@@ -44,7 +52,22 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     validate: {
       name: (value: string | null) => {
         if (!value) {
-          return "Vui lòng nhập tên khoa!";
+          return "Vui lòng nhập tên khoa !";
+        }
+      },
+      startDate: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng nhập ngày bắt đầu !";
+        }
+      },
+      endDate: (value: string | null) => {
+        if (!value) {
+          return "Vui lòng chọn ngày kết thúc !";
+        }
+      },
+      yearGraduationId: (value: number | null) => {
+        if (!value) {
+          return "Vui lòng chọn năm tốt nghiệp !";
         }
       },
     },
@@ -52,7 +75,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
 
   const handleCreate = async (dataSubmit: CreatePeriodModel) => {
     open();
-    const url = `${API_ROUTER.CREATE_YEAR_GRADUATION}`;
+    const url = `${API_ROUTER.CREATE_PERIOD}`;
     const repo = new DegreeRepository<CreatePeriodModel>();
     const dataApi = await repo.post(url, dataSubmit);
 
@@ -60,12 +83,34 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
       onClose((prev: any) => !prev);
       notifications.show({
         color: "green",
-        message: "Thêm năm tốt nghiệp thành công !",
+        message: "Thêm đợt tốt nghiệp thành công !",
       });
       modals.closeAll();
     }
     close();
   };
+
+  const getYearGraduationSelect = async () => {
+    const url = `${API_ROUTER.GET_SELECT_YEAR_GRADUATION}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataYearGraduationSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  useEffect(() => {
+    Promise.all([getYearGraduationSelect()]);
+  }, []);
 
   return (
     <>
@@ -85,12 +130,61 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         />
 
         <Grid mt={10}>
-          <Grid.Col span={12}>
-            <YearPickerInput
-              label={"Tên năm tốt nghiệp"}
-              placeholder={"Nhập tên năm tốt nghiệp"}
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <TextInput
+              label={"Đợt tốt nghiệp"}
+              placeholder={"Nhập đợt năm tốt nghiệp"}
               withAsterisk
               {...form.getInputProps("name")}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <Select
+              label="Năm tốt nghiệp"
+              placeholder="Chọn năm tốt nghiệp"
+              data={dataYearGraduationSelect}
+              withAsterisk
+              {...form.getInputProps("yearGraduationId")}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <DateTimePicker
+              label="Ngày bắt đầu"
+              placeholder="Nhập ngày bắt đầu"
+              valueFormat="DD/MM/YYYY"
+              value={
+                form.getValues().startDate
+                  ? new Date(form.getValues().startDate ?? "")
+                  : null
+              }
+              {...form.getInputProps("startDate")}
+              onChange={(e) =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  startDate: e ? new Date(e ?? "").toISOString() : null,
+                }))
+              }
+              withAsterisk
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+            <DateTimePicker
+              label="Ngày kết thúc"
+              placeholder="Nhập ngày kết thúc"
+              valueFormat="DD/MM/YYYY"
+              value={
+                form.getValues().endDate
+                  ? new Date(form.getValues().endDate ?? "")
+                  : null
+              }
+              {...form.getInputProps("endDate")}
+              onChange={(e) =>
+                form.setValues((prev) => ({
+                  ...prev,
+                  endDate: e ? new Date(e ?? "").toISOString() : null,
+                }))
+              }
+              withAsterisk
             />
           </Grid.Col>
           <Grid.Col span={12}>
