@@ -40,6 +40,10 @@ import { notifications } from "@mantine/notifications";
 import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
 import { ModelPeriodQuery } from "../../../interfaces/Period";
+import {
+  formatDateTime,
+  formatDateTransfer,
+} from "../../../helpers/FunctionHelper";
 
 const Period = () => {
   //data and fetching state
@@ -70,6 +74,40 @@ const Period = () => {
       },
       {
         accessorKey: "name",
+        header: "Đợt tốt nghiệp",
+        Cell: ({ renderedCellValue }) => (
+          <Badge
+            radius="sm"
+            variant="dot"
+            size="lg"
+            color={renderedCellValue === null ? "red" : "green"}
+          >
+            {renderedCellValue === null ? null : renderedCellValue}
+          </Badge>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "startDate",
+        header: "Ngày bắt đầu",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "endDate",
+        header: "Ngày kết thúc",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "yearGraduationName",
         header: "Năm tốt nghiệp",
         enableColumnActions: false,
         enableColumnFilter: false,

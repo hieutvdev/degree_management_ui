@@ -76,7 +76,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
 
   const handleUpdate = async (dataSubmit: UpdatePeriodModel) => {
     open();
-    const url = `${API_ROUTER.CREATE_PERIOD}`;
+    const url = `${API_ROUTER.UPDATE_PERIOD}`;
     const repo = new DegreeRepository<UpdatePeriodModel>();
     const dataApi = await repo.put(url, dataSubmit);
 
@@ -178,6 +178,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
             <DateTimePicker
               label="Ngày bắt đầu"
               placeholder="Nhập ngày bắt đầu"
+              valueFormat="DD/MM/YYYY"
               value={
                 form.getValues().startDate
                   ? new Date(form.getValues().startDate ?? "")
@@ -197,6 +198,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
             <DateTimePicker
               label="Ngày kết thúc"
               placeholder="Nhập ngày kết thúc"
+              valueFormat="DD/MM/YYYY"
               value={
                 form.getValues().endDate
                   ? new Date(form.getValues().endDate ?? "")

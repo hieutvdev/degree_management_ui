@@ -151,6 +151,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
             <DateTimePicker
               label="Ngày bắt đầu"
               placeholder="Nhập ngày bắt đầu"
+              valueFormat="DD/MM/YYYY"
               value={
                 form.getValues().startDate
                   ? new Date(form.getValues().startDate ?? "")
@@ -170,6 +171,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
             <DateTimePicker
               label="Ngày kết thúc"
               placeholder="Nhập ngày kết thúc"
+              valueFormat="DD/MM/YYYY"
               value={
                 form.getValues().endDate
                   ? new Date(form.getValues().endDate ?? "")
