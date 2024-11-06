@@ -110,12 +110,12 @@ const DegreeManagement = () => {
         enableColumnActions: false,
         enableColumnFilter: false,
       },
-      {
-        accessorKey: "creditsRequired",
-        header: "Số tín chỉ tích lũy",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
+      // {
+      //   accessorKey: "creditsRequired",
+      //   header: "Số tín chỉ tích lũy",
+      //   enableColumnActions: false,
+      //   enableColumnFilter: false,
+      // },
       {
         accessorKey: "degreeTypeId",
         header: "Loại văn bằng",

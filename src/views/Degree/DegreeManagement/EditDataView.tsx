@@ -31,7 +31,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
     degreeTypeId: null,
     code: null,
     regNo: null,
-    creditsRequired: null,
+    // creditsRequired: null,
     status: 0,
     description: "",
   };
@@ -63,11 +63,11 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
           return "Vui lòng nhập số hiệu !";
         }
       },
-      creditsRequired: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng nhập số tín chỉ cần tích lũy !";
-        }
-      },
+      // creditsRequired: (value: number | null) => {
+      //   if (!value) {
+      //     return "Vui lòng nhập số tín chỉ cần tích lũy !";
+      //   }
+      // },
       stundentId: (value: number | null) => {
         if (!value) {
           return "Vui lòng nhập sinh viên cần cấp văn bằng !";
@@ -189,7 +189,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
               {...form.getInputProps("code")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+          {/* <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <NumberInput
               label="Số tín chỉ tích lũy"
               placeholder="Nhập số tín chỉ cần tích lũy"
@@ -200,7 +200,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
               withAsterisk
               {...form.getInputProps("creditsRequired")}
             />
-          </Grid.Col>
+          </Grid.Col> */}
           <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
             <Select
               label="Sinh viên"
