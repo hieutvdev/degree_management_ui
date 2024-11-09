@@ -39,6 +39,7 @@ export const API_ROUTER = {
   DELETE_DEGREE: "/Degree/delete",
   DETAIL_DEGREE: "/Degree/get-detail",
   GET_SELECT_DEGREE: "/Degree/get-select",
+  ISSUE_IDENTIFICATION: "/Degree/issue-identification-num",
 
   //WareHouse
   GET_LIST_WAREHOUSE: "/Warehouse/get-list",

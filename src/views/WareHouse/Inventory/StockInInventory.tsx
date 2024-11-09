@@ -187,9 +187,6 @@ const StockInInventory = ({ onClose }: StockInInventoryProps) => {
               {...form.getInputProps("description")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 10 }}>
-            <Checkbox label="Sử dụng" {...form.getInputProps("status")} />
-          </Grid.Col>
         </Grid>
 
         <Group

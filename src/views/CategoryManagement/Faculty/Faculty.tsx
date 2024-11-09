@@ -20,6 +20,7 @@ import React, { useEffect, useState } from "react";
 import {
   IconCaretDown,
   IconDownload,
+  IconEdit,
   IconEye,
   IconPlus,
   IconSearch,
@@ -115,7 +116,7 @@ const Faculty = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            {/* <Tooltip label="Chỉnh sửa">
+            <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 variant="light"
                 color="orange"
@@ -123,7 +124,7 @@ const Faculty = () => {
               >
                 <IconEdit size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip> */}
+            </Tooltip>
 
             <Tooltip label="Chi tiết">
               <ActionIcon
