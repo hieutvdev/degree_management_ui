@@ -61,6 +61,7 @@ export const router = [
     initiallyOpened: true,
     links: [
       { label: "Kho văn bằng", link: "/warehouse" },
+      { label: "Nhập kho văn bằng", link: "/inward" },
       { label: "Quản lý số lượng phôi", link: "/inventory" },
     ],
   },
