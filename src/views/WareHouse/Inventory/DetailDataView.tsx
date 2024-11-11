@@ -176,6 +176,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
             <TextInput
               label="Ghi chú"
               placeholder="Nhập ghi chú"
+              variant="filled"
               readOnly
               {...form.getInputProps("description")}
             />

@@ -325,12 +325,6 @@ const Inventory = () => {
         </Flex>
         <Flex gap="md">
           <Button
-            leftSection={<IconTransferIn size={"15px"} />}
-            onClick={() => handleStockIn()}
-          >
-            Nhập kho
-          </Button>
-          <Button
             onClick={handleExportData}
             leftSection={<IconDownload size={"15px"} />}
           >
