@@ -6,10 +6,9 @@ import {
   Select,
   TextInput,
   Tooltip,
-  Text,
-  Badge,
-  Flex,
   Button,
+  NumberInput,
+  Textarea,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -27,6 +26,8 @@ import {
   useMantineReactTable,
 } from "mantine-react-table";
 import React from "react";
+import { notifications } from "@mantine/notifications";
+import { modals } from "@mantine/modals";
 
 const CreateDataView = ({ onClose }: { onClose: any }) => {
   const entity = {
@@ -34,7 +35,7 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
     requestPersonId: null,
     code: null,
     stockInInvSuggestDetails: null,
-    status: null,
+    status: 1,
     note: null,
   };
 
@@ -47,6 +48,9 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
   const [dataWareHouseSelect, setDataWareHouseSelect] = useState<
     ComboboxItem[]
   >([]);
+  const [dataDegreeTypeSelect, setDataDegreeTypeSelect] = useState<
+    ComboboxItem[]
+  >([]);
 
   const form = useForm<CreateInwardModel>({
     mode: "uncontrolled",
@@ -55,14 +59,41 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
       ...entity,
     },
 
+    transformValues: (values) => ({
+      ...values,
+      warehouseId: Number(values.warehouseId),
+    }),
+
     validate: {},
   });
+
+  const removeByDegreeTypeId = (degreeTypeId: any) => {
+    setStockInInvSuggestDetails((prevState) =>
+      prevState.filter((item) => item.degreeTypeId !== degreeTypeId)
+    );
+  };
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
         accessorKey: "degreeTypeId",
         header: "Loại văn bằng",
+        Cell: ({ row }) => (
+          <Select
+            placeholder="Chọn loại văn bằng"
+            data={dataDegreeTypeSelect}
+            onChange={(e) =>
+              setStockInInvSuggestDetails((prev: any) => {
+                const updateData = [...prev];
+                updateData[row.index] = {
+                  ...updateData[row.index],
+                  degreeTypeId: e ? Number(e) : null,
+                };
+                return updateData;
+              })
+            }
+          />
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
         enableSorting: false,
@@ -70,6 +101,23 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
       {
         accessorKey: "quantity",
         header: "Số lượng",
+        Cell: ({ row }) => (
+          <NumberInput
+            placeholder="Nhập số lượng"
+            min={0}
+            hideControls
+            onChange={(e) =>
+              setStockInInvSuggestDetails((prev: any) => {
+                const updateData = [...prev];
+                updateData[row.index] = {
+                  ...updateData[row.index],
+                  quantity: e ? Number(e) : null,
+                };
+                return updateData;
+              })
+            }
+          />
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
         enableSorting: false,
@@ -80,7 +128,15 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
         size: 10,
         Cell: ({ row }) => (
           <Tooltip label="Xóa">
-            <ActionIcon variant="light" color="red">
+            <ActionIcon
+              variant="light"
+              color="red"
+              onClick={() =>
+                removeByDegreeTypeId(
+                  stockInInvSuggestDetails[row.index].degreeTypeId
+                )
+              }
+            >
               <IconTrash size={20} stroke={1.5} />
             </ActionIcon>
           </Tooltip>
@@ -90,7 +146,7 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
         enableColumnFilter: false,
       },
     ],
-    []
+    [dataDegreeTypeSelect, stockInInvSuggestDetails]
   );
 
   const table = useMantineReactTable({
@@ -146,6 +202,25 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
     }),
   });
 
+  const handleCreateInward = async (dataSubmit: CreateInwardModel) => {
+    const url = `${API_ROUTER.CREATE_INWARD}`;
+    const repo = new DegreeRepository<CreateInwardModel>();
+    const dataApi = await repo.post(url, {
+      ...dataSubmit,
+      requestPersonId: 0,
+      stockInInvSuggestDetails: stockInInvSuggestDetails,
+    });
+
+    if (dataApi && dataApi?.isSuccess) {
+      onClose((prev: any) => !prev);
+      notifications.show({
+        color: "green",
+        message: "Nhập kho thành công !",
+      });
+      modals.closeAll();
+    }
+  };
+
   const getCreateInward = async () => {
     const url = `${API_ROUTER.GET_CREATE_INWARD}`;
     const repo = new DegreeRepository<CreateInwardModel>();
@@ -154,7 +229,7 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
     if (dataApi?.isSuccess) {
       const result = dataApi.data;
       form.setValues(result ?? {});
-      Promise.all([getSelectWareHouse()]);
+      Promise.all([getSelectWareHouse(), getSelectDegreeType()]);
     }
   };
 
@@ -176,12 +251,38 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
     }
   };
 
+  const getSelectDegreeType = async () => {
+    const url = `${API_ROUTER.GET_SELECT_DEGREETYPE}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataDegreeTypeSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
   useEffect(() => {
     getCreateInward();
   }, []);
 
   return (
-    <Box maw={800} w={"50vw"}>
+    <Box
+      maw={800}
+      w={"50vw"}
+      component="form"
+      mx="auto"
+      onSubmit={form.onSubmit((e: CreateInwardModel) => {
+        handleCreateInward(e);
+      })}
+    >
       <Grid mt={10}>
         <Grid.Col span={{ base: 12, md: 12, lg: 8 }}>
           <MantineReactTable table={table} />
@@ -212,6 +313,7 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
             value={form.getValues().code ?? ""}
             variant="filled"
             readOnly
+            {...form.getInputProps("code")}
           />
           <Select
             label="Kho"
@@ -220,6 +322,23 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
             searchable
             clearable
             nothingFoundMessage="Không tìm thấy kho !"
+            {...form.getInputProps("warehouseId")}
+          />
+          <Select
+            label="Trạng thái"
+            value={form.getValues().status?.toString()}
+            data={[
+              { label: "Chờ duyệt", value: "1" },
+              { label: "Từ chối", value: "2" },
+              { label: "Đã duyệt", value: "3" },
+            ]}
+            variant="filled"
+            readOnly
+          />
+          <Textarea
+            label="Ghi chú"
+            placeholder="Nhập ghi chú"
+            {...form.getInputProps("note")}
           />
           <Button
             variant="outline"
@@ -227,6 +346,7 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
             leftSection={<IconCheck size={"14px"} />}
             mt={15}
             w={"100%"}
+            type="submit"
           >
             Lưu
           </Button>

@@ -145,14 +145,6 @@ const DetailDataView = ({ id }: EditDataViewProps) => {
               readOnly
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
-            <Checkbox
-              label={"Sử dụng"}
-              checked={form.getValues().active}
-              {...form.getInputProps("active")}
-              readOnly
-            />
-          </Grid.Col>
         </Grid>
 
         <Group

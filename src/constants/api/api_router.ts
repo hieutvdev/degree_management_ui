@@ -79,6 +79,7 @@ export const API_ROUTER = {
   GET_SELECT_SPECIALIZATION: "/Specialization/get-select",
 
   //Inward
+  GET_LIST_INWARD: "/Inward/get-list-inward-request",
   GET_CREATE_INWARD: "/Inward/create-inward-request",
   CREATE_INWARD: "/Inward/create-inward-request",
   GET_DETAIL_INWARD: "/Inward/detail-inward-request",

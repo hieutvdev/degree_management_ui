@@ -97,20 +97,6 @@ const Specialization = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "active",
-        header: "Hoạt động",
-        Cell: ({ row }) => (
-          <Badge
-            color={row.original.active === true ? "green" : "red"}
-            radius={"sm"}
-          >
-            {row.original.active === true ? "Đang hoạt động" : "Dừng hoạt động"}
-          </Badge>
-        ),
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
         accessorKey: "description",
         header: "Ghi chú",
         enableColumnActions: false,
