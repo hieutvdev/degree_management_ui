@@ -7,7 +7,6 @@ import {
 import {
   ActionIcon,
   Box,
-  Button,
   ComboboxItem,
   Grid,
   NumberInput,
@@ -23,12 +22,7 @@ import {
   MRT_ColumnDef,
   useMantineReactTable,
 } from "mantine-react-table";
-import {
-  IconArrowLeft,
-  IconCheck,
-  IconPlus,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconTrash } from "@tabler/icons-react";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 
@@ -81,28 +75,14 @@ const DetailDataView = ({ id }: { id: any }) => {
       {
         accessorKey: "degreeTypeId",
         header: "Loại văn bằng",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-        enableSorting: false,
-      },
-      {
-        accessorKey: "quantity",
-        header: "Số lượng",
         Cell: ({ row }) => (
-          <NumberInput
-            placeholder="Nhập số lượng"
-            min={0}
-            hideControls
-            onChange={(e) =>
-              setStockInInvSuggestDetails((prev: any) => {
-                const updateData = [...prev];
-                updateData[row.index] = {
-                  ...updateData[row.index],
-                  quantity: e ? Number(e) : null,
-                };
-                return updateData;
-              })
-            }
+          <Select
+            placeholder="Chọn loại văn bằng"
+            data={dataDegreeTypeSelect}
+            value={row.original.degreeTypeId?.toString()}
+            rightSection={" "}
+            variant="unstyled"
+            readOnly
           />
         ),
         enableColumnActions: false,
@@ -110,27 +90,12 @@ const DetailDataView = ({ id }: { id: any }) => {
         enableSorting: false,
       },
       {
-        accessorKey: "action",
-        header: "Thao tác",
-        size: 10,
-        Cell: ({ row }) => (
-          <Tooltip label="Xóa">
-            <ActionIcon
-              variant="light"
-              color="red"
-              onClick={() =>
-                removeByDegreeTypeId(
-                  stockInInvSuggestDetails[row.index].degreeTypeId
-                )
-              }
-            >
-              <IconTrash size={20} stroke={1.5} />
-            </ActionIcon>
-          </Tooltip>
-        ),
-        enableSorting: false,
+        accessorKey: "quantity",
+        header: "Số lượng",
+        size: 50,
         enableColumnActions: false,
         enableColumnFilter: false,
+        enableSorting: false,
       },
     ],
     [dataDegreeTypeSelect, stockInInvSuggestDetails]
@@ -138,7 +103,7 @@ const DetailDataView = ({ id }: { id: any }) => {
 
   const table = useMantineReactTable({
     columns,
-    data: stockInInvSuggestDetails,
+    data: form.getValues().stockInInvSuggestDetails ?? [],
     positionToolbarAlertBanner: "bottom",
     enableTopToolbar: false,
     enableBottomToolbar: false,
@@ -191,7 +156,7 @@ const DetailDataView = ({ id }: { id: any }) => {
 
   const getDetailInward = async () => {
     const url = `${API_ROUTER.GET_DETAIL_INWARD}`;
-    const repo = new DegreeRepository<CreateInwardModel>();
+    const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(`${url}?id=${id}`);
 
     if (dataApi?.isSuccess) {
@@ -260,9 +225,13 @@ const DetailDataView = ({ id }: { id: any }) => {
             label="Kho"
             placeholder="Nhập tên kho"
             data={dataWareHouseSelect}
-            searchable
-            clearable
-            nothingFoundMessage="Không tìm thấy kho !"
+            value={
+              form.getValues().warehouseId
+                ? form.getValues().warehouseId?.toString()
+                : null
+            }
+            variant="filled"
+            readOnly
             {...form.getInputProps("warehouseId")}
           />
           <Select
@@ -279,6 +248,8 @@ const DetailDataView = ({ id }: { id: any }) => {
           <Textarea
             label="Ghi chú"
             placeholder="Nhập ghi chú"
+            variant="filled"
+            readOnly
             {...form.getInputProps("note")}
           />
         </Grid.Col>

@@ -64,7 +64,13 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
       warehouseId: Number(values.warehouseId),
     }),
 
-    validate: {},
+    validate: {
+      warehouseId: (value: number | null) => {
+        if (!value) {
+          return "Vui lòng nhập kho !";
+        }
+      },
+    },
   });
 
   const removeByDegreeTypeId = (degreeTypeId: any) => {
@@ -203,21 +209,29 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
   });
 
   const handleCreateInward = async (dataSubmit: CreateInwardModel) => {
-    const url = `${API_ROUTER.CREATE_INWARD}`;
-    const repo = new DegreeRepository<CreateInwardModel>();
-    const dataApi = await repo.post(url, {
-      ...dataSubmit,
-      requestPersonId: 0,
-      stockInInvSuggestDetails: stockInInvSuggestDetails,
-    });
-
-    if (dataApi && dataApi?.isSuccess) {
-      onClose((prev: any) => !prev);
-      notifications.show({
-        color: "green",
-        message: "Nhập kho thành công !",
+    if (stockInInvSuggestDetails?.length > 0) {
+      const url = `${API_ROUTER.CREATE_INWARD}`;
+      const repo = new DegreeRepository<CreateInwardModel>();
+      const dataApi = await repo.post(url, {
+        ...dataSubmit,
+        requestPersonId: 0,
+        stockInInvSuggestDetails: stockInInvSuggestDetails,
       });
-      modals.closeAll();
+
+      if (dataApi && dataApi?.isSuccess) {
+        onClose((prev: any) => !prev);
+        notifications.show({
+          color: "green",
+          message: "Nhập kho thành công !",
+        });
+        modals.closeAll();
+      }
+    } else {
+      notifications.show({
+        color: "red",
+        message: "Vui lòng thêm phôi loại văn bằng !",
+      });
+      return;
     }
   };
 
@@ -323,6 +337,7 @@ const CreateDataView = ({ onClose }: { onClose: any }) => {
             clearable
             nothingFoundMessage="Không tìm thấy kho !"
             {...form.getInputProps("warehouseId")}
+            withAsterisk
           />
           <Select
             label="Trạng thái"
