@@ -24,7 +24,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
     name: null,
     code: null,
-    active: false,
+    active: true,
     description: "",
     facultyId: 0,
   };

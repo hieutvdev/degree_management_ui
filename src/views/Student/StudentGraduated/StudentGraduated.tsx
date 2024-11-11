@@ -14,7 +14,6 @@ import {
   IconBook,
   IconCaretDown,
   IconDownload,
-  IconEdit,
   IconEye,
   IconGenderFemale,
   IconGenderMale,
@@ -62,8 +61,9 @@ const StudentGraduatedView = () => {
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
-  console.log(selectIds);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
+  //keySearch
+  const [keySearch, setKeySearch] = useState("");
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
@@ -413,8 +413,13 @@ const StudentGraduatedView = () => {
   async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
+
+    let url = `${API_ROUTER.GET_LIST_STUDENTS}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+
     try {
-      const url = `${API_ROUTER.GET_LIST_STUDENTS}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      if (keySearch.length > 0) {
+        url += `&KeySearch=${keySearch}`;
+      }
       const repo = new DegreeRepository<StudentGraduated>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
@@ -637,8 +642,17 @@ const StudentGraduatedView = () => {
     renderTopToolbarCustomActions: () => (
       <Flex justify={"space-between"} w={"100%"}>
         <Flex gap="md">
-          <TextInput placeholder="Nhập từ khóa" />
-          <Button leftSection={<IconSearch size={"15px"} />}>Tìm kiếm</Button>
+          <TextInput
+            placeholder="Nhập từ khóa"
+            value={keySearch}
+            onChange={(e) => setKeySearch(e.currentTarget.value)}
+          />
+          <Button
+            leftSection={<IconSearch size={"15px"} />}
+            onClick={() => fetchData()}
+          >
+            Tìm kiếm
+          </Button>
         </Flex>
         <Flex gap="md">
           <Button

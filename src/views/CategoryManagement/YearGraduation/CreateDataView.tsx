@@ -21,7 +21,7 @@ import { YearPickerInput } from "@mantine/dates";
 const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
     name: null,
-    active: false,
+    active: true,
     description: "",
   };
 

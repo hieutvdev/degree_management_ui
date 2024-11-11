@@ -25,7 +25,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
     id: 0,
     code: null,
     name: null,
-    active: false,
+    active: true,
     duration: null,
     descripion: "",
     level: null,

@@ -25,7 +25,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
     id: id,
     name: null,
     code: null,
-    active: null,
+    active: true,
     description: null,
     facultyId: 0,
   };

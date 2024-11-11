@@ -26,7 +26,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     name: null,
     startDate: null,
     endDate: null,
-    active: false,
+    active: true,
     description: null,
     yearGraduationId: null,
   };
