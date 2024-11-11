@@ -63,7 +63,7 @@ const InWard = () => {
       },
       {
         accessorKey: "code",
-        header: "Mã kho văn bằng",
+        header: "Mã nhập kho",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -78,27 +78,37 @@ const InWard = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "name",
-        header: "Tên kho văn bằng",
+        accessorKey: "warehouseName",
+        header: "Tên kho",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "active",
-        header: "Hoạt động",
-        Cell: ({ row }) => (
+        accessorKey: "status",
+        header: "Trạng thái",
+        Cell: ({ renderedCellValue }) => (
           <Badge
-            color={row.original.active === true ? "green" : "red"}
+            color={
+              renderedCellValue === 1
+                ? "yellow"
+                : renderedCellValue === 2
+                ? "red"
+                : "green"
+            }
             radius={"sm"}
           >
-            {row.original.active === true ? "Đang hoạt động" : "Dừng hoạt động"}
+            {renderedCellValue === 1
+              ? "Chờ duyệt"
+              : renderedCellValue === 2
+              ? "Từ chối"
+              : "Đã duyệt"}
           </Badge>
         ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "description",
+        accessorKey: "note",
         header: "Ghi chú",
         enableColumnActions: false,
         enableColumnFilter: false,
@@ -126,16 +136,6 @@ const InWard = () => {
                 onClick={() => handleDetail(row.original.id)}
               >
                 <IconEye size={20} stroke={1.5} />
-              </ActionIcon>
-            </Tooltip>
-
-            <Tooltip label="Xóa">
-              <ActionIcon
-                variant="light"
-                color="red"
-                onClick={() => handleDelete(row.original.id)}
-              >
-                <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
           </Flex>
@@ -169,7 +169,7 @@ const InWard = () => {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_WAREHOUSE}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
+      const url = `${API_ROUTER.GET_LIST_INWARD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
       const repo = new DegreeRepository<ModelWareHouseQuery>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {

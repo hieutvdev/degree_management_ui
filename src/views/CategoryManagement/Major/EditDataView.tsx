@@ -190,19 +190,6 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
               }
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
-            <Checkbox
-              label={"Sử dụng"}
-              checked={form.getValues().active}
-              {...form.getInputProps("active")}
-              onClick={() =>
-                form.setValues((prev) => ({
-                  ...prev,
-                  active: !form.getValues().active,
-                }))
-              }
-            />
-          </Grid.Col>
         </Grid>
 
         <Group

@@ -156,9 +156,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
               {...form.getInputProps("description")}
             />
           </Grid.Col>
-          <Grid.Col span={12}>
-            <Checkbox label={"Sử dụng"} {...form.getInputProps("active")} />
-          </Grid.Col>
         </Grid>
 
         <Group
