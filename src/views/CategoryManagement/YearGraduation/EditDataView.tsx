@@ -22,7 +22,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
   const entity = {
     id: id,
     name: null,
-    active: false,
+    active: true,
     description: "",
   };
 

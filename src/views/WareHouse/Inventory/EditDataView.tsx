@@ -99,7 +99,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
 
   const callApiGetData = async () => {
     open();
-    const url = `${API_ROUTER.DETAIL_INVENTORY}?id=${id}`;
+    const url = `${API_ROUTER.GET_DETAIL_INVENTORY}?id=${id}`;
     const repo = new DegreeRepository<ModelInventoryQuery>();
     const dataApi = await repo.get(url);
 
@@ -281,7 +281,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
               onClick={() =>
                 form.setValues((prev) => ({
                   ...prev,
-                  active: !form.getValues().status,
+                  status: !form.getValues().status,
                 }))
               }
             />

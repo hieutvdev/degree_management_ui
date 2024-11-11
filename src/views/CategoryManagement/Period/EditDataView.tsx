@@ -27,7 +27,7 @@ const EditDataView = ({ id, onClose }: EditDataViewProps) => {
     name: null,
     startDate: null,
     endDate: null,
-    active: false,
+    active: true,
     description: null,
     yearGraduationId: null,
   };
