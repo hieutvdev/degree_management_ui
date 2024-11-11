@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import {
+  IconBook,
   IconCaretDown,
   IconDownload,
   IconEdit,
@@ -44,6 +45,7 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { notifications } from "@mantine/notifications";
 import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
+import IssueIdentification from "./IssueIdentification";
 
 const StudentGraduatedView = () => {
   //data and fetching state
@@ -60,6 +62,7 @@ const StudentGraduatedView = () => {
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
+  console.log(selectIds);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
@@ -71,6 +74,22 @@ const StudentGraduatedView = () => {
         enableColumnFilter: false,
         size: 1,
         Cell: ({ row }) => Number(row.index) + 1,
+      },
+      {
+        accessorKey: "studentCode",
+        header: "Mã sinh viên",
+        Cell: ({ renderedCellValue }) => (
+          <Badge
+            radius="sm"
+            variant="dot"
+            size="lg"
+            color={renderedCellValue === null ? "red" : "green"}
+          >
+            {renderedCellValue}
+          </Badge>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
       },
       {
         accessorKey: "fullName",
@@ -107,8 +126,20 @@ const StudentGraduatedView = () => {
         enableColumnFilter: false,
       },
       {
+        accessorKey: "birthPlace",
+        header: "Nơi sinh",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
         accessorKey: "contactEmail",
         header: "Email",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "className",
+        header: "Lớp",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -122,14 +153,32 @@ const StudentGraduatedView = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "majorName",
-        header: "Ngành học",
+        accessorKey: "cohort",
+        header: "Khóa tốt nghiệp",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "gpa",
-        header: "GPA",
+        accessorKey: "periodName",
+        header: "Đợt tốt nghiệp",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "specializationName",
+        header: "Chuyên ngành",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "gpA4",
+        header: "GPA (thang điểm 4)",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "gpA10",
+        header: "GPA (thang điểm 10)",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -141,6 +190,28 @@ const StudentGraduatedView = () => {
         ),
         enableColumnActions: false,
         enableColumnFilter: false,
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        Cell: ({ renderedCellValue }) => (
+          <Badge
+            color={
+              renderedCellValue === 0
+                ? "red"
+                : renderedCellValue === 1
+                ? "yellow"
+                : "green"
+            }
+            radius={"sm"}
+          >
+            {renderedCellValue === 0
+              ? "Chưa cấp văn bằng"
+              : renderedCellValue === 1
+              ? "Đang cấp văn bằng"
+              : "Đã cấp văn bằng"}
+          </Badge>
+        ),
       },
       {
         accessorKey: "action",
@@ -234,7 +305,7 @@ const StudentGraduatedView = () => {
             "gender",
             "graduationYear",
             "specializationId",
-            "preiodId",
+            "periodId",
             "birthPlace",
             "className",
             "cohort",
@@ -254,12 +325,12 @@ const StudentGraduatedView = () => {
           gender: item.gender,
           graduationYear: new Date(item.graduationYear)?.toISOString(),
           specializationId: item.specializationId,
-          preiodId: item.periodId,
+          periodId: item.periodId,
           birthPlace: item.birthPlace,
           className: item.className,
           cohort: item.cohort?.toString(),
           status: item.status,
-          gpA10: item.gpa10,
+          gpA10: item.gpA10,
           gpA4: item.gpA4,
           honors: item.honors,
           contactEmail: item.contactEmail,
@@ -373,6 +444,7 @@ const StudentGraduatedView = () => {
       if (dataReview.length > 0) {
         const response = await repo.post(url, { students: dataReview });
         if (response?.isSuccess) {
+          setDeleteViewStatus(!deleteViewStatus);
           notifications.show({
             color: "green",
             message: "Tạo mới thành công!",
@@ -431,6 +503,21 @@ const StudentGraduatedView = () => {
     });
   };
 
+  const handleIssueIdentification = (selectIds: string[]) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xuất số hiệu</Title>,
+      size: "auto",
+      children: (
+        <IssueIdentification
+          onClose={setDeleteViewStatus}
+          selectIds={selectIds}
+        />
+      ),
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
   // useHotkeys([
   //   [
   //     "F11",
@@ -439,6 +526,16 @@ const StudentGraduatedView = () => {
   //     },
   //   ],
   // ]);
+
+  useEffect(() => {
+    const valuesList = Object.keys(rowSelection);
+    setSelectIds(valuesList);
+    if (valuesList.length < 1) setSelectIds([]);
+    else {
+      const valuesList = Object.keys(rowSelection);
+      setSelectIds(valuesList);
+    }
+  }, [rowSelection]);
 
   useEffect(() => {
     fetchData();
@@ -482,7 +579,6 @@ const StudentGraduatedView = () => {
         </Flex>
       </>
     ),
-    enableRowSelection: true,
     initialState: {
       columnPinning: {
         left: ["mrt-row-select", "groupCode"],
@@ -551,6 +647,12 @@ const StudentGraduatedView = () => {
           >
             Thêm mới
           </Button>
+          <Button
+            leftSection={<IconBook size={"15px"} />}
+            onClick={() => handleIssueIdentification(selectIds)}
+          >
+            Xuất số hiệu
+          </Button>
           <Menu shadow="md" width={200}>
             <Menu.Target>
               <Button
@@ -582,6 +684,7 @@ const StudentGraduatedView = () => {
       </Flex>
     ),
     renderToolbarInternalActions: () => <></>,
+    enableRowSelection: true,
     mantineTopToolbarProps: {
       style: {
         borderBottom: "3px solid rgba(128, 128, 128, 0.5)",
@@ -592,7 +695,7 @@ const StudentGraduatedView = () => {
     initialState: {
       showColumnFilters: false,
       columnPinning: {
-        left: ["mrt-row-select", "index", "fullName"],
+        left: ["mrt-row-select", "index", "studentCode"],
         right: ["action"],
       },
       columnVisibility: { id: false },

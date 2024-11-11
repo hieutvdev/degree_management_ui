@@ -39,6 +39,7 @@ export const API_ROUTER = {
   DELETE_DEGREE: "/Degree/delete",
   DETAIL_DEGREE: "/Degree/get-detail",
   GET_SELECT_DEGREE: "/Degree/get-select",
+  ISSUE_IDENTIFICATION: "/Degree/issue-identification-num",
 
   //WareHouse
   GET_LIST_WAREHOUSE: "/Warehouse/get-list",
@@ -76,4 +77,11 @@ export const API_ROUTER = {
   DELETE_SPECIALIZATION: "/Specialization/delete",
   GET_DETAIL_SPECIALIZATION: "/Specialization/get-detail",
   GET_SELECT_SPECIALIZATION: "/Specialization/get-select",
+
+  //Inward
+  GET_CREATE_INWARD: "/Inward/create-inward-request",
+  CREATE_INWARD: "/Inward/create-inward-request",
+  GET_DETAIL_INWARD: "/Inward/detail-inward-request",
+  UPDATE_INWARD: "/Inward/update-inward-request",
+  APPROVE_INWARD: "/Inward/approve_inward_request",
 };

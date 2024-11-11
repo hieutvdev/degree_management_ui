@@ -15,6 +15,7 @@ import DegreeType from "../views/Degree/DegreeType/DegreeType";
 import YearGraduation from "../views/CategoryManagement/YearGraduation/YearGraduation";
 import Period from "../views/CategoryManagement/Period/Period";
 import Specialization from "../views/CategoryManagement/Specialization/Specialization";
+import Inward from "../views/WareHouse/InWard/Inward";
 
 const routerConfig = [
   { path: "/", component: Home, layout: AdminLayout },
@@ -35,6 +36,7 @@ const routerConfig = [
     layout: AdminLayout,
   },
   { path: "/warehouse", component: WareHouse, layout: AdminLayout },
+  { path: "/inward", component: Inward, layout: AdminLayout },
   { path: "/inventory", component: Inventory, layout: AdminLayout },
   { path: "/register", component: Register, layout: DefaulLayout },
   { path: "/login", component: Login, layout: DefaulLayout },

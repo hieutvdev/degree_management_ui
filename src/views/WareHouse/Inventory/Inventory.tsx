@@ -72,8 +72,8 @@ const Inventory = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "degreeId",
-        header: "Văn bằng",
+        accessorKey: "warehouseCode",
+        header: "Mã kho",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -82,11 +82,7 @@ const Inventory = () => {
             color={renderedCellValue === null ? "red" : "green"}
             w={175}
           >
-            {getValueById(
-              renderedCellValue?.toString() ?? "",
-              dataDegreeSelect,
-              "label"
-            )}
+            {renderedCellValue}
           </Badge>
         ),
         size: 175,
@@ -94,25 +90,14 @@ const Inventory = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "issueDate",
-        header: "Ngày cấp văn bằng",
-        Cell: ({ renderedCellValue }: any) => (
-          <Text size="12.5px" fw={"500"}>
-            {renderedCellValue && formatDateTransfer(renderedCellValue)}
-          </Text>
-        ),
+        accessorKey: "warehouseName",
+        header: "Tên kho",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "quantity",
-        header: "Số lượng",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "warehouseId",
-        header: "Kho văn bằng",
+        accessorKey: "degreeTypeCode",
+        header: "Mã loại văn bằng",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -120,11 +105,7 @@ const Inventory = () => {
             size="lg"
             color={renderedCellValue === null ? "red" : "green"}
           >
-            {getValueById(
-              renderedCellValue?.toString() ?? "",
-              dataWareHouseSelect,
-              "label"
-            )}
+            {renderedCellValue}
           </Badge>
         ),
         size: 200,
@@ -132,16 +113,14 @@ const Inventory = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "status",
-        header: "Hoạt động",
-        Cell: ({ row }) => (
-          <Badge
-            color={row.original.status === true ? "green" : "red"}
-            radius={"sm"}
-          >
-            {row.original.status === true ? "Đang hoạt động" : "Dừng hoạt động"}
-          </Badge>
-        ),
+        accessorKey: "degreeTypeName",
+        header: "Loại văn bằng",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "quantity",
+        header: "Số lượng",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -298,7 +277,7 @@ const Inventory = () => {
 
   const handleDetail = (id: string | number) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Chi tiết kho lưu tồn văn bằng</Title>,
+      title: <Title order={5}>Chi tiết phôi văn bằng</Title>,
       size: "auto",
       children: <DetailDataView id={id} />,
       confirmProps: { display: "none" },
@@ -370,10 +349,6 @@ const Inventory = () => {
     getRowId: (row) => row.id?.toString(),
     initialState: {
       showColumnFilters: false,
-      columnPinning: {
-        left: ["mrt-row-select", "stt", "warehouseId"],
-        right: ["degreeId", "action"],
-      },
       columnVisibility: { id: false },
       density: "xs",
     },

@@ -1,14 +1,13 @@
 import {
   Box,
   Button,
-  Checkbox,
   ComboboxItem,
   Grid,
   Group,
   LoadingOverlay,
   NumberInput,
   Select,
-  Textarea,
+  TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
@@ -17,14 +16,13 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { modals } from "@mantine/modals";
 import { IconWindow } from "@tabler/icons-react";
-import { DateTimePicker } from "@mantine/dates";
 import { notifications } from "@mantine/notifications";
 import { ModelInventoryQuery } from "../../../interfaces/Inventory";
 
 const DetailDataView = ({ id }: DetailDataViewProps) => {
   const entity = {
     id: id,
-    degreeId: null,
+    degreeTypeId: null,
     warehouseId: null,
     quantity: null,
     issueDate: null,
@@ -39,46 +37,17 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
 
   const [visible, { toggle, close, open }] = useDisclosure(false);
 
-  const form = useForm<ModelInventoryQuery>({
+  const form = useForm<any>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       ...entity,
     },
-
-    transformValues: (values) => ({
-      ...values,
-      degreeId: Number(values.degreeId),
-      warehouseId: Number(values.warehouseId),
-    }),
-
-    validate: {
-      degreeId: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng nhập văn bằng !";
-        }
-      },
-      warehouseId: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng nhập kho !";
-        }
-      },
-      quantity: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng nhập số lượng !";
-        }
-      },
-      issueDate: (value: string | null) => {
-        if (!value) {
-          return "Vui lòng nhập ngày cấp văn bằng !";
-        }
-      },
-    },
   });
 
   const callApiGetData = async () => {
     open();
-    const url = `${API_ROUTER.DETAIL_INVENTORY}?id=${id}`;
+    const url = `${API_ROUTER.GET_DETAIL_INVENTORY}?id=${id}`;
     const repo = new DegreeRepository<ModelInventoryQuery>();
     const dataApi = await repo.get(url);
 
@@ -100,7 +69,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
   };
 
   const getSelectDegree = async () => {
-    const url = `${API_ROUTER.GET_SELECT_DEGREE}`;
+    const url = `${API_ROUTER.GET_SELECT_DEGREETYPE}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.get(url);
 
@@ -162,13 +131,14 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
               placeholder="Chọn văn bằng"
               data={dataDegreeSelect}
               value={
-                form.getValues().degreeId
-                  ? form.getValues().degreeId?.toString()
+                form.getValues().degreeTypeId
+                  ? form.getValues().degreeTypeId?.toString()
                   : null
               }
               searchable
               clearable
               readOnly
+              variant="filled"
               nothingFoundMessage="Không tìm thấy văn bằng !"
               {...form.getInputProps("degreeId")}
             />
@@ -186,46 +156,28 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
               searchable
               clearable
               readOnly
+              variant="filled"
               nothingFoundMessage={"Không tìm thấy kho văn bằng !"}
               {...form.getInputProps("warehouseId")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
+          <Grid.Col span={{ base: 12, md: 12, lg: 3.5 }}>
             <NumberInput
               label="Số lượng"
               placeholder="Nhập số lượng"
               value={form.getValues().quantity}
               readOnly
+              variant="filled"
               hideControls
               {...form.getInputProps("quantity")}
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-            <DateTimePicker
-              label="Ngày cấp văn bằng"
-              placeholder="Nhập ngày cấp văn bằng"
-              value={
-                form.getValues().issueDate
-                  ? new Date(form.getValues().issueDate ?? "")
-                  : null
-              }
-              readOnly
-              {...form.getInputProps("issueDate")}
-            />
-          </Grid.Col>
-          <Grid.Col span={12}>
-            <Textarea
+          <Grid.Col span={{ base: 12, md: 12, lg: 8.5 }}>
+            <TextInput
               label="Ghi chú"
               placeholder="Nhập ghi chú"
               readOnly
               {...form.getInputProps("description")}
-            />
-          </Grid.Col>
-          <Grid.Col span={12}>
-            <Checkbox
-              label="Sử dụng"
-              checked={form.getValues().status}
-              {...form.getInputProps("status")}
             />
           </Grid.Col>
         </Grid>
