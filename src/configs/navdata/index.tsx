@@ -69,5 +69,9 @@ export const router = [
     label: "Quản trị",
     icon: IconUserCog,
     initiallyOpened: true,
+    links: [
+      { label: "Chức danh", link: "/role" },
+      { label: "Người dùng", link: "/users" },
+    ],
   },
 ];

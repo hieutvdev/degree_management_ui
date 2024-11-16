@@ -1,8 +1,7 @@
-import { Flex, Box, ScrollArea, rem } from "@mantine/core";
+import { Flex, Box, Text, rem, Avatar, Menu } from "@mantine/core";
 import NavbarNested from "./navbar";
 import { useState } from "react";
-import { IconMenu2, IconX } from "@tabler/icons-react";
-import { transitions } from "@mantine/core/lib/components/Transition/transitions";
+import { IconBellRinging, IconMenu2 } from "@tabler/icons-react";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [openMenu, setOpenMenu] = useState<boolean>(false);
@@ -35,7 +34,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         <Flex
-          justify={"flex-start"}
+          justify={"space-between"}
           h={"50px"}
           style={{
             borderBottom: "1px solid #f0f0f0",
@@ -44,7 +43,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           align={"center"}
         >
           {openMenu ? (
-            <></>
+            <Box></Box>
           ) : (
             <IconMenu2
               style={{
@@ -54,6 +53,18 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               onClick={() => setOpenMenu(!openMenu)}
             />
           )}
+          <Menu>
+            <Menu.Target>
+              <Avatar color="cyan" radius="xl" style={{ cursor: "pointer" }}>
+                <IconBellRinging />
+              </Avatar>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Flex align={"center"} justify={"center"}>
+                <Text>Không có thông báo !</Text>
+              </Flex>
+            </Menu.Dropdown>
+          </Menu>
         </Flex>
         <Box p={10}>{children}</Box>
       </Box>

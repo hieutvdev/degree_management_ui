@@ -16,6 +16,8 @@ import YearGraduation from "../views/CategoryManagement/YearGraduation/YearGradu
 import Period from "../views/CategoryManagement/Period/Period";
 import Specialization from "../views/CategoryManagement/Specialization/Specialization";
 import Inward from "../views/WareHouse/InWard/Inward";
+import Role from "../views/Administrator/Role/Role";
+import User from "../views/Administrator/User/User";
 
 const routerConfig = [
   { path: "/", component: Home, layout: AdminLayout },
@@ -38,6 +40,8 @@ const routerConfig = [
   { path: "/warehouse", component: WareHouse, layout: AdminLayout },
   { path: "/inward", component: Inward, layout: AdminLayout },
   { path: "/inventory", component: Inventory, layout: AdminLayout },
+  { path: "/role", component: Role, layout: AdminLayout },
+  { path: "/users", component: User, layout: AdminLayout },
   { path: "/register", component: Register, layout: DefaulLayout },
   { path: "/login", component: Login, layout: DefaulLayout },
 ];
