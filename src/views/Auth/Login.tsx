@@ -36,7 +36,7 @@ export default function Login() {
       if (response && response.token) {
         Notifications.show({
           title: "Success",
-          message: "Resgiter successfully",
+          message: "Đăng nhập thành công !",
           color: "green",
         });
         navigate("/");

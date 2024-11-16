@@ -8,6 +8,8 @@ import {
   Title,
   Text,
   ComboboxItem,
+  Menu,
+  Box,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -17,12 +19,16 @@ import {
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
 import {
+  IconCheck,
   IconDownload,
   IconEdit,
   IconEye,
   IconPlus,
   IconSearch,
+  IconStatusChange,
+  IconTransferIn,
   IconTrash,
+  IconX,
 } from "@tabler/icons-react";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
@@ -34,6 +40,7 @@ import DeleteView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
 import { ModelWareHouseQuery } from "../../../interfaces/WareHouse";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import { notifications } from "@mantine/notifications";
 
 const InWard = () => {
   //data and fetching state
@@ -128,7 +135,37 @@ const InWard = () => {
                   <IconEdit size={20} stroke={1.5} />
                 </ActionIcon>
               </Tooltip> */}
-
+            <Menu>
+              <Menu.Target>
+                <ActionIcon
+                  variant="light"
+                  color="teal"
+                  disabled={row.original.status !== 1}
+                >
+                  <IconStatusChange size={20} stroke={1.5} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Flex direction={"column"} gap={"xs"}>
+                  <Button
+                    variant="outline"
+                    leftSection={<IconCheck size={"14px"} />}
+                    color="teal"
+                    onClick={() => modalApprove(true, row.original.id)}
+                  >
+                    Duyệt
+                  </Button>
+                  <Button
+                    variant="outline"
+                    leftSection={<IconX size={"14px"} />}
+                    color="red"
+                    onClick={() => modalApprove(false, row.original.id)}
+                  >
+                    Từ chối
+                  </Button>
+                </Flex>
+              </Menu.Dropdown>
+            </Menu>
             <Tooltip label="Chi tiết">
               <ActionIcon
                 variant="light"
@@ -191,6 +228,24 @@ const InWard = () => {
     }
   }
 
+  const handleApprove = async (isApproved: boolean, id: number | string) => {
+    const url = `${API_ROUTER.APPROVE_INWARD}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.post(url, {
+      stockInInvId: id,
+      isApproved: isApproved,
+    });
+
+    if (dataApi && dataApi?.isSuccess) {
+      notifications.show({
+        color: "green",
+        message: "Xác nhận trạng thái thành công !",
+      });
+      modals.closeAll();
+      setDeleteViewStatus(!deleteViewStatus);
+    }
+  };
+
   const handleCreate = () => {
     modals.openConfirmModal({
       title: <Title order={5}>Nhập kho văn bằng</Title>,
@@ -231,6 +286,33 @@ const InWard = () => {
     });
   };
 
+  const modalApprove = (isApproved: boolean, id: number | null) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xác nhận nhập kho</Title>,
+      size: "auto",
+      children: (
+        <Box mt={15}>
+          <Text fw={500} size="20px">
+            {isApproved
+              ? "Bạn có chắc muốn duyệt lần nhập kho này ?"
+              : "Bạn có chắc muốn từ chối lần nhập kho này ?"}
+          </Text>
+          <Flex justify={"end"} mt={15}>
+            <Button
+              variant="outline"
+              leftSection={<IconCheck size={"14px"} />}
+              onClick={() => handleApprove(isApproved, Number(id))}
+            >
+              Xác nhận
+            </Button>
+          </Flex>
+        </Box>
+      ),
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
   useEffect(() => {
     fetchData();
   }, [deleteViewStatus]);
@@ -261,10 +343,10 @@ const InWard = () => {
         </Flex>
         <Flex gap="md">
           <Button
-            leftSection={<IconPlus size={"15px"} />}
+            leftSection={<IconTransferIn size={"15px"} />}
             onClick={() => handleCreate()}
           >
-            Thêm mới
+            Nhập kho
           </Button>
           <Button
             onClick={handleExportData}

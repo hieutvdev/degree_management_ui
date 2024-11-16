@@ -84,5 +84,15 @@ export const API_ROUTER = {
   CREATE_INWARD: "/Inward/create-inward-request",
   GET_DETAIL_INWARD: "/Inward/detail-inward-request",
   UPDATE_INWARD: "/Inward/update-inward-request",
-  APPROVE_INWARD: "/Inward/approve_inward_request",
+  APPROVE_INWARD: "/Inward/approve-inward-request",
+
+  //Role
+  GET_LIST_ROLE: "/roles/get-list",
+  CREATE_ROLE: "/roles/create",
+  UPDATE_ROLE: "/roles/update",
+  GET_DETAIL_ROLE: "/roles/detail",
+  ASSIGN_ROLE: "/roles/assign-role",
+
+  //User
+  GET_LIST_USER: "/users/get-all",
 };
