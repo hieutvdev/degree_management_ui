@@ -18,6 +18,8 @@ import Specialization from "../views/CategoryManagement/Specialization/Specializ
 import Inward from "../views/WareHouse/InWard/Inward";
 import Role from "../views/Administrator/Role/Role";
 import User from "../views/Administrator/User/User";
+import IssueDiplomas from "../views/Degree/IssueDiplomas/IssueDiplomas";
+import DiplomaNumber from "../views/Degree/IssueDiplomas/DiplomaNumber";
 
 const routerConfig = [
   { path: "/", component: Home, layout: AdminLayout },
@@ -27,6 +29,8 @@ const routerConfig = [
   { path: "/period", component: Period, layout: AdminLayout },
   { path: "/year-graduation", component: YearGraduation, layout: AdminLayout },
   { path: "/degree-type", component: DegreeType, layout: AdminLayout },
+  { path: "/issue-diplomas", component: IssueDiplomas, layout: AdminLayout },
+  { path: "/diploma-number", component: DiplomaNumber, layout: DefaulLayout },
   {
     path: "/student-graduated",
     component: StudentGraduatedView,
