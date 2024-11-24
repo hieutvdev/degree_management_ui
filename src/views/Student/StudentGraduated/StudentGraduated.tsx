@@ -46,7 +46,11 @@ import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
 import IssueIdentification from "./IssueIdentification";
 
-const StudentGraduatedView = () => {
+const StudentGraduatedView = ({
+  isDiplomaNumber,
+}: {
+  isDiplomaNumber: any;
+}) => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
@@ -217,9 +221,10 @@ const StudentGraduatedView = () => {
         accessorKey: "action",
         header: "Thao tác",
         size: 10,
-        Cell: ({ row }) => (
-          <Flex gap={"md"} align={"center"}>
-            {/* <Tooltip label="Chỉnh sửa">
+        Cell: ({ row }) =>
+          !isDiplomaNumber ? (
+            <Flex gap={"md"} align={"center"}>
+              {/* <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 onClick={() => handleEdit(row.original.id)}
                 variant="light"
@@ -229,6 +234,27 @@ const StudentGraduatedView = () => {
               </ActionIcon>
             </Tooltip> */}
 
+              <Tooltip label="Chi tiết">
+                <ActionIcon
+                  onClick={() => handleDetail(row.original.id)}
+                  variant="light"
+                  color="cyan"
+                >
+                  <IconEye size={20} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
+
+              <Tooltip label="Xóa">
+                <ActionIcon
+                  onClick={() => handleDelete(row.original.id)}
+                  variant="light"
+                  color="red"
+                >
+                  <IconTrash size={20} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
+            </Flex>
+          ) : (
             <Tooltip label="Chi tiết">
               <ActionIcon
                 onClick={() => handleDetail(row.original.id)}
@@ -238,18 +264,7 @@ const StudentGraduatedView = () => {
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
-
-            <Tooltip label="Xóa">
-              <ActionIcon
-                onClick={() => handleDelete(row.original.id)}
-                variant="light"
-                color="red"
-              >
-                <IconTrash size={20} stroke={1.5} />
-              </ActionIcon>
-            </Tooltip>
-          </Flex>
-        ),
+          ),
         enableSorting: false,
         enableColumnActions: false,
         enableColumnFilter: false,
@@ -549,7 +564,9 @@ const StudentGraduatedView = () => {
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
     const handleResize = () => {
-      setHeight(window.innerHeight - (190 + headerHeight));
+      !isDiplomaNumber
+        ? setHeight(window.innerHeight - (190 + headerHeight))
+        : setHeight(window.innerHeight - (300 + headerHeight));
     };
 
     handleResize();
@@ -558,7 +575,7 @@ const StudentGraduatedView = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [height]);
 
   const tableReview = useMantineReactTable({
     columns,
@@ -661,12 +678,12 @@ const StudentGraduatedView = () => {
           >
             Thêm mới
           </Button>
-          <Button
+          {/* <Button
             leftSection={<IconBook size={"15px"} />}
             onClick={() => handleIssueIdentification(selectIds)}
           >
             Xuất số hiệu
-          </Button>
+          </Button> */}
           <Menu shadow="md" width={200}>
             <Menu.Target>
               <Button
@@ -698,6 +715,7 @@ const StudentGraduatedView = () => {
       </Flex>
     ),
     renderToolbarInternalActions: () => <></>,
+    enableTopToolbar: !isDiplomaNumber,
     enableRowSelection: true,
     mantineTopToolbarProps: {
       style: {
