@@ -21,6 +21,7 @@ import {
   IconEdit,
   IconEye,
   IconPlus,
+  IconPrinter,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
@@ -35,6 +36,7 @@ import DetailDataView from "./DetailDataView";
 import { ModelDegreeManagementQuery } from "../../../interfaces/DegreeManagement";
 import { getValueById } from "../../../helpers/FunctionHelper";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import { API_URL } from "../../../constants/api";
 
 const DegreeManagement = () => {
   //data and fetching state
@@ -191,6 +193,16 @@ const DegreeManagement = () => {
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
+
+            <Tooltip label="In Văn bằng">
+              <ActionIcon
+                variant="light"
+                color="blue"
+                onClick={async () => handlePrintFileDegree()}
+              >
+                <IconPrinter size={20} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
           </Flex>
         ),
         enableSorting: false,
@@ -332,6 +344,44 @@ const DegreeManagement = () => {
     });
   };
 
+  const handlePrintFileDegree = async () => {
+    try {
+      const payload = {
+        degreeType: "CN",
+        studentName: "TRINH VAN HIEU",
+        birthDay: "26/11/2003",
+        rank: "Good",
+        serialNumber: "124124NBBB",
+        referenceNumber: "124124NBBB",
+      };
+      const res = await fetch(`${API_URL}${API_ROUTER.DOWN_LOAD_DEGREE}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${payload.studentName}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        console.log("Print file degree success");
+      } else {
+        const data = await res.json();
+        console.error("Error print file degree:", data.message);
+      }
+    } catch (error) {
+      console.error("Error print file degree:", error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [deleteViewStatus]);
@@ -446,3 +496,6 @@ const DegreeManagement = () => {
 };
 
 export default DegreeManagement;
+function saveAs(blob: Blob, arg1: string) {
+  throw new Error("Function not implemented.");
+}

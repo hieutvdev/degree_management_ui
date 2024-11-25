@@ -9,7 +9,7 @@ import {
 } from "@mantine/core";
 import { IconCalendarStats, IconChevronRight } from "@tabler/icons-react";
 import classes from "./style/NavbarLinksGroup.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 
 interface LinksGroupProps {
@@ -25,6 +25,7 @@ export function LinksGroup({
   initiallyOpened,
   links,
 }: LinksGroupProps) {
+  const navigation = useNavigate();
   const hasLinks = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
   const items = (hasLinks ? links : []).map((link) => (
@@ -49,7 +50,16 @@ export function LinksGroup({
             <ThemeIcon variant="light" size={30} color="#F27423">
               <Icon style={{ width: rem(18), height: rem(18) }} />
             </ThemeIcon>
-            <Box ml="md">{label}</Box>
+            <Box
+              ml="md"
+              onClick={() => {
+                if (label === "Trang chủ") {
+                  navigation("/");
+                }
+              }}
+            >
+              {label}
+            </Box>
           </Box>
           {hasLinks && (
             <IconChevronRight

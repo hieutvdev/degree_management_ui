@@ -31,7 +31,11 @@ export function NavbarNested({ currentState, toggleState }: NavbarNestedProps) {
       <div className={classes.header}>
         <Flex justify={"space-between"} align={"center"}>
           <Group p={10} justify="center">
-            <img src={logo} style={{ width: rem(50) }} />
+            <img
+              onClick={() => navigation("/")}
+              src={logo}
+              style={{ width: rem(50), cursor: "pointer" }}
+            />
           </Group>
           {currentState ? (
             <IconX

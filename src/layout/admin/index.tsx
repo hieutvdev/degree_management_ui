@@ -1,10 +1,14 @@
 import { Flex, Box, Text, rem, Avatar, Menu } from "@mantine/core";
 import NavbarNested from "./navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconBellRinging, IconMenu2 } from "@tabler/icons-react";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [openMenu, setOpenMenu] = useState<boolean>(false);
+  const [user, setUser] = useState<any>({});
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem("user") || "{}"));
+  });
   return (
     <Flex
       w={"100%"}
@@ -53,19 +57,46 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               onClick={() => setOpenMenu(!openMenu)}
             />
           )}
-          <Menu>
-            <Menu.Target>
-              <Avatar color="cyan" radius="xl" style={{ cursor: "pointer" }}>
-                <IconBellRinging />
-              </Avatar>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Flex align={"center"} justify={"center"}>
-                <Text>Không có thông báo !</Text>
-              </Flex>
-            </Menu.Dropdown>
-          </Menu>
+          <Flex gap={"10px"}>
+            <Menu>
+              <Menu.Target>
+                <Avatar color="cyan" radius="xl" style={{ cursor: "pointer" }}>
+                  <IconBellRinging />
+                </Avatar>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Flex align={"center"} justify={"center"}>
+                  <Text>Không có thông báo !</Text>
+                </Flex>
+              </Menu.Dropdown>
+            </Menu>
+            <Menu>
+              <Menu.Target>
+                <Avatar
+                  key={user.fullName}
+                  name={user.fullName}
+                  color="initials"
+                  radius="xl"
+                >
+                  {user.fullName?.toString().slice(0, 2).toUpperCase()}
+                </Avatar>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item>
+                  <Text size="12.5px" c="#f27423">
+                    {user.fullName}
+                  </Text>
+                </Menu.Item>
+                <Menu.Item>
+                  <Text size="12.5px" c="#f27423">
+                    {user.userName}
+                  </Text>
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Flex>
         </Flex>
+
         <Box p={10}>{children}</Box>
       </Box>
     </Flex>

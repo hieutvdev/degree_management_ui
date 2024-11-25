@@ -6,12 +6,14 @@ import {
   IconBuildingWarehouse,
   IconUserCog,
 } from "@tabler/icons-react";
+import { link } from "fs";
 
 export const router = [
   {
     label: "Trang chủ",
     icon: IconHome,
     initiallyOpened: true,
+    link: "/",
   },
   {
     label: "Quản lý danh mục",

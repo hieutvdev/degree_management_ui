@@ -95,4 +95,13 @@ export const API_ROUTER = {
 
   //User
   GET_LIST_USER: "/users/get-all",
+  BAN_USER: "/users/ban-user",
+  ACTIVE_USER: "/users/change-status",
+  GET_DETAIL_USER: "/users/",
+
+  // Role
+  GET_SELECT_ROLE: "/roles/get-select",
+
+  // GEN FILE
+  DOWN_LOAD_DEGREE: "/Pdf/generate-image",
 };

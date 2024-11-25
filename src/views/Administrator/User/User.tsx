@@ -6,6 +6,9 @@ import {
   Title,
   Avatar,
   Badge,
+  Tooltip,
+  ActionIcon,
+  Notification,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -14,12 +17,25 @@ import {
   useMantineReactTable,
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
-import { IconSearch } from "@tabler/icons-react";
+import {
+  IconEdit,
+  IconEye,
+  IconHandClick,
+  IconHandOff,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+  IconUserCheck,
+} from "@tabler/icons-react";
 import { modals } from "@mantine/modals";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { mkConfig } from "export-to-csv";
+import { stat } from "fs";
+import { API_URL } from "../../../constants/api";
+import { Notifications } from "@mantine/notifications";
+import AssignRole from "./AssignRole";
 
 const User = () => {
   //data and fetching state
@@ -35,10 +51,121 @@ const User = () => {
   //table state
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
+
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
   //keySearch
   const [keySearch, setKeySearch] = useState("");
 
+  const handleAssignRole = async (userId: string) => {
+    modals.openConfirmModal({
+      title: (
+        <>
+          <Title order={5}>Gán quyền cho người dùng</Title>
+        </>
+      ),
+      size: "auto",
+      children: <AssignRole userId={userId} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleActiveUser = async (userId: string) => {
+    modals.openConfirmModal({
+      title: (
+        <>
+          <Title order={5}>
+            Bạn có chắc chắn muốn phê duyệt tài khoản này ?
+          </Title>
+        </>
+      ),
+      confirmProps: {
+        onClick: async () => {
+          try {
+            const res = await fetch(`${API_URL}${API_ROUTER.ACTIVE_USER}`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id: userId }),
+            });
+            var data = await res.json();
+            console.log(data);
+
+            if (data.isSuccess) {
+              await fetchData();
+              Notifications.show({
+                title: "Thành công",
+                message: "Thay đổi trạng thái người dùng thành công",
+                color: "green",
+              });
+            } else {
+              Notifications.show({
+                title: "Lỗi",
+                message: "Có lỗi xảy ra khi thay đổi trạng thái người dùng",
+                color: "red",
+              });
+            }
+          } catch (error) {
+            Notifications.show({
+              title: "Lỗi",
+              message: "Có lỗi xảy ra khi thay đổi trạng thái người dùng",
+              color: "red",
+            });
+          }
+        },
+        content: "Xác nhận",
+      },
+    });
+  };
+
+  const handleBanUser = async (userId: string) => {
+    modals.openConfirmModal({
+      title: (
+        <>
+          <Title order={5}>Bạn có chắc chắn muốn khóa tài khoản này ?</Title>
+        </>
+      ),
+      confirmProps: {
+        onClick: async () => {
+          try {
+            const res = await fetch(`${API_URL}${API_ROUTER.BAN_USER}`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id: userId }),
+            });
+            var data = await res.json();
+            console.log(data);
+
+            if (data.isSuccess) {
+              await fetchData();
+              Notifications.show({
+                title: "Thành công",
+                message: "Thay đổi trạng thái người dùng thành công",
+                color: "green",
+              });
+            } else {
+              Notifications.show({
+                title: "Lỗi",
+                message: "Có lỗi xảy ra khi thay đổi trạng thái người dùng",
+                color: "red",
+              });
+            }
+          } catch (error) {
+            Notifications.show({
+              title: "Lỗi",
+              message: "Có lỗi xảy ra khi thay đổi trạng thái người dùng",
+              color: "red",
+            });
+          }
+        },
+        content: "Khóa tài khoản",
+      },
+      cancelProps: { display: "none" },
+    });
+  };
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
@@ -88,12 +215,73 @@ const User = () => {
         header: "Trạng thái",
         Cell: ({ row }) => (
           <Badge
-            color={row.original.status === 0 ? "green" : "red"}
+            color={row.original.status === 2 ? "green" : "red"}
             radius={"sm"}
+            variant="light"
           >
-            {row.original.status === 0 ? "Đang sử dụng" : "Không sử dụng"}
+            {row.original.status === 2
+              ? "Được phép truy cập"
+              : "Không được phép truy cập"}
           </Badge>
         ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "action",
+        header: "Thao tác",
+        size: 10,
+        Cell: ({ row }) => (
+          <Flex gap={"md"} align={"center"}>
+            <Tooltip label="Chấp thuận đăng nhập">
+              <ActionIcon
+                onClick={async () => {
+                  await handleActiveUser(row.original.id);
+                }}
+                variant="light"
+                color="green"
+              >
+                <IconHandClick size={20} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+
+            <Tooltip label="Khóa tài khoản">
+              <ActionIcon
+                onClick={async () => {
+                  await handleBanUser(row.original.id);
+                }}
+                variant="light"
+                color="red"
+              >
+                <IconHandOff size={20} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Gán quyền">
+              <ActionIcon
+                onClick={async () => {
+                  await handleAssignRole(row.original.id);
+                }}
+                variant="light"
+                color="orange"
+              >
+                <IconUserCheck size={20} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+
+            <Tooltip label="Chi tiết">
+              <ActionIcon variant="light" color="cyan">
+                <IconEye size={20} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+
+            <Tooltip label="Xóa">
+              <ActionIcon variant="light" color="red">
+                <IconTrash size={20} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+          </Flex>
+        ),
+        enableSorting: false,
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -257,6 +445,13 @@ const User = () => {
             onClick={() => fetchData()}
           >
             Tìm kiếm
+          </Button>
+        </Flex>
+
+        <Flex>
+          <Button>
+            Thêm mới
+            <IconPlus size={"15px"} />
           </Button>
         </Flex>
       </Flex>
