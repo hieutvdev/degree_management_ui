@@ -4,6 +4,8 @@ import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { useEffect, useState } from "react";
 import { modals } from "@mantine/modals";
+import { YearPickerInput } from "@mantine/dates";
+import dayjs from "dayjs";
 
 const SelectOptionSV = ({
   period,
@@ -17,9 +19,6 @@ const SelectOptionSV = ({
   setYear: any;
 }) => {
   const [dataPeriodSelect, setDataPeriodSelect] = useState<ComboboxItem[]>([]);
-  const [dataYearGraduation, setDataYearGraduation] = useState<ComboboxItem[]>(
-    []
-  );
 
   const getSelectPeriod = async () => {
     const url = `${API_ROUTER.GET_SELECT_PERIOD}`;
@@ -39,31 +38,12 @@ const SelectOptionSV = ({
     }
   };
 
-  const getSelectYearGraduation = async () => {
-    const url = `${API_ROUTER.GET_SELECT_YEAR_GRADUATION}`;
-    const repo = new DegreeRepository<any>();
-    const dataApi = await repo.get(url);
-
-    if (dataApi?.isSuccess) {
-      const result = dataApi?.data;
-      setDataYearGraduation(
-        result
-          ?.filter((item: any) => item.text != null && item.value != null)
-          ?.map((item: any) => ({
-            label: item.text,
-            value: item.value?.toString(),
-          }))
-      );
-    }
-  };
-
   useEffect(() => {
     getSelectPeriod();
-    getSelectYearGraduation();
   }, []);
 
   return (
-    <Box mt={10}>
+    <Box mt={10} w={"30vw"} maw={400}>
       <Grid>
         <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
           <Select
@@ -77,11 +57,16 @@ const SelectOptionSV = ({
           />
         </Grid.Col>
         <Grid.Col span={{ base: 12, md: 12, lg: 6 }}>
-          <Select
+          <YearPickerInput
             label="Năm tốt nghiệp"
-            placeholder="Chọn năm tốt nghiệp"
-            data={dataYearGraduation}
-            onChange={(e) => setYear(e)}
+            placeholder="Năm tốt nghiệp"
+            onChange={(e) =>
+              setYear(
+                e
+                  ? new Date(dayjs(e).add(7, "hour").toDate())?.toISOString()
+                  : ""
+              )
+            }
           />
         </Grid.Col>
       </Grid>
@@ -90,7 +75,6 @@ const SelectOptionSV = ({
           variant="outline"
           leftSection={<IconCheck size={"14px"} />}
           onClick={() => modals.closeAll()}
-          disabled={period || year}
         >
           Xác nhận
         </Button>

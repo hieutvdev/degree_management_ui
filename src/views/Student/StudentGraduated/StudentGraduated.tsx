@@ -2,16 +2,18 @@ import {
   ActionIcon,
   Badge,
   Button,
+  ComboboxItem,
   Flex,
+  Grid,
   Menu,
   rem,
+  Select,
   TextInput,
   Title,
   Tooltip,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import {
-  IconBook,
   IconCaretDown,
   IconDownload,
   IconEye,
@@ -45,15 +47,19 @@ import { notifications } from "@mantine/notifications";
 import * as xlsx from "xlsx";
 import DropZoneFile from "../../../utils/extensions/DropZoneFile";
 import IssueIdentification from "./IssueIdentification";
+import { YearPickerInput } from "@mantine/dates";
+import dayjs from "dayjs";
 
 const StudentGraduatedView = ({
   isDiplomaNumber,
   period,
   year,
+  setStudentIds,
 }: {
   isDiplomaNumber: any;
   period?: any;
   year?: any;
+  setStudentIds?: any;
 }) => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
@@ -70,8 +76,21 @@ const StudentGraduatedView = ({
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
+
+  const [dataPeriodSelect, setDataPeriodSelect] = useState<ComboboxItem[]>([]);
+  const [dataMajorSelect, setDataMajorSelect] = useState<ComboboxItem[]>([]);
+  const [dataDegreeTypeSelect, setDataDegreeTypeSelect] = useState<
+    ComboboxItem[]
+  >([]);
   //keySearch
-  const [keySearch, setKeySearch] = useState("");
+  const [keySearch, setKeySearch] = useState({
+    graduationYear: "",
+    periodId: "",
+    majorId: "",
+    degreeTypeId: "",
+    className: "",
+    keySearch: "",
+  });
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
@@ -205,28 +224,28 @@ const StudentGraduatedView = ({
         enableColumnActions: false,
         enableColumnFilter: false,
       },
-      {
-        accessorKey: "status",
-        header: "Trạng thái",
-        Cell: ({ renderedCellValue }) => (
-          <Badge
-            color={
-              renderedCellValue === 0
-                ? "red"
-                : renderedCellValue === 1
-                ? "yellow"
-                : "green"
-            }
-            radius={"sm"}
-          >
-            {renderedCellValue === 0
-              ? "Chưa cấp văn bằng"
-              : renderedCellValue === 1
-              ? "Đang cấp văn bằng"
-              : "Đã cấp văn bằng"}
-          </Badge>
-        ),
-      },
+      // {
+      //   accessorKey: "status",
+      //   header: "Trạng thái",
+      //   Cell: ({ renderedCellValue }) => (
+      //     <Badge
+      //       color={
+      //         renderedCellValue === 0
+      //           ? "red"
+      //           : renderedCellValue === 1
+      //           ? "yellow"
+      //           : "green"
+      //       }
+      //       radius={"sm"}
+      //     >
+      //       {renderedCellValue === 0
+      //         ? "Chưa cấp văn bằng"
+      //         : renderedCellValue === 1
+      //         ? "Đang cấp văn bằng"
+      //         : "Đã cấp văn bằng"}
+      //     </Badge>
+      //   ),
+      // },
       {
         accessorKey: "action",
         header: "Thao tác",
@@ -439,6 +458,10 @@ const StudentGraduatedView = ({
     }
   };
 
+  const handleChangeSearchValue = (value: string, key: string) => {
+    setKeySearch((prevData) => ({ ...prevData, [key]: value }));
+  };
+
   async function fetchData() {
     setIsLoading(true);
     setIsRefetching(true);
@@ -446,9 +469,38 @@ const StudentGraduatedView = ({
     let url = `${API_ROUTER.GET_LIST_STUDENTS}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
 
     try {
-      if (keySearch.length > 0) {
-        url += `&KeySearch=${keySearch}`;
+      if (keySearch.keySearch.length > 0) {
+        url += `&KeySearch=${keySearch.keySearch}`;
       }
+
+      if (year !== null) {
+        url += `&GraduationYear=${year}`;
+      }
+
+      if (keySearch.graduationYear.length > 0) {
+        url += `&GraduationYear=${keySearch.graduationYear}`;
+      }
+
+      if (period !== null) {
+        url += `&PeriodId=${period}`;
+      }
+
+      if (keySearch.periodId.length > 0) {
+        url += `&PeriodId=${keySearch.periodId}`;
+      }
+
+      if (keySearch.majorId.length > 0) {
+        url += `&MajorId=${keySearch.majorId}`;
+      }
+
+      if (keySearch.degreeTypeId.length > 0) {
+        url += `&DegreeTypeId=${keySearch.degreeTypeId}`;
+      }
+
+      if (keySearch.className.length > 0) {
+        url += `&ClassName=${keySearch.className}`;
+      }
+
       const repo = new DegreeRepository<StudentGraduated>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
@@ -456,6 +508,11 @@ const StudentGraduatedView = ({
         if (result) {
           setData(result.data);
           setRowCount(result?.count ?? 0);
+          Promise.all([
+            getSelectPeriod(),
+            getSelectMajor(),
+            getSelectDegreeType(),
+          ]);
         } else {
           setData([]);
           setRowCount(0);
@@ -494,6 +551,60 @@ const StudentGraduatedView = ({
     } catch (e) {
       console.error(e);
       return;
+    }
+  };
+
+  const getSelectPeriod = async () => {
+    const url = `${API_ROUTER.GET_SELECT_PERIOD}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataPeriodSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  const getSelectMajor = async () => {
+    const url = `${API_ROUTER.GET_SELECT_MAJOR}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataMajorSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  const getSelectDegreeType = async () => {
+    const url = `${API_ROUTER.GET_SELECT_DEGREETYPE}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataDegreeTypeSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
     }
   };
 
@@ -573,7 +684,12 @@ const StudentGraduatedView = ({
 
   useEffect(() => {
     fetchData();
-  }, [deleteViewStatus]);
+  }, [deleteViewStatus, period, year]);
+
+  useEffect(() => {
+    const ids = data.map((item) => item.id);
+    setStudentIds(ids);
+  }, [data]);
 
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
@@ -672,20 +788,94 @@ const StudentGraduatedView = ({
     positionToolbarAlertBanner: "bottom",
     renderTopToolbarCustomActions: () => (
       <Flex justify={"space-between"} w={"100%"}>
-        <Flex gap="md">
-          <TextInput
-            placeholder="Nhập từ khóa"
-            value={keySearch}
-            onChange={(e) => setKeySearch(e.currentTarget.value)}
-          />
-          <Button
-            leftSection={<IconSearch size={"15px"} />}
-            onClick={() => fetchData()}
-          >
-            Tìm kiếm
-          </Button>
+        <Flex gap="md" w={"76%"}>
+          <Grid w={"100%"}>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 / 7 }}>
+              <YearPickerInput
+                placeholder="Năm tốt nghiệp"
+                onChange={(e) =>
+                  handleChangeSearchValue(
+                    e
+                      ? new Date(
+                          dayjs(e).add(7, "hour").toDate()
+                        )?.toISOString()
+                      : "",
+                    "graduationYear"
+                  )
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 / 7 }}>
+              <Select
+                placeholder="Đợt tốt nghiệp"
+                data={dataPeriodSelect}
+                searchable
+                clearable
+                nothingFoundMessage="Không tìm thấy đợt tốt nghiệp !"
+                onChange={(e) =>
+                  handleChangeSearchValue(e?.toString() ?? "", "periodId")
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 / 7 }}>
+              <Select
+                placeholder="Ngành"
+                data={dataMajorSelect}
+                searchable
+                clearable
+                nothingFoundMessage="Không tìm thấy ngành !"
+                onChange={(e) =>
+                  handleChangeSearchValue(e?.toString() ?? "", "majorId")
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 / 7 }}>
+              <Select
+                placeholder="Loại văn bằng"
+                data={dataDegreeTypeSelect}
+                searchable
+                clearable
+                nothingFoundMessage="Không tìm thấy loại văn bẳng !"
+                onChange={(e) =>
+                  handleChangeSearchValue(e?.toString() ?? "", "degreeTypeId")
+                }
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 / 7 }}>
+              <TextInput
+                placeholder="Lớp"
+                value={keySearch.className}
+                onChange={(e) => {
+                  handleChangeSearchValue(
+                    e.currentTarget.value ?? "",
+                    "className"
+                  );
+                }}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 / 7 }}>
+              <TextInput
+                placeholder="Nhập từ khóa"
+                value={keySearch.keySearch}
+                onChange={(e) => {
+                  handleChangeSearchValue(
+                    e.currentTarget.value ?? "",
+                    "keySearch"
+                  );
+                }}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 6, lg: 12 / 7 }}>
+              <Button
+                leftSection={<IconSearch size={"15px"} />}
+                onClick={() => fetchData()}
+              >
+                Tìm kiếm
+              </Button>
+            </Grid.Col>
+          </Grid>
         </Flex>
-        <Flex gap="md">
+        <Flex gap="md" w={"16%"}>
           <Button
             leftSection={<IconPlus size={"15px"} />}
             onClick={() => handleCreate()}
