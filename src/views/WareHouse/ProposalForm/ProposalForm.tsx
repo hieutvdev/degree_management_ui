@@ -286,12 +286,6 @@ const ProposalForm = () => {
         </Flex>
         <Flex gap="md">
           <Button
-            leftSection={<IconPlus size={"15px"} />}
-            onClick={() => navigate("/diploma-number")}
-          >
-            Chạy số hiệu
-          </Button>
-          <Button
             onClick={handleExportData}
             leftSection={<IconDownload size={"15px"} />}
           >

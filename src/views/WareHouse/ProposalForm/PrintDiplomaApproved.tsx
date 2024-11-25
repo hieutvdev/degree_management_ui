@@ -1,8 +1,8 @@
-import style from "./pdf.module.scss";
+import style from "./pdfApproved.module.scss";
 
 const PrintDiplomaApproved = ({ innerRef }: { innerRef: any }) => {
   return (
-    <div ref={innerRef}>
+    <div ref={innerRef} className={style.main}>
       <div className={style.topTitle}>
         <div className={style.topTitleLeft}>
           <div>
@@ -33,87 +33,114 @@ const PrintDiplomaApproved = ({ innerRef }: { innerRef: any }) => {
         <div>
           <span>PHIẾU CẤP PHÔI BẰNG CHỨNG CHỈ TỐT NGHIỆP</span>
         </div>
-        <div>
-          <span>Kính gửi: BAN GIÁM HIỆU</span>
-        </div>
       </div>
       <div className={style.body}>
-        <p>
-          Kính đề nghị Ban Giám Hiệu cấp cho Phòng Đào tạo phôi bằng tốt nghiệp{" "}
-          {"Thạc sĩ"} để in và cấp cho học viên tốt nghiệp năm{" "}
-          {new Date().getFullYear()} cụ thể như sau:
+        <p className={style.tab}>
+          Vào hồi {new Date().getHours()} giờ {new Date().getMinutes()} phút,
+          ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm{" "}
+          {new Date().getFullYear()}, tại kho lưu trữ văn bằng
         </p>
-        <p>
-          1. Kết quả tốt nghiệp theo Quyết định số 10806/QĐ-ĐT-ĐN ngày{" "}
-          {new Date().getDate()}/{new Date().getMonth() + 1}/
-          {new Date().getFullYear()} về việc Công nhận sinh viên đủ điều kiện
-          tốt nghiệp của Hiệu trưởng Trường Đại học Đại Nam
-        </p>
-        <table border={1} className={style.table1}>
+        <p className={style.tab}>Trường Đại học Đại Nam, chúng tôi bao gồm:</p>
+        <div className={style.member}>
+          <div>
+            <div>
+              <div>
+                <p>1. Ban gíam hiệu: </p>
+              </div>
+              <div>
+                <p> Ông/bà: Lương Cao Đông</p>
+              </div>
+            </div>
+            <div>
+              <div>
+                <p>2. Phòng đào tạo: </p>
+              </div>
+              <div>
+                <p> Ông/bà: Đỗ Thu Hương</p>
+              </div>
+            </div>
+            <div>
+              <div>
+                <p>3. Cán bộ đề xuất: </p>
+              </div>
+              <div>
+                <p> Ông/bà: Lê Trung Hiếu</p>
+              </div>
+            </div>
+          </div>
+          <div className={style.role}>
+            <div>
+              <p>Chức vụ: Hiệu Trưởng</p>
+            </div>
+            <div>
+              <p>Chức vụ: Trưởng phòng đào tạo</p>
+            </div>
+            <div>
+              <p>Chức vụ: Chuyên viên</p>
+            </div>
+          </div>
+        </div>
+        <table className={style.table}>
           <thead>
             <tr>
-              <th>TT</th>
-              <th>Chuyên ngành đào tạo</th>
-              <th>Khóa học</th>
-              <th>Sinh viên tốt nghiệp</th>
-              <th>Ghi chú</th>
+              <th rowSpan={2}>TT</th>
+              <th rowSpan={2}>Tên phôi văn bằng, chứng chỉ</th>
+              <th rowSpan={2}>Đơn vị tính</th>
+              <th rowSpan={2}>Số lượng</th>
+              <th colSpan={2}>Số seri</th>
+              <th rowSpan={2}>Ghi chú</th>
+            </tr>
+            <tr>
+              <th>Số đầu</th>
+              <th>Số cuối</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>1</td>
-              <td>Quản lý kinh tế</td>
-              <td>5</td>
-              <td>200</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Tài chính ngân hàng</td>
-              <td>4</td>
-              <td>200</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td colSpan={3}>Cộng</td>
+              <td>Thạc sĩ</td>
+              <td>Chiếc</td>
               <td>400</td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-        <p className={style.p2}>2. Số lượng đề nghị cấp</p>
-        <table border={1} className={style.table2}>
-          <thead>
-            <tr>
-              <th>TT</th>
-              <th>Loại bằng</th>
-              <th>Số lượng SV theo Quyết định tốt nghiệp</th>
-              <th>Số lượng đề nghị cấp</th>
-              <th>Ghi chú</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>{"Thạc sĩ"}</td>
-              <td>24</td>
-              <td>24</td>
+              <td>000159</td>
+              <td>000558</td>
               <td></td>
             </tr>
             <tr>
               <td></td>
               <td>Cộng</td>
-              <td>24</td>
-              <td>24</td>
+              <td></td>
+              <td colSpan={3}>400</td>
               <td></td>
             </tr>
           </tbody>
         </table>
-        <p>Rất mong nhận được sự chấp thuận của Ban Giám Hiệu nhà trường.</p>
-        <p>
-          Phòng Đào tạo xin đảm bảo quản lý và cấp phát văn bằng theo đúng quy
-          chế cấp phát văn bằng chứng chỉ của Trường Đại học Đại Nam.
+        <p className={style.tab}>
+          Toàn bộ số phôi bằng, chứng chỉ trên không bị rách, nhàu nát, ẩm ướt
+          và bẩn.
         </p>
+        <p className={style.tab}>
+          Ông/bà Lê Trung Hiếu đã kiểm tra, nhận đủ số phôi bằng, chứng chỉ nói
+          trên và ký nhận vào biên bản và giao nhận.
+        </p>
+        <p className={style.tab}>
+          Biên bản được in thành 03 bản có giá trị như nhau và mỗi bên giữ 01
+          bản.
+        </p>
+        <p className={style.tab}>
+          Việc bàn giao kết thúc vào hồi {new Date().getHours()} giờ{" "}
+          {new Date().getMinutes()} phút cùng ngày.
+        </p>
+        <div className={style.signature}>
+          <div>
+            <span>CÁN BỘ NHẬN PHÔI</span>
+          </div>
+          <div>
+            <span>PHÒNG ĐÀO TẠO</span>
+          </div>
+          <div>
+            <span>BAN GIÁM HIỆU</span>
+          </div>
+        </div>
       </div>
     </div>
   );

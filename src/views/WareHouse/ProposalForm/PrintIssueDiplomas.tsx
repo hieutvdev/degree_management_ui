@@ -2,7 +2,7 @@ import style from "./pdf.module.scss";
 
 const PrintIssueDiplomas = ({ innerRef }: { innerRef: any }) => {
   return (
-    <div ref={innerRef}>
+    <div ref={innerRef} className={style.main}>
       <div className={style.topTitle}>
         <div className={style.topTitleLeft}>
           <div>

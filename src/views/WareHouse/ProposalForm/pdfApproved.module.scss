@@ -51,22 +51,63 @@
 .body {
     padding: 0px 70px;
 
-    p {
+    .tab {
         text-indent: 32px;
     }
 
-    p:nth-child(2), .p2 {
-        font-weight: 700;
+    .member {
+        display: flex;
+        gap: 100px;
+        margin-left: 30px;
+
+        div {
+
+            div {
+                display: flex;
+
+                div {
+                    margin: -10px 0px;
+                }
+
+                div:nth-child(1) {
+                    p {
+                        font-weight: 700;
+                    }
+                }   
+            }
+        }
+
+        .role {
+            margin-top: -10px;
+
+            div {
+                margin-bottom: -21px;
+            }
+        }
     }
 
-    .table1, .table2 {
+    .table {
         border-collapse: collapse;
         width: 100%;
         border: 1px solid grey;
+        margin-top: 10px;
     
         th, td {
             border: 1px solid grey;
             text-align: center;
+        }
+    }
+
+    .signature {
+        margin-top: 50px;
+        display: flex;
+        justify-content: space-around;
+
+        div {
+            span {
+                font-weight: 700;
+                font-size: 16px;
+            }
         }
     }
 }

@@ -33,11 +33,13 @@ import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
 import DetailDataView from "./DetailDataView";
 import { ModelDegreeManagementQuery } from "../../../interfaces/DegreeManagement";
-import { getValueById } from "../../../helpers/FunctionHelper";
+import { formatDateTime, getValueById } from "../../../helpers/FunctionHelper";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import { useNavigate } from "react-router-dom";
 
 const DegreeManagement = () => {
   //data and fetching state
+  const navigate = useNavigate();
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([]);
   const [isError, setIsError] = useState(false);
@@ -96,26 +98,37 @@ const DegreeManagement = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "stundentId",
-        header: "Sinh viên",
-        Cell: ({ renderedCellValue }) => (
-          <Text size="12.5px" fw={500}>
-            {getValueById(
-              renderedCellValue?.toString() ?? "",
-              dataStudentSelect,
-              "label"
-            )}
+        accessorKey: "stundentCode",
+        header: "Mã sinh viên",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "studentName",
+        header: "Tên sinh viên",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "dateOfBirth",
+        header: "Ngày sinh",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "honors",
+        header: "Học lực",
+        Cell: ({ row }) => (
+          <Text fw={500} size="12.5px">
+            {getHonors(row.original.honors)}
           </Text>
         ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
-      // {
-      //   accessorKey: "creditsRequired",
-      //   header: "Số tín chỉ tích lũy",
-      //   enableColumnActions: false,
-      //   enableColumnFilter: false,
-      // },
       {
         accessorKey: "degreeTypeId",
         header: "Loại văn bằng",
@@ -140,10 +153,10 @@ const DegreeManagement = () => {
             radius={"sm"}
           >
             {renderedCellValue === 0
-              ? "Chưa cấp văn bằng"
-              : renderedCellValue === 1
               ? "Đang cấp văn bằng"
-              : "Đã cấp văn bằng"}
+              : renderedCellValue === 1
+              ? "Đã cấp văn bằng"
+              : "Hủy văn bằng"}
           </Badge>
         ),
         size: 175,
@@ -201,6 +214,25 @@ const DegreeManagement = () => {
     [dataDegreeTypeSelect, dataStudentSelect]
   );
 
+  const getHonors = (honorId: number) => {
+    switch (honorId) {
+      case 0:
+        return "Kém";
+      case 1:
+        return "Yếu";
+      case 2:
+        return "Trung bình";
+      case 3:
+        return "Khá";
+      case 4:
+        return "Giỏi";
+      case 5:
+        return "Xuất sắc";
+      default:
+        return "Không xác định";
+    }
+  };
+
   const csvConfig = mkConfig({
     fieldSeparator: ",",
     decimalSeparator: ".",
@@ -221,11 +253,11 @@ const DegreeManagement = () => {
   const getColorStatus = (value: number) => {
     switch (value) {
       case 0:
-        return "red";
-      case 1:
         return "yellow";
-      case 2:
+      case 1:
         return "green";
+      case 2:
+        return "red";
     }
   };
 
@@ -361,6 +393,12 @@ const DegreeManagement = () => {
           <Button leftSection={<IconSearch size={"15px"} />}>Tìm kiếm</Button>
         </Flex>
         <Flex gap="md">
+          <Button
+            leftSection={<IconPlus size={"15px"} />}
+            onClick={() => navigate("/diploma-number")}
+          >
+            Chạy số hiệu
+          </Button>
           <Button
             leftSection={<IconPlus size={"15px"} />}
             onClick={() => handleCreate()}

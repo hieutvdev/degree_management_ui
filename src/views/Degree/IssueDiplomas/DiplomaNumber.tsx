@@ -39,8 +39,6 @@ const DiplomaNumber = () => {
     regNoLength: null,
     suffixRegNo: null,
   });
-
-  console.log(dataSubmit);
   const [dataDegreeTypeSelect, setDataDegreeTypeSelect] = useState<
     ComboboxItem[]
   >([]);
@@ -78,7 +76,7 @@ const DiplomaNumber = () => {
     });
 
     if (dataApi && dataApi?.isSuccess) {
-      navigate("/issue-diplomas");
+      navigate("/degree-management");
       notifications.show({
         color: "green",
         message: "Chạy số hiệu hoàn tất !",
@@ -133,7 +131,7 @@ const DiplomaNumber = () => {
         <Button
           leftSection={<IconArrowLeft size={14} />}
           color="red"
-          onClick={() => navigate("/issue-diplomas")}
+          onClick={() => navigate("/degree-management")}
         >
           Quay lại
         </Button>

@@ -53,7 +53,7 @@ export const router = [
     links: [
       { label: "Loại văn bằng", link: "/degree-type" },
       { label: "Quản lý văn bằng", link: "/degree-management" },
-      { label: "Cấp phát văn bằng tốt nghiệp", link: "/issue-diplomas" },
+      // { label: "Cấp phát văn bằng tốt nghiệp", link: "/issue-diplomas" },
     ],
   },
   {
