@@ -31,13 +31,13 @@ import { useNavigate } from "react-router-dom";
 import { modals } from "@mantine/modals";
 import DetailDataView from "./DetailDataView";
 import { useReactToPrint } from "react-to-print";
-import PrintIssueDiplomas from "./PrintIssueDiplomas";
 import { formatDateTime } from "../../../helpers/FunctionHelper";
+import PrintDiplomaApproved from "./PrintDiplomaApproved";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { notifications } from "@mantine/notifications";
 
-const ProposalForm = () => {
+const EmbryoIssuance = () => {
   //data and fetching state
   const navigate = useNavigate();
   const headerRef = React.useRef<HTMLDivElement>(null);
@@ -54,14 +54,15 @@ const ProposalForm = () => {
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
   //export PDF
   const [id, setId] = useState<any>();
-  const componentRef = React.useRef(null);
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
+  const componentRefApproved = React.useRef(null);
+
+  const handlePrintApproved = useReactToPrint({
+    contentRef: componentRefApproved,
     pageStyle: `
-      @page {
-        size:auto;
-        margin: 5mm 0;
-    }`,
+        @page {
+          size:auto;
+          margin: 5mm 0;
+      }`,
   });
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
@@ -186,7 +187,7 @@ const ProposalForm = () => {
                 color="teal"
                 onClick={() => {
                   setId(row.original.id);
-                  handlePrint();
+                  handlePrintApproved();
                 }}
               >
                 <IconPrinter size={20} stroke={1.5} />
@@ -223,7 +224,7 @@ const ProposalForm = () => {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_OUTWARD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}&Type=1`;
+      const url = `${API_ROUTER.GET_LIST_OUTWARD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}&Type=2`;
       const repo = new DegreeRepository<any>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
@@ -398,10 +399,10 @@ const ProposalForm = () => {
     <>
       <MantineReactTable table={table} />
       <Box display={"none"}>
-        <PrintIssueDiplomas innerRef={componentRef} id={id} />
+        <PrintDiplomaApproved innerRef={componentRefApproved} />
       </Box>
     </>
   );
 };
 
-export default ProposalForm;
+export default EmbryoIssuance;

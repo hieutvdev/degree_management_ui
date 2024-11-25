@@ -1,6 +1,69 @@
+import { useEffect, useState } from "react";
 import style from "./pdf.module.scss";
+import { API_ROUTER } from "../../../constants/api/api_router";
+import { DegreeRepository } from "../../../services/RepositoryBase";
+import { ComboboxItem } from "@mantine/core";
+import { getValueById } from "../../../helpers/FunctionHelper";
 
-const PrintIssueDiplomas = ({ innerRef }: { innerRef: any }) => {
+const PrintIssueDiplomas = ({ innerRef, id }: { innerRef: any; id: any }) => {
+  const [dataPrint, setDataPrint] = useState<any>();
+  const [dataDegreeType, setDataDegreeType] = useState<ComboboxItem[]>([]);
+  const [dataMajorSelect, setDataMajorSelect] = useState<ComboboxItem[]>([]);
+
+  const callApiGetData = async () => {
+    const url = `${API_ROUTER.GET_DETAIL_OUTWARD}?Id=${id}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi) {
+      const result = dataApi?.data;
+      setDataPrint(result);
+      Promise.all([getSelectDegreeType(), getMajorSelect()]);
+    }
+  };
+
+  const getMajorSelect = async () => {
+    const url = `${API_ROUTER.GET_SELECT_MAJOR}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataMajorSelect(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  const getSelectDegreeType = async () => {
+    const url = `${API_ROUTER.GET_SELECT_DEGREETYPE}`;
+    const repo = new DegreeRepository<any>();
+    const dataApi = await repo.get(url);
+
+    if (dataApi?.isSuccess) {
+      const result = dataApi?.data;
+      setDataDegreeType(
+        result
+          ?.filter((item: any) => item.text != null && item.value != null)
+          ?.map((item: any) => ({
+            label: item.text,
+            value: item.value?.toString(),
+          }))
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      callApiGetData();
+    }
+  }, [id]);
+
   return (
     <div ref={innerRef} className={style.main}>
       <div className={style.topTitle}>
@@ -60,23 +123,28 @@ const PrintIssueDiplomas = ({ innerRef }: { innerRef: any }) => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>Quản lý kinh tế</td>
-              <td>5</td>
-              <td>200</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Tài chính ngân hàng</td>
-              <td>4</td>
-              <td>200</td>
-              <td></td>
-            </tr>
+            {dataPrint &&
+              dataPrint?.templateProposalDetails.length > 0 &&
+              dataPrint.templateProposalDetails?.map(
+                (item: any, index: any) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>
+                      {getValueById(
+                        item.majorId?.toString(),
+                        dataMajorSelect,
+                        "label"
+                      )}
+                    </td>
+                    <td>{item.cohort}</td>
+                    <td>{item.quantityStudent}</td>
+                    <td></td>
+                  </tr>
+                )
+              )}
             <tr>
               <td colSpan={3}>Cộng</td>
-              <td>400</td>
+              <td>{dataPrint?.quantityRequest}</td>
               <td></td>
             </tr>
           </tbody>
@@ -95,16 +163,22 @@ const PrintIssueDiplomas = ({ innerRef }: { innerRef: any }) => {
           <tbody>
             <tr>
               <td>1</td>
-              <td>{"Thạc sĩ"}</td>
-              <td>24</td>
-              <td>24</td>
+              <td>
+                {getValueById(
+                  dataPrint?.degreeTypeId?.toString(),
+                  dataDegreeType,
+                  "label"
+                )}
+              </td>
+              <td>{dataPrint?.quantityRequest}</td>
+              <td>{dataPrint?.quantityRequest}</td>
               <td></td>
             </tr>
             <tr>
               <td></td>
               <td>Cộng</td>
-              <td>24</td>
-              <td>24</td>
+              <td>{dataPrint?.quantityRequest}</td>
+              <td>{dataPrint?.quantityRequest}</td>
               <td></td>
             </tr>
           </tbody>
