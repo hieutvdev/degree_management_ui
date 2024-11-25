@@ -30,15 +30,21 @@ import { modals } from "@mantine/modals";
 import DetailDataView from "./DetailDataView";
 import { useReactToPrint } from "react-to-print";
 import PrintIssueDiplomas from "./PrintIssueDiplomas";
+import { formatDateTime } from "../../../helpers/FunctionHelper";
 
-const IssueDiplomas = () => {
+const ProposalForm = () => {
   //data and fetching state
   const navigate = useNavigate();
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [data, setData] = useState<any[]>([
     {
       id: 1,
-      mvb: "MVB20242411",
+      ngayDeXuat: new Date().toISOString(),
+      soQD: 712867946,
+      code: "PDX20241125",
+      idLoaiPhieu: 1,
+      loaiPhieu: "Cử nhân",
+      soPhoiDeNghiCap: 400,
     },
   ]);
   const [isError, setIsError] = useState(false);
@@ -56,11 +62,10 @@ const IssueDiplomas = () => {
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
     pageStyle: `
-    @page {
-      size:auto;
-      margin: 5mm 0;
-  }`,
-    documentTitle: " VĂN BẰNG TỐT NGHIỆP ",
+      @page {
+        size:auto;
+        margin: 5mm 0;
+    }`,
   });
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
@@ -74,20 +79,23 @@ const IssueDiplomas = () => {
         Cell: ({ row }) => Number(row.index) + 1,
       },
       {
-        accessorKey: "name",
-        header: "Tên loại văn bằng",
+        accessorKey: "ngayDeXuat",
+        header: "Ngày đề xuất",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "specializationName",
-        header: "Chuyên ngành",
+        accessorKey: "soQD",
+        header: "Số QĐ",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
         accessorKey: "code",
-        header: "Mã loại văn bằng",
+        header: "Mã phiếu",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -102,29 +110,14 @@ const IssueDiplomas = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "duration",
-        header: "Thời gian học",
-        Cell: ({ renderedCellValue }) => <Text>{renderedCellValue} năm</Text>,
+        accessorKey: "loaiPhieu",
+        header: "Loại phiếu",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "level",
-        header: "Cấp bậc",
-        Cell: ({ row }) => (
-          <Badge
-            color={row.original.level === 0 ? "#09b8ff" : "#fc8c0c"}
-            radius={"sm"}
-          >
-            {row.original.level === 0 ? "Đại học" : "Sau đại học"}
-          </Badge>
-        ),
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "description",
-        header: "Ghi chú",
+        accessorKey: "soPhoiDeNghiCap",
+        header: "Số phôi đề nghị cấp",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -134,16 +127,6 @@ const IssueDiplomas = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            {/* <Tooltip label="Chỉnh sửa">
-                <ActionIcon
-                  onClick={() => handleEdit(row.original.id)}
-                  variant="light"
-                  color="orange"
-                >
-                  <IconEdit size={20} stroke={1.5} />
-                </ActionIcon>
-              </Tooltip> */}
-
             <Tooltip label="Chi tiết">
               <ActionIcon
                 variant="light"
@@ -154,7 +137,7 @@ const IssueDiplomas = () => {
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label="In văn bằng">
+            <Tooltip label="In phiếu đề xuất">
               <ActionIcon
                 variant="light"
                 color="teal"
@@ -314,4 +297,4 @@ const IssueDiplomas = () => {
   );
 };
 
-export default IssueDiplomas;
+export default ProposalForm;

@@ -330,6 +330,8 @@ const StudentGraduatedView = ({
             "honors",
             "contactEmail",
             "phoneNumber",
+            "degreeTypeId",
+            "majorId",
           ],
         ]);
         const jsonData = xlsx.utils.sheet_to_json(worksheet);
@@ -350,6 +352,8 @@ const StudentGraduatedView = ({
           honors: item.honors,
           contactEmail: item.contactEmail,
           phoneNumber: item.phoneNumber,
+          degreeTypeId: item.degreeTypeId,
+          majorId: item.majorId,
         }));
         setDataReview(dataSubmit);
         setTimeout(() => {
