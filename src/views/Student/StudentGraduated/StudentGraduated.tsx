@@ -48,8 +48,12 @@ import IssueIdentification from "./IssueIdentification";
 
 const StudentGraduatedView = ({
   isDiplomaNumber,
+  period,
+  year,
 }: {
   isDiplomaNumber: any;
+  period?: any;
+  year?: any;
 }) => {
   //data and fetching state
   const headerRef = React.useRef<HTMLDivElement>(null);
@@ -169,8 +173,8 @@ const StudentGraduatedView = ({
         enableColumnFilter: false,
       },
       {
-        accessorKey: "specializationName",
-        header: "Chuyên ngành",
+        accessorKey: "majorName",
+        header: "Ngành",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -192,6 +196,12 @@ const StudentGraduatedView = ({
         Cell: ({ renderedCellValue }: any) => (
           <>{getHonors(renderedCellValue)}</>
         ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "degreeTypeName",
+        header: "Loại văn bằng",
         enableColumnActions: false,
         enableColumnFilter: false,
       },

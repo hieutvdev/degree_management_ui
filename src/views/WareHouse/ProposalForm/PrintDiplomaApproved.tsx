@@ -1,6 +1,6 @@
 import style from "./pdf.module.scss";
 
-const PrintIssueDiplomas = ({ innerRef }: { innerRef: any }) => {
+const PrintDiplomaApproved = ({ innerRef }: { innerRef: any }) => {
   return (
     <div ref={innerRef}>
       <div className={style.topTitle}>
@@ -31,7 +31,7 @@ const PrintIssueDiplomas = ({ innerRef }: { innerRef: any }) => {
       </div>
       <div className={style.title}>
         <div>
-          <span>PHIẾU ĐỀ XUẤT</span>
+          <span>PHIẾU CẤP PHÔI BẰNG CHỨNG CHỈ TỐT NGHIỆP</span>
         </div>
         <div>
           <span>Kính gửi: BAN GIÁM HIỆU</span>
@@ -119,4 +119,4 @@ const PrintIssueDiplomas = ({ innerRef }: { innerRef: any }) => {
   );
 };
 
-export default PrintIssueDiplomas;
+export default PrintDiplomaApproved;

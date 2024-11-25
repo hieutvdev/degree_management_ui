@@ -192,7 +192,7 @@ const IssueDiplomas = () => {
 
   const detailItem = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Phiếu xuất kho phôi văn abwnfg tốt nghiệp</Title>,
+      title: <Title order={5}>Phiếu xuất kho phôi văn bằng tốt nghiệp</Title>,
       size: "auto",
       children: <DetailDataView />,
       confirmProps: { display: "none" },

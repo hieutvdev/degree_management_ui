@@ -242,7 +242,7 @@ const InWard = () => {
         message: "Xác nhận trạng thái thành công !",
       });
       modals.closeAll();
-      setDeleteViewStatus(!deleteViewStatus);
+      fetchData();
     }
   };
 

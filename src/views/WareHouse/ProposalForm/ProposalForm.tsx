@@ -8,6 +8,7 @@ import {
   Text,
   Title,
   Box,
+  Menu,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -18,11 +19,14 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import {
+  IconCheck,
   IconDownload,
   IconEye,
   IconPlus,
   IconPrinter,
   IconSearch,
+  IconStatusChange,
+  IconX,
 } from "@tabler/icons-react";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +35,7 @@ import DetailDataView from "./DetailDataView";
 import { useReactToPrint } from "react-to-print";
 import PrintIssueDiplomas from "./PrintIssueDiplomas";
 import { formatDateTime } from "../../../helpers/FunctionHelper";
+import PrintDiplomaApproved from "./PrintDiplomaApproved";
 
 const ProposalForm = () => {
   //data and fetching state
@@ -41,10 +46,21 @@ const ProposalForm = () => {
       id: 1,
       ngayDeXuat: new Date().toISOString(),
       soQD: 712867946,
-      code: "PDX20241125",
+      code: "PDX20241125000",
       idLoaiPhieu: 1,
       loaiPhieu: "Cử nhân",
       soPhoiDeNghiCap: 400,
+      status: 0,
+    },
+    {
+      id: 2,
+      ngayDeXuat: new Date().toISOString(),
+      soQD: 983712489,
+      code: "PDX20241125001",
+      idLoaiPhieu: 1,
+      loaiPhieu: "Cử nhân",
+      soPhoiDeNghiCap: 200,
+      status: 1,
     },
   ]);
   const [isError, setIsError] = useState(false);
@@ -59,8 +75,18 @@ const ProposalForm = () => {
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
   //export PDF
   const componentRef = React.useRef(null);
+  const componentRefApproved = React.useRef(null);
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
+    pageStyle: `
+      @page {
+        size:auto;
+        margin: 5mm 0;
+    }`,
+  });
+
+  const handlePrintApproved = useReactToPrint({
+    contentRef: componentRefApproved,
     pageStyle: `
       @page {
         size:auto;
@@ -122,11 +148,54 @@ const ProposalForm = () => {
         enableColumnFilter: false,
       },
       {
+        accessorKey: "status",
+        header: "Trạng thái",
+        Cell: ({ renderedCellValue }) => (
+          <Badge
+            color={renderedCellValue === 0 ? "red" : "green"}
+            radius={"sm"}
+          >
+            {renderedCellValue === 0 ? "Chưa duyệt" : "Đã duyệt"}
+          </Badge>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
         accessorKey: "action",
         header: "Thao tác",
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
+            <Menu>
+              <Menu.Target>
+                <ActionIcon
+                  variant="light"
+                  color="teal"
+                  disabled={row.original.status !== 0}
+                >
+                  <IconStatusChange size={20} stroke={1.5} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Flex direction={"column"} gap={"xs"}>
+                  <Button
+                    variant="outline"
+                    leftSection={<IconCheck size={"14px"} />}
+                    color="teal"
+                  >
+                    Duyệt
+                  </Button>
+                  <Button
+                    variant="outline"
+                    leftSection={<IconX size={"14px"} />}
+                    color="red"
+                  >
+                    Từ chối
+                  </Button>
+                </Flex>
+              </Menu.Dropdown>
+            </Menu>
             <Tooltip label="Chi tiết">
               <ActionIcon
                 variant="light"
@@ -141,7 +210,13 @@ const ProposalForm = () => {
               <ActionIcon
                 variant="light"
                 color="teal"
-                onClick={() => handlePrint()}
+                onClick={() => {
+                  if (row.original.status === 0) {
+                    handlePrint();
+                  } else if (row.original.status === 1) {
+                    handlePrintApproved();
+                  }
+                }}
               >
                 <IconPrinter size={20} stroke={1.5} />
               </ActionIcon>
@@ -292,6 +367,7 @@ const ProposalForm = () => {
       <MantineReactTable table={table} />
       <Box display={"none"}>
         <PrintIssueDiplomas innerRef={componentRef} />
+        <PrintDiplomaApproved innerRef={componentRefApproved} />
       </Box>
     </>
   );

@@ -25,10 +25,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
   const entity = {
     code: null,
     name: null,
-    active: true,
-    duration: null,
     level: null,
-    specializationId: null,
     description: null,
   };
 
@@ -45,11 +42,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
       ...entity,
     },
 
-    transformValues: (values) => ({
-      ...values,
-      specializationId: Number(values.specializationId),
-    }),
-
     validate: {
       code: (value: string | null) => {
         if (value === null || value === undefined) {
@@ -61,19 +53,9 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
           return "Vui lòng nhập tên loại văn bằng!";
         }
       },
-      duration: (value: number | null) => {
-        if (value === null || value === undefined) {
-          return "Vui lòng nhập thời gian học!";
-        }
-      },
       level: (value: number | null) => {
         if (value === null || value === undefined) {
           return "Vui lòng chọn cấp độ!";
-        }
-      },
-      specializationId: (value: number | null) => {
-        if (!value) {
-          return "Vui lòng chọn chuyên ngành !";
         }
       },
     },
@@ -118,6 +100,8 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
     Promise.all([getSelectSpecialization()]);
   }, []);
 
+  console.log(form.getValues());
+
   return (
     <>
       <Box
@@ -155,20 +139,7 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
         </Grid>
 
         <Grid mt={10}>
-          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
-            <NumberInput
-              min={1.5}
-              max={7}
-              withAsterisk
-              decimalScale={1}
-              allowDecimal
-              label={"Thời gian học"}
-              placeholder={"Nhập thời gian học (năm)"}
-              hideControls
-              {...form.getInputProps("duration")}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+          <Grid.Col span={12}>
             <Select
               label={"Cấp độ"}
               placeholder={"Chọn cấp độ"}
@@ -185,20 +156,6 @@ const CreateDataView = ({ onClose }: CreateDataViewProps) => {
                   level: Number(value),
                 }));
               }}
-            />
-          </Grid.Col>
-        </Grid>
-
-        <Grid>
-          <Grid.Col span={12}>
-            <Select
-              label="Chuyên ngành"
-              placeholder="Nhập tên chuyên ngành"
-              data={dataSpecializationSelect}
-              searchable
-              clearable
-              nothingFoundMessage="Không tìm thấy chuyên ngành !"
-              {...form.getInputProps("specializationId")}
             />
           </Grid.Col>
         </Grid>

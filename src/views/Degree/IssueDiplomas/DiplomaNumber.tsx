@@ -4,22 +4,42 @@ import {
   Divider,
   Flex,
   Grid,
-  Select,
-  Text,
   TextInput,
+  Title,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
-import {
-  IconArrowLeft,
-  IconCheck,
-  IconDeviceFloppy,
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconArrowLeft, IconCheck, IconPlus } from "@tabler/icons-react";
 import StudentGraduatedView from "../../Student/StudentGraduated/StudentGraduated";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { modals } from "@mantine/modals";
+import SelectOptionSV from "./SelectOptionSV";
 
 const DiplomaNumber = () => {
   const navigate = useNavigate();
+  const [period, setPeriod] = useState<any>(null);
+  const [year, setYear] = useState<any>(null);
+
+  const modalSelectOption = () => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Thông tin sinh viên tốt nghiệp</Title>,
+      size: "auto",
+      children: (
+        <SelectOptionSV
+          period={period}
+          year={year}
+          setPeriod={setPeriod}
+          setYear={setYear}
+        />
+      ),
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  useEffect(() => {
+    modalSelectOption();
+  }, []);
 
   return (
     <Box p={"10px 10px 0px 10px"}>
@@ -107,7 +127,11 @@ const DiplomaNumber = () => {
         label="Sinh viên tốt nghiệp"
         labelPosition="center"
       />
-      <StudentGraduatedView isDiplomaNumber={true} />
+      <StudentGraduatedView
+        isDiplomaNumber={true}
+        period={period}
+        year={year}
+      />
     </Box>
   );
 };

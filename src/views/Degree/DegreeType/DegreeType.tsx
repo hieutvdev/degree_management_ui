@@ -67,12 +67,6 @@ const DegreeType = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "specializationName",
-        header: "Chuyên ngành",
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
         accessorKey: "code",
         header: "Mã loại văn bằng",
         Cell: ({ renderedCellValue }) => (
@@ -85,13 +79,6 @@ const DegreeType = () => {
             {renderedCellValue === null ? null : renderedCellValue}
           </Badge>
         ),
-        enableColumnActions: false,
-        enableColumnFilter: false,
-      },
-      {
-        accessorKey: "duration",
-        header: "Thời gian học",
-        Cell: ({ renderedCellValue }) => <Text>{renderedCellValue} năm</Text>,
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -141,7 +128,7 @@ const DegreeType = () => {
               </ActionIcon>
             </Tooltip>
 
-            {/* <Tooltip label="Xóa">
+            <Tooltip label="Xóa">
               <ActionIcon
                 onClick={() => handleDelete(row.original.id)}
                 variant="light"
@@ -149,7 +136,7 @@ const DegreeType = () => {
               >
                 <IconTrash size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip> */}
+            </Tooltip>
           </Flex>
         ),
         enableSorting: false,
