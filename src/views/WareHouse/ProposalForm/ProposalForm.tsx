@@ -5,8 +5,10 @@ import {
   Badge,
   Tooltip,
   ActionIcon,
-  Title,
   Text,
+  Title,
+  Box,
+  Menu,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -14,31 +16,53 @@ import {
   MantineReactTable,
   useMantineReactTable,
 } from "mantine-react-table";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import {
+  IconCheck,
   IconDownload,
-  IconEdit,
   IconEye,
   IconPlus,
+  IconPrinter,
   IconSearch,
-  IconTrash,
+  IconStatusChange,
+  IconX,
 } from "@tabler/icons-react";
-import { DegreeRepository } from "../../../services/RepositoryBase";
-import { useHotkeys } from "@mantine/hooks";
-import { modals } from "@mantine/modals";
-import CreateDataView from "./CreateDataView";
-import { DegreeTypeModelQuery } from "../../../interfaces/DegreeType";
-import { API_ROUTER } from "../../../constants/api/api_router";
-import EditDataView from "./EditDataView";
-import DeleteDataView from "./DeleteDataView";
-import DetailDataView from "./DetailDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
+import { useNavigate } from "react-router-dom";
+import { modals } from "@mantine/modals";
+import DetailDataView from "./DetailDataView";
+import { useReactToPrint } from "react-to-print";
+import PrintIssueDiplomas from "./PrintIssueDiplomas";
+import { formatDateTime } from "../../../helpers/FunctionHelper";
+import PrintDiplomaApproved from "./PrintDiplomaApproved";
 
-const DegreeType = () => {
+const ProposalForm = () => {
   //data and fetching state
+  const navigate = useNavigate();
   const headerRef = React.useRef<HTMLDivElement>(null);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>([
+    {
+      id: 1,
+      ngayDeXuat: new Date().toISOString(),
+      soQD: 712867946,
+      code: "PDX20241125000",
+      idLoaiPhieu: 1,
+      loaiPhieu: "Cử nhân",
+      soPhoiDeNghiCap: 400,
+      status: 0,
+    },
+    {
+      id: 2,
+      ngayDeXuat: new Date().toISOString(),
+      soQD: 983712489,
+      code: "PDX20241125001",
+      idLoaiPhieu: 1,
+      loaiPhieu: "Cử nhân",
+      soPhoiDeNghiCap: 200,
+      status: 1,
+    },
+  ]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -49,6 +73,26 @@ const DegreeType = () => {
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
+  //export PDF
+  const componentRef = React.useRef(null);
+  const componentRefApproved = React.useRef(null);
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+    pageStyle: `
+      @page {
+        size:auto;
+        margin: 5mm 0;
+    }`,
+  });
+
+  const handlePrintApproved = useReactToPrint({
+    contentRef: componentRefApproved,
+    pageStyle: `
+      @page {
+        size:auto;
+        margin: 5mm 0;
+    }`,
+  });
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
@@ -61,14 +105,23 @@ const DegreeType = () => {
         Cell: ({ row }) => Number(row.index) + 1,
       },
       {
-        accessorKey: "name",
-        header: "Tên loại văn bằng",
+        accessorKey: "ngayDeXuat",
+        header: "Ngày đề xuất",
+        Cell: ({ renderedCellValue }: any) => (
+          <>{renderedCellValue && formatDateTime(renderedCellValue)}</>
+        ),
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "soQD",
+        header: "Số QĐ",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
         accessorKey: "code",
-        header: "Mã loại văn bằng",
+        header: "Mã phiếu",
         Cell: ({ renderedCellValue }) => (
           <Badge
             radius="sm"
@@ -83,22 +136,28 @@ const DegreeType = () => {
         enableColumnFilter: false,
       },
       {
-        accessorKey: "level",
-        header: "Cấp bậc",
-        Cell: ({ row }) => (
-          <Badge
-            color={row.original.level === 0 ? "#09b8ff" : "#fc8c0c"}
-            radius={"sm"}
-          >
-            {row.original.level === 0 ? "Đại học" : "Sau đại học"}
-          </Badge>
-        ),
+        accessorKey: "loaiPhieu",
+        header: "Loại phiếu",
         enableColumnActions: false,
         enableColumnFilter: false,
       },
       {
-        accessorKey: "description",
-        header: "Ghi chú",
+        accessorKey: "soPhoiDeNghiCap",
+        header: "Số phôi đề nghị cấp",
+        enableColumnActions: false,
+        enableColumnFilter: false,
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        Cell: ({ renderedCellValue }) => (
+          <Badge
+            color={renderedCellValue === 0 ? "red" : "green"}
+            radius={"sm"}
+          >
+            {renderedCellValue === 0 ? "Chưa duyệt" : "Đã duyệt"}
+          </Badge>
+        ),
         enableColumnActions: false,
         enableColumnFilter: false,
       },
@@ -108,33 +167,58 @@ const DegreeType = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
-            {/* <Tooltip label="Chỉnh sửa">
-              <ActionIcon
-                onClick={() => handleEdit(row.original.id)}
-                variant="light"
-                color="orange"
-              >
-                <IconEdit size={20} stroke={1.5} />
-              </ActionIcon>
-            </Tooltip> */}
-
+            <Menu>
+              <Menu.Target>
+                <ActionIcon
+                  variant="light"
+                  color="teal"
+                  disabled={row.original.status !== 0}
+                >
+                  <IconStatusChange size={20} stroke={1.5} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Flex direction={"column"} gap={"xs"}>
+                  <Button
+                    variant="outline"
+                    leftSection={<IconCheck size={"14px"} />}
+                    color="teal"
+                  >
+                    Duyệt
+                  </Button>
+                  <Button
+                    variant="outline"
+                    leftSection={<IconX size={"14px"} />}
+                    color="red"
+                  >
+                    Từ chối
+                  </Button>
+                </Flex>
+              </Menu.Dropdown>
+            </Menu>
             <Tooltip label="Chi tiết">
               <ActionIcon
-                onClick={() => handleDetail(row.original.id)}
                 variant="light"
                 color="cyan"
+                onClick={() => detailItem()}
               >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label="Xóa">
+            <Tooltip label="In phiếu đề xuất">
               <ActionIcon
-                onClick={() => handleDelete(row.original.id)}
                 variant="light"
-                color="red"
+                color="teal"
+                onClick={() => {
+                  if (row.original.status === 0) {
+                    handlePrint();
+                  } else if (row.original.status === 1) {
+                    handlePrintApproved();
+                  }
+                }}
               >
-                <IconTrash size={20} stroke={1.5} />
+                <IconPrinter size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
           </Flex>
@@ -164,84 +248,15 @@ const DegreeType = () => {
     download(csvConfig)(csv);
   };
 
-  async function fetchData() {
-    setIsLoading(true);
-    setIsRefetching(true);
-    try {
-      const url = `${API_ROUTER.GET_LIST_DEGREETYPE}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}`;
-      const repo = new DegreeRepository<DegreeTypeModelQuery>();
-      const dataApi = await repo.getLists(url);
-      if (dataApi && dataApi.isSuccess) {
-        const result = dataApi?.data;
-        if (result) {
-          setData(result.data);
-          setRowCount(result?.count ?? 0);
-        } else {
-          setData([]);
-          setRowCount(0);
-        }
-        setSelectIds([]);
-        table.resetRowSelection();
-        setIsLoading(false);
-        setIsRefetching(false);
-      }
-    } catch (error) {
-      console.error("Error fetching student list:", error);
-    }
-  }
-
-  const handleCreate = () => {
+  const detailItem = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Tạo mới loại văn bằng</Title>,
+      title: <Title order={5}>Phiếu xuất kho phôi văn abwnfg tốt nghiệp</Title>,
       size: "auto",
-      children: <CreateDataView onClose={setDeleteViewStatus} />,
+      children: <DetailDataView />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
   };
-
-  const handleEdit = (id: number | string) => {
-    modals.openConfirmModal({
-      title: <Title order={5}>Sửa loại văn bằng</Title>,
-      size: "auto",
-      children: <EditDataView id={id} onClose={setDeleteViewStatus} />,
-      confirmProps: { display: "none" },
-      cancelProps: { display: "none" },
-    });
-  };
-
-  const handleDetail = (id: number | string) => {
-    modals.openConfirmModal({
-      title: <Title order={5}>Xem chi tiết loại văn bằng</Title>,
-      size: "auto",
-      children: <DetailDataView id={id} />,
-      confirmProps: { display: "none" },
-      cancelProps: { display: "none" },
-    });
-  };
-
-  const handleDelete = (id: string | number) => {
-    modals.openConfirmModal({
-      title: <Title order={5}>Xóa loại văn bằng</Title>,
-      size: "auto",
-      children: <DeleteDataView onClose={setDeleteViewStatus} id={id} />,
-      confirmProps: { display: "none" },
-      cancelProps: { display: "none" },
-    });
-  };
-
-  useHotkeys([
-    [
-      "F11",
-      () => {
-        handleCreate();
-      },
-    ],
-  ]);
-
-  useEffect(() => {
-    fetchData();
-  }, [deleteViewStatus]);
 
   useEffect(() => {
     const headerHeight = headerRef.current?.offsetHeight || 0;
@@ -270,12 +285,6 @@ const DegreeType = () => {
           <Button leftSection={<IconSearch size={"15px"} />}>Tìm kiếm</Button>
         </Flex>
         <Flex gap="md">
-          <Button
-            leftSection={<IconPlus size={"15px"} />}
-            onClick={() => handleCreate()}
-          >
-            Thêm mới
-          </Button>
           <Button
             onClick={handleExportData}
             leftSection={<IconDownload size={"15px"} />}
@@ -347,7 +356,15 @@ const DegreeType = () => {
     }),
   });
 
-  return <MantineReactTable table={table} />;
+  return (
+    <>
+      <MantineReactTable table={table} />
+      <Box display={"none"}>
+        <PrintIssueDiplomas innerRef={componentRef} />
+        <PrintDiplomaApproved innerRef={componentRefApproved} />
+      </Box>
+    </>
+  );
 };
 
-export default DegreeType;
+export default ProposalForm;

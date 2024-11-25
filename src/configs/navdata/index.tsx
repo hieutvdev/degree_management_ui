@@ -26,10 +26,10 @@ export const router = [
         label: "Danh sách ngành",
         link: "/major",
       },
-      {
-        label: "Danh sách chuyên ngành",
-        link: "/specialization",
-      },
+      // {
+      //   label: "Danh sách chuyên ngành",
+      //   link: "/specialization",
+      // },
       {
         label: "Đợt tốt nghiệp",
         link: "/period",
@@ -53,7 +53,7 @@ export const router = [
     links: [
       { label: "Loại văn bằng", link: "/degree-type" },
       { label: "Quản lý văn bằng", link: "/degree-management" },
-      { label: "Cấp phát văn bằng tốt nghiệp", link: "/issue-diplomas" },
+      // { label: "Cấp phát văn bằng tốt nghiệp", link: "/issue-diplomas" },
     ],
   },
   {
@@ -61,6 +61,7 @@ export const router = [
     icon: IconBuildingWarehouse,
     initiallyOpened: true,
     links: [
+      { label: "Phiếu đề xuất", link: "/proposal-form" },
       { label: "Kho văn bằng", link: "/warehouse" },
       { label: "Nhập kho văn bằng", link: "/inward" },
       { label: "Quản lý số lượng phôi", link: "/inventory" },
