@@ -31,13 +31,13 @@ import { useNavigate } from "react-router-dom";
 import { modals } from "@mantine/modals";
 import DetailDataView from "./DetailDataView";
 import { useReactToPrint } from "react-to-print";
-import PrintIssueDiplomas from "./PrintIssueDiplomas";
 import { formatDateTime } from "../../../helpers/FunctionHelper";
+import PrintDiplomaApproved from "./PrintDiplomaApproved";
 import { API_ROUTER } from "../../../constants/api/api_router";
 import { DegreeRepository } from "../../../services/RepositoryBase";
 import { notifications } from "@mantine/notifications";
 
-const ProposalForm = () => {
+const EmbryoIssuance = () => {
   //data and fetching state
   const navigate = useNavigate();
   const headerRef = React.useRef<HTMLDivElement>(null);
@@ -53,15 +53,15 @@ const ProposalForm = () => {
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
   //export PDF
-  const [id, setId] = useState<any>();
-  const componentRef = React.useRef(null);
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
+  const [dataPrint, setDataPrint] = useState();
+  const componentRefApproved = React.useRef(null);
+  const handlePrintApproved = useReactToPrint({
+    contentRef: componentRefApproved,
     pageStyle: `
-      @page {
-        size:auto;
-        margin: 5mm 0;
-    }`,
+        @page {
+          size:auto;
+          margin: 5mm 0;
+      }`,
   });
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
@@ -115,17 +115,17 @@ const ProposalForm = () => {
         Cell: ({ renderedCellValue }) => (
           <Badge
             color={
-              renderedCellValue === 1
+              renderedCellValue === 2
                 ? "yellow"
-                : renderedCellValue === 2
+                : renderedCellValue === 3
                 ? "green"
                 : "red"
             }
             radius={"sm"}
           >
-            {renderedCellValue === 1
+            {renderedCellValue === 2
               ? "Đang chờ duyệt"
-              : renderedCellValue === 2
+              : renderedCellValue === 3
               ? "Đã duyệt"
               : "Từ chối"}
           </Badge>
@@ -144,7 +144,7 @@ const ProposalForm = () => {
                 <ActionIcon
                   variant="light"
                   color="teal"
-                  disabled={row.original.status !== 1}
+                  disabled={row.original.status !== 2}
                 >
                   <IconStatusChange size={20} stroke={1.5} />
                 </ActionIcon>
@@ -185,8 +185,8 @@ const ProposalForm = () => {
                 variant="light"
                 color="teal"
                 onClick={() => {
-                  setId(row.original.id);
-                  handlePrint();
+                  setDataPrint(row.original);
+                  handlePrintApproved();
                 }}
               >
                 <IconPrinter size={20} stroke={1.5} />
@@ -223,7 +223,7 @@ const ProposalForm = () => {
     setIsLoading(true);
     setIsRefetching(true);
     try {
-      const url = `${API_ROUTER.GET_LIST_OUTWARD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}&Type=1`;
+      const url = `${API_ROUTER.GET_LIST_OUTWARD}?PageIndex=${pagination.pageIndex}&PageSize=${pagination.pageSize}&Type=2`;
       const repo = new DegreeRepository<any>();
       const dataApi = await repo.getLists(url);
       if (dataApi && dataApi.isSuccess) {
@@ -246,7 +246,7 @@ const ProposalForm = () => {
   }
 
   const handleApprove = async (isApproved: boolean, id: number | string) => {
-    const url = `${API_ROUTER.APPROVE_TEMPLATE_PROPOSAL}`;
+    const url = `${API_ROUTER.APPROVE_TO_OUTWARD}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.post(url, {
       templateProposalId: id,
@@ -265,14 +265,14 @@ const ProposalForm = () => {
 
   const modalApprove = (isApproved: boolean, id: number | null) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Duyệt phiếu đề xuất</Title>,
+      title: <Title order={5}>Duyệt phiếu cấp phôi</Title>,
       size: "auto",
       children: (
         <Box mt={15}>
           <Text fw={500} size="20px">
             {isApproved
-              ? "Bạn có chắc muốn duyệt phiếu đề xuất này ?"
-              : "Bạn có chắc muốn từ chối phiếu đề xuất này ?"}
+              ? "Bạn có chắc muốn duyệt phiếu cấp phôi này ?"
+              : "Bạn có chắc muốn từ chối phiếu cấp phôi này ?"}
           </Text>
           <Flex justify={"end"} mt={15}>
             <Button
@@ -398,10 +398,13 @@ const ProposalForm = () => {
     <>
       <MantineReactTable table={table} />
       <Box display={"none"}>
-        <PrintIssueDiplomas innerRef={componentRef} id={id} />
+        <PrintDiplomaApproved
+          innerRef={componentRefApproved}
+          dataPrint={dataPrint}
+        />
       </Box>
     </>
   );
 };
 
-export default ProposalForm;
+export default EmbryoIssuance;

@@ -21,6 +21,8 @@ import User from "../views/Administrator/User/User";
 import IssueDiplomas from "../views/Degree/IssueDiplomas/IssueDiplomas";
 import DiplomaNumber from "../views/Degree/IssueDiplomas/DiplomaNumber";
 import ProposalForm from "../views/WareHouse/ProposalForm/ProposalForm";
+import EmbryoIssuance from "../views/WareHouse/EmbryoIssuance/EmbryoIssuance";
+import EmbryoExport from "../views/WareHouse/EmbryoExport/EmbryoExport";
 
 const routerConfig = [
   { path: "/", component: Home, layout: AdminLayout },
@@ -33,6 +35,8 @@ const routerConfig = [
   { path: "/issue-diplomas", component: IssueDiplomas, layout: AdminLayout },
   { path: "/diploma-number", component: DiplomaNumber, layout: DefaulLayout },
   { path: "/proposal-form", component: ProposalForm, layout: AdminLayout },
+  { path: "/embryo-issuance", component: EmbryoIssuance, layout: AdminLayout },
+  { path: "/embryo-export", component: EmbryoExport, layout: AdminLayout },
   {
     path: "/student-graduated",
     component: StudentGraduatedView,

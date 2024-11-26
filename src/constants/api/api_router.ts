@@ -87,6 +87,13 @@ export const API_ROUTER = {
   UPDATE_INWARD: "/Inward/update-inward-request",
   APPROVE_INWARD: "/Inward/approve-inward-request",
 
+  //Outward
+  GET_LIST_OUTWARD: "/Outward/get-list-outward",
+  GET_DETAIL_OUTWARD: "/Outward/get-detail-outward",
+  APPROVE_TEMPLATE_PROPOSAL: "/Outward/approve-template-proposal",
+  APPROVE_TO_OUTWARD: "/Outward/approve-to-outward",
+  APPROVE_OUTWARD: "/Outward/approve-outward",
+
   //Role
   GET_LIST_ROLE: "/roles/get-list",
   CREATE_ROLE: "/roles/create",
