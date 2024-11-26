@@ -24,6 +24,11 @@ const DegreeType = ({ id, onClose }: { id: any; onClose: any }) => {
     initialValues: {
       ...entity,
     },
+
+    transformValues: (values) => ({
+      ...values,
+      degreeTypeIds: values.degreeTypeIds.map(Number),
+    }),
   });
 
   const handleUpdateDegreeType = async (dataSubmit: any) => {
@@ -65,8 +70,6 @@ const DegreeType = ({ id, onClose }: { id: any; onClose: any }) => {
     getSelectDegreeType();
   }, []);
 
-  console.log(form.getValues());
-
   return (
     <Box
       component="form"
@@ -86,7 +89,7 @@ const DegreeType = ({ id, onClose }: { id: any; onClose: any }) => {
         onChange={(e) => {
           form.setValues((prev) => ({
             ...prev,
-            degreeTypeIds: [...prev.degreeTypeIds, e],
+            degreeTypeIds: e,
           }));
         }}
       />
