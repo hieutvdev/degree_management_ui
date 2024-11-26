@@ -53,9 +53,8 @@ const EmbryoIssuance = () => {
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
   //export PDF
-  const [id, setId] = useState<any>();
+  const [dataPrint, setDataPrint] = useState();
   const componentRefApproved = React.useRef(null);
-
   const handlePrintApproved = useReactToPrint({
     contentRef: componentRefApproved,
     pageStyle: `
@@ -116,17 +115,17 @@ const EmbryoIssuance = () => {
         Cell: ({ renderedCellValue }) => (
           <Badge
             color={
-              renderedCellValue === 1
+              renderedCellValue === 2
                 ? "yellow"
-                : renderedCellValue === 2
+                : renderedCellValue === 3
                 ? "green"
                 : "red"
             }
             radius={"sm"}
           >
-            {renderedCellValue === 1
+            {renderedCellValue === 2
               ? "Đang chờ duyệt"
-              : renderedCellValue === 2
+              : renderedCellValue === 3
               ? "Đã duyệt"
               : "Từ chối"}
           </Badge>
@@ -145,7 +144,7 @@ const EmbryoIssuance = () => {
                 <ActionIcon
                   variant="light"
                   color="teal"
-                  disabled={row.original.status !== 1}
+                  disabled={row.original.status !== 2}
                 >
                   <IconStatusChange size={20} stroke={1.5} />
                 </ActionIcon>
@@ -171,7 +170,7 @@ const EmbryoIssuance = () => {
                 </Flex>
               </Menu.Dropdown>
             </Menu>
-            <Tooltip label="Chi tiết">
+            {/* <Tooltip label="Chi tiết">
               <ActionIcon
                 variant="light"
                 color="cyan"
@@ -179,14 +178,14 @@ const EmbryoIssuance = () => {
               >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip label="In phiếu đề xuất">
               <ActionIcon
                 variant="light"
                 color="teal"
                 onClick={() => {
-                  setId(row.original.id);
+                  setDataPrint(row.original);
                   handlePrintApproved();
                 }}
               >
@@ -247,7 +246,7 @@ const EmbryoIssuance = () => {
   }
 
   const handleApprove = async (isApproved: boolean, id: number | string) => {
-    const url = `${API_ROUTER.APPROVE_TEMPLATE_PROPOSAL}`;
+    const url = `${API_ROUTER.APPROVE_TO_OUTWARD}`;
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.post(url, {
       templateProposalId: id,
@@ -266,14 +265,14 @@ const EmbryoIssuance = () => {
 
   const modalApprove = (isApproved: boolean, id: number | null) => {
     modals.openConfirmModal({
-      title: <Title order={5}>Duyệt phiếu đề xuất</Title>,
+      title: <Title order={5}>Duyệt phiếu cấp phôi</Title>,
       size: "auto",
       children: (
         <Box mt={15}>
           <Text fw={500} size="20px">
             {isApproved
-              ? "Bạn có chắc muốn duyệt lần nhập kho này ?"
-              : "Bạn có chắc muốn từ chối lần nhập kho này ?"}
+              ? "Bạn có chắc muốn duyệt phiếu cấp phôi này ?"
+              : "Bạn có chắc muốn từ chối phiếu cấp phôi này ?"}
           </Text>
           <Flex justify={"end"} mt={15}>
             <Button
@@ -399,7 +398,10 @@ const EmbryoIssuance = () => {
     <>
       <MantineReactTable table={table} />
       <Box display={"none"}>
-        <PrintDiplomaApproved innerRef={componentRefApproved} />
+        <PrintDiplomaApproved
+          innerRef={componentRefApproved}
+          dataPrint={dataPrint}
+        />
       </Box>
     </>
   );

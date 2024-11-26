@@ -170,7 +170,7 @@ const ProposalForm = () => {
                 </Flex>
               </Menu.Dropdown>
             </Menu>
-            <Tooltip label="Chi tiết">
+            {/* <Tooltip label="Chi tiết">
               <ActionIcon
                 variant="light"
                 color="cyan"
@@ -178,7 +178,7 @@ const ProposalForm = () => {
               >
                 <IconEye size={20} stroke={1.5} />
               </ActionIcon>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip label="In phiếu đề xuất">
               <ActionIcon
@@ -271,8 +271,8 @@ const ProposalForm = () => {
         <Box mt={15}>
           <Text fw={500} size="20px">
             {isApproved
-              ? "Bạn có chắc muốn duyệt lần nhập kho này ?"
-              : "Bạn có chắc muốn từ chối lần nhập kho này ?"}
+              ? "Bạn có chắc muốn duyệt phiếu đề xuất này ?"
+              : "Bạn có chắc muốn từ chối phiếu đề xuất này ?"}
           </Text>
           <Flex justify={"end"} mt={15}>
             <Button
