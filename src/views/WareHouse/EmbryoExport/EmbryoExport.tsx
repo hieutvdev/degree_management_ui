@@ -250,6 +250,7 @@ const EmbryoExport = () => {
     const repo = new DegreeRepository<any>();
     const dataApi = await repo.post(url, {
       templateProposalId: id,
+      warehouseId: 1,
       isApproved: isApproved,
     });
 

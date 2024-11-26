@@ -115,7 +115,7 @@ const PrintDiplomaApproved = ({
               <td></td>
               <td>Cộng</td>
               <td></td>
-              <td colSpan={3}>400</td>
+              <td colSpan={3}>{dataPrint?.quantityRequest}</td>
               <td></td>
             </tr>
           </tbody>
