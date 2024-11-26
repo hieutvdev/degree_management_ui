@@ -72,3 +72,11 @@ export const getValueById = (id: number | string, data: any, value: any) => {
   }
   return "";
 };
+
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.getMonth() + 1; // Months are zero-based
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};

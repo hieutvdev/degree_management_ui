@@ -7,6 +7,7 @@ import {
   ActionIcon,
   Text,
   Title,
+  Box,
 } from "@mantine/core";
 import {
   MRT_ColumnDef,
@@ -14,7 +15,7 @@ import {
   MantineReactTable,
   useMantineReactTable,
 } from "mantine-react-table";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { paginationBase } from "../../../interfaces/PaginationResponseBase";
 import {
   IconDownload,
@@ -27,6 +28,8 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { useNavigate } from "react-router-dom";
 import { modals } from "@mantine/modals";
 import DetailDataView from "./DetailDataView";
+import { useReactToPrint } from "react-to-print";
+import PrintIssueDiplomas from "./PrintIssueDiplomas";
 
 const IssueDiplomas = () => {
   //data and fetching state
@@ -48,6 +51,17 @@ const IssueDiplomas = () => {
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectIds, setSelectIds] = useState<string[]>([]);
   const [deleteViewStatus, setDeleteViewStatus] = useState(false);
+  //export PDF
+  const componentRef = React.useRef(null);
+  const handlePrint = useReactToPrint({
+    contentRef: componentRef,
+    pageStyle: `
+    @page {
+      size:auto;
+      margin: 5mm 0;
+  }`,
+    documentTitle: " VĂN BẰNG TỐT NGHIỆP ",
+  });
 
   const columns = React.useMemo<MRT_ColumnDef<any>[]>(
     () => [
@@ -141,7 +155,11 @@ const IssueDiplomas = () => {
             </Tooltip>
 
             <Tooltip label="In văn bằng">
-              <ActionIcon variant="light" color="teal">
+              <ActionIcon
+                variant="light"
+                color="teal"
+                onClick={() => handlePrint()}
+              >
                 <IconPrinter size={20} stroke={1.5} />
               </ActionIcon>
             </Tooltip>
@@ -174,7 +192,7 @@ const IssueDiplomas = () => {
 
   const detailItem = () => {
     modals.openConfirmModal({
-      title: <Title order={5}>Phiếu xuất kho phôi văn abwnfg tốt nghiệp</Title>,
+      title: <Title order={5}>Phiếu xuất kho phôi văn bằng tốt nghiệp</Title>,
       size: "auto",
       children: <DetailDataView />,
       confirmProps: { display: "none" },
@@ -209,12 +227,6 @@ const IssueDiplomas = () => {
           <Button leftSection={<IconSearch size={"15px"} />}>Tìm kiếm</Button>
         </Flex>
         <Flex gap="md">
-          <Button
-            leftSection={<IconPlus size={"15px"} />}
-            onClick={() => navigate("/diploma-number")}
-          >
-            Chạy số hiệu
-          </Button>
           <Button
             onClick={handleExportData}
             leftSection={<IconDownload size={"15px"} />}
@@ -286,7 +298,14 @@ const IssueDiplomas = () => {
     }),
   });
 
-  return <MantineReactTable table={table} />;
+  return (
+    <>
+      <MantineReactTable table={table} />
+      <Box display={"none"}>
+        <PrintIssueDiplomas innerRef={componentRef} />
+      </Box>
+    </>
+  );
 };
 
 export default IssueDiplomas;

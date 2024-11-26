@@ -128,22 +128,7 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
       </Grid>
 
       <Grid mt={10}>
-        <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
-          <NumberInput
-            readOnly
-            variant="filled"
-            min={1.5}
-            max={7}
-            decimalScale={1}
-            allowDecimal
-            label={"Thời gian học"}
-            placeholder={"Nhập thời gian học (năm)"}
-            hideControls
-            value={Number(form.getValues().duration)}
-            {...form.getInputProps("duration")}
-          />
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 6, lg: 6 }}>
+        <Grid.Col span={12}>
           <Select
             readOnly
             variant="filled"
@@ -155,27 +140,6 @@ const DetailDataView = ({ id }: DetailDataViewProps) => {
             ]}
             value={form.getValues().level?.toString()}
             {...form.getInputProps("level")}
-          />
-        </Grid.Col>
-      </Grid>
-
-      <Grid>
-        <Grid.Col span={12}>
-          <Select
-            label="Chuyên ngành"
-            placeholder="Nhập tên chuyên ngành"
-            data={dataSpecializationSelect}
-            value={
-              form.getValues().specializationId
-                ? form.getValues().specializationId?.toString()
-                : null
-            }
-            searchable
-            clearable
-            nothingFoundMessage="Không tìm thấy chuyên ngành !"
-            {...form.getInputProps("specializationId")}
-            variant="filled"
-            readOnly
           />
         </Grid.Col>
       </Grid>

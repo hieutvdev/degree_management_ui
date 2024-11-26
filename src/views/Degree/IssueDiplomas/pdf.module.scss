@@ -1,0 +1,82 @@
+.main {
+    font-family: "Times New Roman", Times, serif;
+}
+
+.topTitle {
+    display: flex;
+    justify-content: space-around;
+
+    .topTitleLeft {
+        div {
+            text-align: center;
+        }
+        div:nth-child(2) {
+            span {
+                font-weight: bold;
+                font-size: 16px;
+            }
+        }
+        div:nth-child(3) {
+            height: 10px;
+            width: 200px;
+            background-color: black;
+        }
+    }
+
+    .topTitleRight {
+        div {
+            text-align: center;
+        }
+        div:nth-child(1) {
+            font-size: 16px;
+        }
+        div:nth-child(1), div:nth-child(2) {
+            span {
+                font-weight: bold;
+            }
+        }
+    }
+}
+
+.title {
+    margin-top: 35px;
+
+    div {
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+}
+
+.body {
+    padding: 0px 70px;
+
+    .table1 {
+        margin-top: 50px;
+        border-collapse: collapse;
+        width: 100%;
+        border: 1px solid grey;
+    
+        th, td {
+            border: 1px solid grey;
+            text-align: center;
+        }
+    }
+
+    p {
+        font-style: italic;
+    }
+
+    .signature {
+        margin-top: 50px;
+        display: flex;
+        justify-content: space-around;
+
+        div {
+            span {
+                font-weight: 700;
+                font-size: 16px;
+            }
+        }
+    }
+}

@@ -103,6 +103,23 @@ const Home = () => {
     ],
   });
 
+  const [byY, setByY] = useState<AgChartOptions>({
+    title: { text: "Tỷ lệ học lực" },
+    data: [
+      { asset: "Trung bình", amount: 6000 },
+      { asset: "Khá", amount: 7000 },
+      { asset: "Giỏi", amount: 4000 },
+      { asset: "Suất xắc", amount: 2000 },
+    ],
+    series: [
+      {
+        type: "pie",
+        angleKey: "amount",
+        legendItemKey: "asset",
+      },
+    ],
+  });
+
   return (
     <>
       <Grid>
@@ -144,16 +161,16 @@ const Home = () => {
           <AgCharts options={options as any} />
         </Grid.Col>
         <Grid.Col>
-          <p>Graduation Rate by Department</p>
+          <p>Số lượng sinh viên tốt nghiệp theo khoa</p>
           <AgCharts options={departmentOptions} />
         </Grid.Col>
         <Grid.Col>
-          <p>Graduation Rate by Year</p>
+          <p>Số lượng sinh viên tốt nghiệp theo năm</p>
           <AgCharts options={yearOptions} />
         </Grid.Col>
 
         <Grid.Col>
-          <p>Graduation Rate by Semester</p>
+          <p>Tỷ lệ chất lượng đầu ra</p>
           <AgCharts options={semesterOptions} />
         </Grid.Col>
       </Grid>

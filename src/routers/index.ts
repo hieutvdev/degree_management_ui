@@ -20,6 +20,7 @@ import Role from "../views/Administrator/Role/Role";
 import User from "../views/Administrator/User/User";
 import IssueDiplomas from "../views/Degree/IssueDiplomas/IssueDiplomas";
 import DiplomaNumber from "../views/Degree/IssueDiplomas/DiplomaNumber";
+import ProposalForm from "../views/WareHouse/ProposalForm/ProposalForm";
 
 const routerConfig = [
   { path: "/", component: Home, layout: AdminLayout },
@@ -31,6 +32,7 @@ const routerConfig = [
   { path: "/degree-type", component: DegreeType, layout: AdminLayout },
   { path: "/issue-diplomas", component: IssueDiplomas, layout: AdminLayout },
   { path: "/diploma-number", component: DiplomaNumber, layout: DefaulLayout },
+  { path: "/proposal-form", component: ProposalForm, layout: AdminLayout },
   {
     path: "/student-graduated",
     component: StudentGraduatedView,

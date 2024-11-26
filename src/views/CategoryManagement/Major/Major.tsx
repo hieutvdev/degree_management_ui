@@ -16,6 +16,7 @@ import {
 } from "mantine-react-table";
 import React, { useEffect, useState } from "react";
 import {
+  IconCertificate,
   IconDownload,
   IconEdit,
   IconEye,
@@ -33,6 +34,7 @@ import EditDataView from "./EditDataView";
 import DeleteView from "./DeleteDataView";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import DetailDataView from "./DetailDataView";
+import DegreeType from "./DegreeType";
 
 const Major = () => {
   //data and fetching state
@@ -100,6 +102,15 @@ const Major = () => {
         size: 10,
         Cell: ({ row }) => (
           <Flex gap={"md"} align={"center"}>
+            <Tooltip label="Loại văn bằng">
+              <ActionIcon
+                variant="light"
+                color="teal"
+                onClick={() => handleDegreeType(row.original.id)}
+              >
+                <IconCertificate size={20} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
             <Tooltip label="Chỉnh sửa">
               <ActionIcon
                 variant="light"
@@ -217,6 +228,16 @@ const Major = () => {
       title: <Title order={5}>Xóa ngành</Title>,
       size: "auto",
       children: <DeleteView id={id} onClose={setDeleteViewStatus} />,
+      confirmProps: { display: "none" },
+      cancelProps: { display: "none" },
+    });
+  };
+
+  const handleDegreeType = (id: string | number) => {
+    modals.openConfirmModal({
+      title: <Title order={5}>Xét loại văn bằng</Title>,
+      size: "auto",
+      children: <DegreeType id={id} onClose={setDeleteViewStatus} />,
       confirmProps: { display: "none" },
       cancelProps: { display: "none" },
     });
