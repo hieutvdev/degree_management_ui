@@ -1,6 +1,12 @@
 import style from "./pdfApproved.module.scss";
 
-const PrintDiplomaApproved = ({ innerRef }: { innerRef: any }) => {
+const PrintDiplomaApproved = ({
+  innerRef,
+  dataPrint,
+}: {
+  innerRef: any;
+  dataPrint: any;
+}) => {
   return (
     <div ref={innerRef} className={style.main}>
       <div className={style.topTitle}>
@@ -98,11 +104,11 @@ const PrintDiplomaApproved = ({ innerRef }: { innerRef: any }) => {
           <tbody>
             <tr>
               <td>1</td>
-              <td>Thạc sĩ</td>
+              <td>{dataPrint?.degreeTypeName}</td>
               <td>Chiếc</td>
-              <td>400</td>
-              <td>000159</td>
-              <td>000558</td>
+              <td>{dataPrint?.quantityRequest}</td>
+              <td>{dataPrint?.startNumber}</td>
+              <td>{dataPrint?.endNumber}</td>
               <td></td>
             </tr>
             <tr>

@@ -18,7 +18,6 @@ import {
 import React, { useEffect, useState } from "react";
 import {
   IconDownload,
-  IconEdit,
   IconEye,
   IconPlus,
   IconPrinter,
@@ -173,9 +172,9 @@ const DegreeManagement = () => {
             color={getColorStatus(Number(renderedCellValue))}
             radius={"sm"}
           >
-            {renderedCellValue === 0
+            {renderedCellValue === 1
               ? "Đang cấp văn bằng"
-              : renderedCellValue === 1
+              : renderedCellValue === 2
               ? "Đã cấp văn bằng"
               : "Hủy văn bằng"}
           </Badge>
@@ -279,6 +278,17 @@ const DegreeManagement = () => {
     }
   };
 
+  const getColorStatus = (value: number) => {
+    switch (value) {
+      case 1:
+        return "yellow";
+      case 2:
+        return "green";
+      case 3:
+        return "red";
+    }
+  };
+
   const csvConfig = mkConfig({
     fieldSeparator: ",",
     decimalSeparator: ".",
@@ -294,17 +304,6 @@ const DegreeManagement = () => {
   const handleExportData = () => {
     const csv = generateCsv(csvConfig)(data);
     download(csvConfig)(csv);
-  };
-
-  const getColorStatus = (value: number) => {
-    switch (value) {
-      case 0:
-        return "yellow";
-      case 1:
-        return "green";
-      case 2:
-        return "red";
-    }
   };
 
   async function fetchData() {

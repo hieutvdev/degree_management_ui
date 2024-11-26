@@ -24,7 +24,7 @@ const DiplomaNumber = () => {
   const navigate = useNavigate();
   const [period, setPeriod] = useState<any>(null);
   const [year, setYear] = useState<any>(null);
-  const [studentIds, setStudentIds] = useState([]);
+  const [studentIds, setStudentIds] = useState<any[]>([]);
   const [dataSubmit, setDataSubmit] = useState<any>({
     studentIds: [],
     degreeTypeId: null,

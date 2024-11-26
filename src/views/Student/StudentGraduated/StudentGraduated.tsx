@@ -473,7 +473,7 @@ const StudentGraduatedView = ({
         url += `&KeySearch=${keySearch.keySearch}`;
       }
 
-      if (year !== null) {
+      if (year !== null && year !== undefined) {
         url += `&GraduationYear=${year}`;
       }
 
@@ -481,7 +481,7 @@ const StudentGraduatedView = ({
         url += `&GraduationYear=${keySearch.graduationYear}`;
       }
 
-      if (period !== null) {
+      if (period !== null && period !== undefined) {
         url += `&PeriodId=${period}`;
       }
 
@@ -687,8 +687,10 @@ const StudentGraduatedView = ({
   }, [deleteViewStatus, period, year]);
 
   useEffect(() => {
-    const ids = data.map((item) => item.id);
-    setStudentIds(ids);
+    if (data.length > 1 && period && year) {
+      const ids = data.map((item) => item.id);
+      setStudentIds(ids);
+    }
   }, [data]);
 
   useEffect(() => {
